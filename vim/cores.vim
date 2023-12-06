@@ -58,8 +58,8 @@ vim9script
   hi TabLineSel       cterm=BOLD   ctermbg=000  ctermfg=007  gui=BOLD   guibg=NONE    guifg=NONE
   hi Terminal         cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Title            cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi Visual           cterm=NONE   ctermbg=240  ctermfg=NONE gui=NONE   guibg=#505050 guifg=NONE
-  hi VisualNOS   cterm=UNDERLINE   ctermbg=240  ctermfg=NONE gui=NONE   guibg=#505050 guifg=NONE
+  hi Visual           cterm=NONE   ctermbg=230  ctermfg=NONE gui=NONE   guibg=#404040 guifg=NONE
+  hi VisualNOS   cterm=UNDERLINE   ctermbg=230  ctermfg=NONE gui=NONE   guibg=#404040 guifg=NONE
   hi WarningMsg       cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi WildMenu         cterm=BOLD   ctermbg=007  ctermfg=000  gui=BOLD   guibg=#ffffff guifg=#000000
 
