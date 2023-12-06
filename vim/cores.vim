@@ -42,8 +42,8 @@ vim9script
   hi PopupNotificatio cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Question         cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi QuickFixLine     cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi Search           cterm=BOLD   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi CurSearch cterm=BOLD,UNDERLINE ctermbg=NONE ctermfg=NONE gui=NONE  guibg=NONE    guifg=NONE
+  hi Search           cterm=NONE   ctermbg=019  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
+  hi CurSearch        cterm=NONE   ctermbg=017  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi SpecialKey       cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi SpellBad         cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi SpellCap         cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
