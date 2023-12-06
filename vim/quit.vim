@@ -14,6 +14,7 @@ cnoremap wq<CR> :echoerr "press ZZ to save and quit"<CR>
 cnoremap w<CR> :echoerr "press CTRL-S to save"<CR>
 
 " sane mappings
+" This requires running `stty -ixon` on your shellrc
 nnoremap <C-s> :w<CR>
 cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'MyQuit' : 'q')<CR>
 nnoremap ZZ :w<CR>:MyQuit<CR>
