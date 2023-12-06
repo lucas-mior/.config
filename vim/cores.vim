@@ -1,7 +1,7 @@
 vim9script
 # Editor highlight groups
   hi ColorColumn      cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  # hi Conceal          cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
+# hi Conceal          cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Cursor           cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=#000000 guifg=NONE
   hi lCursor          cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=#000000 guifg=NONE
   hi CursorIM         cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
@@ -11,7 +11,7 @@ vim9script
   hi DiffAdd          cterm=BOLD   ctermbg=018  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi DiffChange       cterm=BOLD   ctermbg=019  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi DiffDelete       cterm=BOLD   ctermbg=017  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi DiffText cterm=BOLD,UNDERLINE ctermbg=001  ctermfg=NONE gui=BOLD,UNDERLINE guibg=NONE guifg=NONE
+  hi DiffText cterm=BOLD,UNDERLINE ctermbg=001  ctermfg=NONE gui=NONE   guibg=NONE guifg=NONE
   hi EndOfBuffer      cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi ErrorMsg         cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=#ff0000 guifg=#ffffff
   hi VertSplit        cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
@@ -19,7 +19,7 @@ vim9script
   hi FoldColumn       cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi SignColumn       cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi IncSearch        cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi LineNr           cterm=NONE   ctermbg=NONE ctermfg=003  gui=BOLD   guibg=NONE    guifg=#cccc00
+  hi LineNr           cterm=BOLD   ctermbg=NONE ctermfg=003  gui=NONE   guibg=NONE    guifg=#cccc00
   hi LineNrAbove      cterm=NONE   ctermbg=NONE ctermfg=003  gui=NONE   guibg=NONE    guifg=#cccc00
   hi LineNrBelow      cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi CursorLineNr     cterm=BOLD   ctermbg=NONE ctermfg=003  gui=NONE   guibg=NONE    guifg=NONE
@@ -32,7 +32,7 @@ vim9script
   hi NonText          cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Normal           cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Pmenu            cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi PmenuSel         cterm=BOLD   ctermbg=007  ctermfg=000  gui=BOLD   guibg=#ffffff guifg=#000000
+  hi PmenuSel         cterm=BOLD   ctermbg=007  ctermfg=000  gui=NONE   guibg=#ffffff guifg=#000000
   hi PmenuKind        cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi PmenuKindSel     cterm=NONE   ctermbg=015  ctermfg=008  gui=NONE   guibg=#cccccc guifg=#000000
   hi PmenuExtra       cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
@@ -53,18 +53,18 @@ vim9script
   hi StatusLineNC     cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi StatusLineTe     cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi StatusLineTe     cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi TabLine          cterm=ITALIC ctermbg=230  ctermfg=000  gui=ITALIC guibg=#cccccc guifg=#000000
+  hi TabLine          cterm=ITALIC ctermbg=230  ctermfg=000  gui=NONE   guibg=#cccccc guifg=#000000
   hi TabLineFill      cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi TabLineSel       cterm=BOLD   ctermbg=000  ctermfg=007  gui=BOLD   guibg=NONE    guifg=NONE
+  hi TabLineSel       cterm=BOLD   ctermbg=000  ctermfg=007  gui=NONE   guibg=NONE    guifg=NONE
   hi Terminal         cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Title            cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Visual           cterm=NONE   ctermbg=230  ctermfg=NONE gui=NONE   guibg=#404040 guifg=NONE
   hi VisualNOS   cterm=UNDERLINE   ctermbg=230  ctermfg=NONE gui=NONE   guibg=#404040 guifg=NONE
   hi WarningMsg       cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi WildMenu         cterm=BOLD   ctermbg=007  ctermfg=000  gui=BOLD   guibg=#ffffff guifg=#000000
+  hi WildMenu         cterm=BOLD   ctermbg=007  ctermfg=000  gui=NONE   guibg=#ffffff guifg=#000000
 
 # Syntax highlight groups
-  hi Comment          cterm=ITALIC ctermbg=NONE ctermfg=245  gui=ITALIC guibg=NONE    guifg=#888888
+  hi Comment          cterm=ITALIC ctermbg=NONE ctermfg=246  gui=NONE   guibg=NONE    guifg=#989898
 
   hi Constant         cterm=NONE   ctermbg=NONE ctermfg=011  gui=NONE   guibg=NONE    guifg=#ff3300
   hi String           cterm=NONE   ctermbg=NONE ctermfg=001  gui=NONE   guibg=NONE    guifg=#ff0000
@@ -85,15 +85,15 @@ vim9script
   hi Exception        cterm=NONE   ctermbg=NONE ctermfg=011  gui=NONE   guibg=NONE    guifg=#ee9900
 
   hi PreProc          cterm=NONE   ctermbg=NONE ctermfg=005  gui=NONE   guibg=NONE    guifg=#ff00ff
-  hi Include          cterm=NONE   ctermbg=NONE ctermfg=013  gui=NONE   guibg=NONE    guifg=#dd00dd
-  hi Define           cterm=NONE   ctermbg=NONE ctermfg=013  gui=NONE   guibg=NONE    guifg=#dd00dd
+  hi Include          cterm=NONE   ctermbg=NONE ctermfg=013  gui=NONE   guibg=NONE    guifg=#dd00ff
+  hi Define           cterm=NONE   ctermbg=NONE ctermfg=013  gui=NONE   guibg=NONE    guifg=#ff00dd
   hi Macro            cterm=NONE   ctermbg=NONE ctermfg=005  gui=NONE   guibg=NONE    guifg=#0077aa
-  hi PreCondit        cterm=NONE   ctermbg=NONE ctermfg=005  gui=NONE   guibg=NONE    guifg=#ff00ff
+  hi PreCondit        cterm=NONE   ctermbg=NONE ctermfg=005  gui=NONE   guibg=NONE    guifg=#dd22dd
 
   hi Type             cterm=NONE   ctermbg=NONE ctermfg=010  gui=NONE   guibg=NONE    guifg=#00cc00
   hi StorageClass     cterm=BOLD   ctermbg=NONE ctermfg=010  gui=NONE   guibg=NONE    guifg=#00cc00
   hi Structure        cterm=NONE   ctermbg=NONE ctermfg=004  gui=NONE   guibg=NONE    guifg=#0080ee
-  hi Typedef          cterm=NONE   ctermbg=NONE ctermfg=010  gui=NONE   guibg=NONE    guifg=#00ff00
+  hi Typedef          cterm=NONE   ctermbg=NONE ctermfg=010  gui=NONE   guibg=NONE    guifg=#00ee00
 
   hi Special          cterm=NONE   ctermbg=NONE ctermfg=011  gui=NONE   guibg=NONE    guifg=#ddbb00
   hi SpecialChar      cterm=NONE   ctermbg=NONE ctermfg=011  gui=NONE   guibg=NONE    guifg=#ddbb00
@@ -101,7 +101,7 @@ vim9script
   hi Delimiter        cterm=NONE   ctermbg=NONE ctermfg=011  gui=NONE   guibg=NONE    guifg=#ddbb00
   hi SpecialComment   cterm=NONE   ctermbg=NONE ctermfg=011  gui=NONE   guibg=NONE    guifg=#ddbb00
   hi Debug            cterm=NONE   ctermbg=NONE ctermfg=011  gui=NONE   guibg=NONE    guifg=#ddbb00
-  hi debugPC          cterm=NONE   ctermbg=230  guibg=#555555
+  hi debugPC          cterm=NONE   ctermbg=230  ctermfg=NONE gui=NONE   guibg=#555555 guifg=NONE
 #debugBreakpoint xxx term=reverse ctermbg=9 guibg=red
 #debugBreakpointDisabled xxx term=reverse ctermbg=248 guibg=gray
 
