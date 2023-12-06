@@ -1,0 +1,30 @@
+/* #LS_COLORS+='rs=0:mh=0:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:mi=0:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44' */
+/* filetypes */ /* use: ls_colors.awk <this file> */
+LS_COLORS+='rs=0:mh=0:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:mi=0:su=37;41:sg=30;43:ca=30;41:tw=0;0:ow=0;0:st=0;0'
+LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;255;000:ln=01;38;2;128;128;128:or=0;38;2;000;000;000'
+
+{ /* label     bold                        extensions */
+    imagens:    1   : rgb(000, 136, 255) : jpg jpeg gif bmp png ff svg tif tiff xcf webp hdr
+    videos:     1   : rgb(255, 000, 255) : mov mpg mpeg mkv webm 3gp mp4 wmv avi
+    audio:      1   : rgb(000, 170, 170) : mp3 flac wma ogg wav opus aac m4a
+    compress:   1   : rgb(250, 165, 000) : iso img tar.bz tar.bz2 tbz tbz2 tar.gz tgz zip nar rar gz gz 7z zstd
+    print:      1   : rgb(205, 036, 036) : pdf djvu epub ps
+    office:     1   : rgb(095, 000, 255) : odt docx ino
+    office:     1   : rgb(000, 170, 000) : ods xlsx
+    office:     1   : rgb(250, 085, 000) : odp pptx
+    ms-office:  0   : rgb(095, 000, 255) : doc
+    ms-office:  0   : rgb(000, 170, 000) : xls
+    ms-office:  0   : rgb(250, 085, 000) : ppt
+    kicad:      1   : rgb(000, 160, 000) : kicad_pro
+    special:    1   : rgb(255, 255, 255) : kicad_pcb kicad_sch tab pgn bib exe dll
+    markup:     1   : rgb(240, 240, 000) : tex md sent 1
+    diffs:      0   : rgb(000, 160, 000) : diff patch
+    orig:       0   : rgb(240, 210, 150) : orig
+    rej:        0   : rgb(000, 190, 000) : rej
+    programs:   1   : rgb(255, 102, 000) : asm c cpp go rs zig f90 awk pl m vim plt py lua sh zsh bash fish vhd mo mos
+    library:    0   : rgb(255, 102, 000) : h hpp rlib
+    part:       0   : rgb(255, 000, 095) : part
+    torrent:    1   : rgb(255, 187, 095) : torrent
+    blender:    1   : rgb(255, 050, 050) : torrent
+    windows:    1   : rgb(000, 200, 000) : exe
+}
