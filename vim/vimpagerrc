@@ -1,0 +1,22 @@
+set undodir=$XDG_DATA_HOME/vim/undo
+set directory=$XDG_DATA_HOME/vim/swap
+set backupdir=$XDG_DATA_HOME/vim/backup
+set viewdir=$XDG_DATA_HOME/vim/view
+set runtimepath=$XDG_CONFIG_HOME/vim,$VIMRUNTIME,
+set runtimepath+=$XDG_CONFIG_HOME/vim/after
+filetype off
+set runtimepath+=/usr/share/vim/vimfiles/
+filetype on
+syntax on
+let $MYVIMRC="$XDG_CONFIG_HOME/vim/vimrc"
+
+source /home/lucas/.config/vim/mappings.vim
+source /home/lucas/.config/vim/settings.vim
+source /home/lucas/.config/vim/autocmds.vim
+source /home/lucas/.config/vim/.arquivos.vim
+source /home/lucas/.config/vim/plugins.vim
+source /home/lucas/.config/vim/cores.vim
+source /home/lucas/.config/vim/lspconfig.vim
+source /home/lucas/.config/vim/quit.vim
+
+set viminfo+=n$XDG_DATA_HOME/vim/viminfo
