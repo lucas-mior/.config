@@ -46,7 +46,7 @@ cnoreabbrev vrc /home/lucas/.config/newsboat/colors
 cnoreabbrev vv0 /home/lucas/.config/vim/vimrc
 cnoreabbrev vv1 /home/lucas/.config/vim/mappings.vim
 cnoreabbrev vvs /home/lucas/.config/vim/settings.vim
-cnoreabbrev vvc /home/lucas/.config/vim/colores.vim
+cnoreabbrev vvc /home/lucas/.config/vim/cores.vim
 cnoreabbrev vvp /home/lucas/.config/vim/plugins.vim
 cnoreabbrev vva /home/lucas/.config/vim/autocmds.vim
 cnoreabbrev vsx1 /home/lucas/.config/nsxiv/exec/key-handler
