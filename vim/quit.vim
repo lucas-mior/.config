@@ -7,6 +7,7 @@
 "        - if not saved will error.
 "        - if last buffer, also quit vim.
 "        - if more then one window open, close the window
+" :qa! -> quit vim, no matter what
 
 " old habits die hard
 cnoremap wq<CR> :echoerr "press ZZ to save and quit"<CR>
