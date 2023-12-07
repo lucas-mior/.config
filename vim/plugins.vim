@@ -16,10 +16,12 @@ Plug 'dahu/vim-fanfingtastic'
 
 call plug#end()
 
+packadd termdebug 
 nnoremap <c-f> :Files<CR>
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
 let g:airline#extensions#tabline#enabled = 1
+let g:DiffColors = 1
 
 let g:gitgutter_signs = 1
 let g:gitgutter_highlight_lines = 1
@@ -35,8 +37,6 @@ let g:gitgutter_map_keys = 0
 let g:gitgutter_terminal_reports_focus = 0
 silent! highlight! link SignColumn LineNr?
 
-let g:DiffColors = 1
-
 function! Gototo()
     try
         :LspGotoDefinition
@@ -47,7 +47,6 @@ endfunction
 nnoremap <C-]> :call Gototo()<CR>
 nnoremap <leader>l :LspDiagNext<CR>
 nnoremap <leader>o :LspHover<CR>
-packadd termdebug 
 
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
 function! ToggleMarkdownListItem()
@@ -65,7 +64,8 @@ function! ToggleMarkdownListItem()
     endif
 endfunction
 
-function! SynGroup()
+command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
+function! GetSyntaxGroup()
     let l:s = synID(line('.'), col('.'), 1)
     echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
 endfun
