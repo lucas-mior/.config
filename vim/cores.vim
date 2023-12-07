@@ -11,9 +11,9 @@ vim9script
   hi DiffAdd          cterm=BOLD   ctermbg=018  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi DiffChange       cterm=BOLD   ctermbg=019  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi DiffDelete       cterm=BOLD   ctermbg=017  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi DiffText cterm=BOLD,UNDERLINE ctermbg=001  ctermfg=NONE gui=NONE   guibg=NONE guifg=NONE
+  hi DiffText cterm=BOLD,UNDERLINE ctermbg=001  ctermfg=NONE gui=NONE   guibg=#ff0000 guifg=NONE
   hi EndOfBuffer      cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
-  hi ErrorMsg         cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=#ff0000 guifg=#ffffff
+  hi ErrorMsg         cterm=NONE   ctermbg=001  ctermfg=007  gui=NONE   guibg=#ff0000 guifg=#ffffff
   hi VertSplit        cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Folded           cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=NONE    guifg=#555555
   hi FoldColumn       cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
@@ -110,20 +110,21 @@ vim9script
   hi Error            cterm=NONE   ctermbg=017  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Todo             cterm=NONE   ctermbg=019  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
 
-# 00 "#000000",
-# 01 "#ff0000",
-# 02 "#00ff00",
-# 03 "#ffff00",
-# 04 "#0088ff",
-# 05 "#ff00ff",
-# 06 "#00aaaa",
-# 07 "#ffffff",
+# Simple terminal colors
+# 00 #000000
+# 01 #ff0000
+# 02 #00ff00
+# 03 #ffff00
+# 04 #0088ff
+# 05 #ff00ff
+# 06 #00aaaa
+# 07 #ffffff
 #
-# 08 "#333333",
-# 09 "#ff6600",
-# 10 "#00cc00",
-# 11 "#ffbb00",
-# 12 "#0066ff",
-# 13 "#c600c6",
-# 14 "#0066aa",
-# 15 "#f1f1f1",
+# 08 #333333,
+# 09 #ff6600,
+# 10 #00cc00,
+# 11 #ffbb00,
+# 12 #0066ff,
+# 13 #c600c6,
+# 14 #0066aa,
+# 15 #f1f1f1,
