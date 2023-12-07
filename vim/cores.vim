@@ -1,6 +1,6 @@
 vim9script
 # Editor highlight groups
-  hi ColorColumn      cterm=NONE   ctermbg=NONE ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
+  hi ColorColumn      cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=#000000 guifg=NONE
 # hi Conceal          cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=NONE    guifg=NONE
   hi Cursor           cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=#000000 guifg=NONE
   hi lCursor          cterm=NONE   ctermbg=000  ctermfg=NONE gui=NONE   guibg=#000000 guifg=NONE
