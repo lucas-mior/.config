@@ -33,6 +33,7 @@
     set scrolloff=5
     set visualbell t_vb=
     set splitbelow
+    set splitright
     set wrap
 "" Find
     set path+=**
