@@ -8,8 +8,8 @@ vim9script
     au BufWritePost ~/.config/ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
     au BufWritePost ~/.config/lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
     au BufRead */Makefile,*.mk,
-               \*/dmenu/*,*/dwm/*,*/nsxiv/*,*/nsxiv-extra/*,
-               \*/sent/*,*/st/*,*/swarp/*,*/src/lf/* set noexpandtab
+               \*/src/dmenu/*,*/src/dwm/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
+               \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
 # compilações
     au BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
     au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
