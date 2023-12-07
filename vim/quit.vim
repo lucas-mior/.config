@@ -18,6 +18,26 @@ cnoremap w<CR> :echoerr "press CTRL-S to save"<CR>
 nnoremap <C-s> :w<CR>
 cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'MyQuit' : 'q')<CR>
 nnoremap ZZ :w<CR>:MyQuit<CR>
+nnoremap <tab> :MyBNext<cr>
+nnoremap <C-^> :MyAltFile<cr>
+
+command! -nargs=0 MyAltFile :call MyAltFile()
+function! MyAltFile()
+    if &buftype == 'help'
+        tabn
+    else
+        e #
+    endif
+endfunction
+
+command! -nargs=0 MyBNext :call MyBNext()
+function! MyBNext()
+    if &buftype == 'help'
+        tabn
+    else
+        bn
+    endif
+endfunction
 
 " quit is context dependent
 command! -nargs=0 MyQuit :call MyQuit()

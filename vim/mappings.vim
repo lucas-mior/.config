@@ -67,7 +67,3 @@
 " my_functions
     " <C-@> is <C-Space> (for whatever reason)
     nnoremap <C-@> :ToggleMarkdownListItem<CR>
-" buffers
-    nnoremap <tab> :bnext<cr>
-    nnoremap <leader>; :bnext<CR>
-    nnoremap <leader>j :bprev<CR>

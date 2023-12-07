@@ -3,6 +3,10 @@
     let &t_EI .= "\<Esc>[2 q\<Esc>]12;yellow\x7"
 "" configurações para não complicar minha vida
     set titlelen=0
+    set breakindent
+    set breakindentopt=sbr
+    set showbreak=>
+    set cpoptions+=n
     set commentstring=#%s
     set shell=/usr/bin/zsh
     set hidden
@@ -45,6 +49,7 @@
     set backspace=indent,eol,start
     set tabstop=4 shiftwidth=4 expandtab
     set textwidth=80
+    set cc=+1
     set linebreak autoindent
     set autoread
     set formatoptions-=c,r,o,/,b,n,i,j
