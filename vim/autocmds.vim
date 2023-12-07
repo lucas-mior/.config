@@ -3,11 +3,10 @@ vim9script
     au BufWritePost ~/.config/tmux/tmux.conf                !tmux source-file %
     au BufWritePost ~/.config/X11/*                         !xrdb ~/.config/X11/Xresources
     au BufWritePost ~/.config/sxhkd/sxhkdrc                 !pkill -SIGUSR1 sxhkd
-    au BufWritePost ~/.config/dunst/dunstrc                 !killall dunst; setsid -f dunst > /dev/null 2> /dev/null
-    au BufWritePost ~/.config/atalhos,*/atalhos.awk         !atalhos.awk ~/.config/atalhos
+    au BufWritePost ~/.config/dunst/dunstrc                 !killall dunst; setsid -f dunst 2>&1 > /dev/null
+    au BufWritePost ~/.config/atalhos,*/atalhos.awk         !atalhos.awk   ~/.config/atalhos
     au BufWritePost ~/.config/ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
     au BufWritePost ~/.config/lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
-    au BufWritePost ~/.config/mpd/mpd.conf                  !killall mpd; setsid -f mpd
     au BufRead */Makefile,*.mk,
                \*/dmenu/*,*/dwm/*,*/nsxiv/*,*/nsxiv-extra/*,
                \*/sent/*,*/st/*,*/swarp/*,*/src/lf/* set noexpandtab
