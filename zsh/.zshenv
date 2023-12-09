@@ -89,7 +89,6 @@ export RUST_BACKTRACE=1
 ## pass generate [-n] <N>
 export PASSWORD_STORE_GENERATED_LENGTH=30
 export PASSWORD_STORE_CHARACTER_SET="a-zA-Z0-9!@#$%&()_+=:;[]{}-"
-export OPENAI_API_KEY="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"
 
 ## meus scripts
 export LIXEIRA="$HOME/.local/lixeira"
