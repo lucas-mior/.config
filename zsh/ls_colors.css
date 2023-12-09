@@ -11,17 +11,19 @@ LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;255;000:ln=01;38;2;128;12
     print:      1   : rgb(205, 036, 036) : pdf djvu epub ps
     office:     1   : rgb(095, 000, 255) : odt docx ino
     office:     1   : rgb(000, 170, 000) : ods xlsx
+    office:     0   : rgb(000, 170, 000) : csv tsv
     office:     1   : rgb(250, 085, 000) : odp pptx
     ms-office:  0   : rgb(095, 000, 255) : doc
-    ms-office:  0   : rgb(000, 170, 000) : xls
+    ms-office:  0   : rgb(000, 160, 000) : xls
     ms-office:  0   : rgb(250, 085, 000) : ppt
     kicad:      1   : rgb(000, 160, 000) : kicad_pro
-    special:    1   : rgb(255, 255, 255) : kicad_pcb kicad_sch tab pgn bib exe dll
+    special:    1   : rgb(255, 255, 255) : kicad_pcb kicad_sch tab pgn bib dll
     markup:     1   : rgb(240, 240, 000) : tex md sent 1
     diffs:      0   : rgb(000, 160, 000) : diff patch
     orig:       0   : rgb(240, 210, 150) : orig
-    rej:        0   : rgb(000, 190, 000) : rej
-    programs:   1   : rgb(255, 102, 000) : asm c cpp go rs zig f90 awk pl m vim plt py lua sh zsh bash fish vhd mo mos
+    rej:        0   : rgb(000, 180, 000) : rej
+    programs:   1   : rgb(255, 102, 000) : asm c cpp go rs zig f90
+    programs:   1   : rgb(255, 102, 000) : awk pl m vim plt py lua sh zsh bash fish vhd mo mos
     library:    0   : rgb(255, 102, 000) : h hpp rlib
     part:       0   : rgb(255, 000, 095) : part
     torrent:    1   : rgb(255, 187, 095) : torrent
