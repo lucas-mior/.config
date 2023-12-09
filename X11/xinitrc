@@ -1,0 +1,33 @@
+#!/bin/sh
+
+redshift -P -O 6000 && echo 6000 > "$REDSHIFT_CACHE"
+wall_random.bash
+xrdb /home/lucas/.config/X11/Xresources
+
+dunst &
+picom &
+sxhkd &
+urxvtd &
+clipsim --daemon &
+events.bash &
+
+dwmblocks2 &
+
+xset m 1 1 &
+
+# /etc/X11/xorg.conf.d/00-keyboard.conf
+# Section "InputClass"
+#     Identifier "system-keyboard"
+#     MatchIsKeyboard "on"
+#     Option "XkbLayout" "br_lucas_mior"
+#     # Option "XkbModel" "pc104"
+#     # Option "XkbVariant" ",dvorak"
+#     Option "XkbOptions" "caps:swapescape"
+#     Option "AutoRepeat" "0 0"
+# EndSection
+
+xrandr.sh auto
+exec dwm
+
+# export DESKTOP_SESSION=plasma
+# exec startplasma-x11

@@ -1,0 +1,299 @@
+\documentclass[a4paper,12pt,twoside]{article}
+
+\usepackage[a4paper, inner=2cm, outer=2cm,top=2cm, bottom=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[portuges]{babel}
+\usepackage{aeguill}
+\usepackage{indentfirst}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{amsmath}
+
+\usepackage{listings}
+\usepackage{color}
+\input{~/docs/latex/lstset.tex}
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{~/docs/latex/refs.bib}
+
+\renewcommand{\maketitle}{
+\begin{center}
+{\Huge\bfseries
+\thetitle}
+\vspace{.25em}
+\Large{09/07/2020 - 15/07/2020}
+\end{center}
+}
+
+\title{Relatório de Iniciação Científica}
+\author{Lucas Budde Mior}
+
+\begin{document}
+
+\newgeometry{inner=3cm, outer=2cm, top=3cm, bottom=2cm}
+\maketitle
+\section{Objetivos}
+
+\begin{itemize}
+    \item{Estudar capítulo 3 \cite{gonzales}, terminando a parte de histogramas e filtros. Aplicar técnicas de processamento usando Octave \cite{octave}}. 
+\end{itemize}
+
+\section{Resultados}
+\subsection{Uso de estatísticas do histograma para aprimoramento de imagem}
+Sendo \(p(r_i)\) o histograma normalizado de uma imagem, sabe-se que \(p(r_i)\) é uma estimativa da probabilidade que a intensidade \(r_i\) ocorre na imagem.
+Se uma imagem tem L níveis de intensidade, o enésimo \textit{momento central} de \(r\) é definido como
+\begin{equation}\label{central}
+    \mu_n = \sum_{i=0}^{L-1}{(r_i-m)^np(r_i)}
+\end{equation}
+Onde \(m\) é dado por
+\begin{equation}\label{mean}
+    m = \sum_{i=0}^{L-1}{r_ip(r_i)}
+\end{equation}
+\(m\) é uma medida da média de intensidade.
+A variância (ou desvio padrão, \(\sigma\)), dado por
+\begin{equation}\label{vari}
+    \sigma^2 = \mu_2 = \sum_{i=0}^{L-1}(r_i-m)^2p(r_i)
+\end{equation}
+é uma medida de contraste.
+
+As grandezas definidas acimas são \textit{globais}. 
+São úteis para ajustes grossos na intensidade e contraste.
+Grandezas \textit{locais} análogas a estas são mais poderosas, no que se utiliza de características da vizinhança de cada pixel.
+O valor médio dos pixels em uma vizinhança \(S_{xy}\) é dado pela expressão
+\begin{equation}\label{locmed}
+    m_{S_{xy}} = \sum_{i=0}^{L-1}{r_ip_{S_{xy}}(r_i)}
+\end{equation}
+Sendo \(p_{s_{xy}}\) o histograma dos pixels na vizinhança \(S_{xy}\). 
+A variância local, por sua vez, é dada por
+\begin{equation}\label{locvar}
+    \sigma^2_{S_{xy}} = \sum_{i=0}^{L-1}{(r_i-m_{S_{xy}})^2p_{S_{xy}}(r_i)}
+\end{equation}
+
+Analogamente as grandezas globais, a equação \ref{locmed} representa a intensidade média da região, enquanto aquela da equação \ref{locvar} representa o contraste.
+É possível usar essas grandezas no aprimoramento de imagens.
+Se uma imagem, em certas regiões muito escuras, contém detalhes quase imperceptíveis, aplica-se um aumento do contraste nessas regiões (e não nas demais), pelo critérios
+de:
+\begin{itemize}
+    \item{Média de intensidade da região em comparação com a média global}
+    \item{Variância local em comparação com a variância global}
+\end{itemize}
+Desta forma, somente os pixels que se enquadram nas duas características serão submetidos a uma função de intensidade.
+Nesse caso, poderia ser simplesmente a multiplicação por uma constante \(C\).
+Os pixels levemente mais claros se tornariam claros o suficiente para serem facilmente discernidos.
+\subsection{Introdução a filtros espaciais}
+A filtragem é um termo que vem do processamento no domínio da frequência, mas no domínio do espaço, significa uma transformação em cada pixel definida por uma função do valor do pixel e seus vizinhos.
+Um filtro linear é definido pelo seu núcleo \(w\),
+uma matriz cuja ordem define a vizinhança a ser utilizada no cálculo.
+O pixel resultante nada mais é do que a soma dos produtos de cada elemento da matriz (núcleo) com o pixel correspondente da vizinhança. Algebricamente:
+\begin{equation}\label{linfilt}
+    g(x,y) = \sum_{s=-a}^a\sum_{t=-b}^b{w(s,t)f(x+s,y+t)}
+\end{equation}
+A função \texttt{fspecial} do Octave gera automaticamente alguns núcleos habitualmente utilizados. Com o núcleo em mãos, basta aplicar a função \texttt{imfilter}, usando como argumento a imagem e o núcleo, que a equação \ref{linfilt} é calculada para todos os pixels da imagem.
+
+Uma vez que núcleos são matrizes, pela álgebra linear é possível demonstrar que, se uma matriz é decomposta em produtos de outras matrizes menores, pode se aplicar o filtro em questão em múltiplas etapas (uma para cada matriz).
+Isso reduz o número de operações realizadas, e o resultado final é o mesmo.
+
+Em geral, há 3 maneiras de definir o núcleo:
+\begin{enumerate}
+    \item{Baseado em propriedades matemáticas (por exemplo, média da vizinhança)}
+    \item{Usar uma função de duas variáveis, cuja superfície tem uma propriedade de interesse}
+    \item{Projetar um núcleo que tem uma frequência de resposta específica}
+\end{enumerate}
+
+\subsection{Filtros passa baixa (suavização)}
+Filtros de suavização são usados para reduzir transições bruscas em intensidade. 
+Como ruído consiste tipicamente destas, uma aplicação desses filtros é reduzir o ruído. Há diversas outras utilidades.
+O efeito geral desses filtros é borrar a imagem, sendo que a intensidade desse efeito depende das dimensões do núcleo e o valor de seus elementos. 
+Através de filtros passa baixa é possível gerar outros tipos (passa alta, passa faixa, rejeita faixa).
+\subsubsection{Filtros de caixa}\label{boxsec}
+Esses são os mais simples.
+O núcleo tem todos seus elementos iguais a \(1 \div mn\), sendo \(m\) e \(n\) as dimensões do núcleo.
+Quanto maior m e n, mais borrada a imagem fica, como ilustrado no exemplo a seguir.
+O código abaixo, a partir da imagem da figura \ref{t1}, aplica um filtro de caixa de tamanho \(3 \times 3\), \(10 \times 10\) e \(20 \times 20\).
+\lstinputlisting[language=octave]{box.m}
+Os respectivos resultados estão nas figuras \ref{3x3}, \ref{10x10} e \ref{20x20}.
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{trinker.jpg}
+    \caption{trinker.jpg}\label{t1}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{3x3.jpg}
+        \caption{Caixa 3x3}\label{3x3}
+    \end{minipage}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{10x10.jpg}
+    \caption{Caixa 10x10}\label{10x10}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{20x20.jpg}
+        \caption{Caixa 20x20}\label{20x20}
+    \end{minipage}
+\end{figure}
+\newpage
+\subsubsection{Núcleos Gaussianos}
+A técnica de filtros de caixa (\ref{boxsec}) é útil, mas falha em algumas circunstâncias. 
+Por exemplo, ela favorece o desfoque em direções perpendiculares, o que em imagens com componentes geométricos, produz resultados indesejados.
+Em situações como esta, são escolhidos filtros de núcleo simétricos circularmente, dos quais o único tipo que é separável é o Gaussiano, definido assim:
+\begin{equation}
+    w(s,t) = G(s,t) = Ke^{-\frac{s^2+t^2}{2\sigma^2}}
+\end{equation}
+que, definido \(r\) como \([s^2+t^2]^{\frac{1}{2}}\), pode ser reescrita como 
+\begin{equation}
+    w(r) = G(r) = Ke^{-\frac{r^2}{2\sigma^2}}
+\end{equation}
+Essa forma ilustra a propriedade circular dos filtros Gaussianos, ou seja, o fato de que o valor de cada elemento do núcleo depende apenas da distância ao centro (e das constantes \(K\), e \(\sigma^2\)).
+Valores de \(r\) maiores que \(3\sigma\) são pequenos o bastante para serem ignorados.
+Segue o exemplo em Octave, sendo \(K = 1\) e \(\sigma = 5\) em todos os casos, utilizando a imagem da figura \ref{coringa}:
+Os respectivos resultados estão nas figuras \ref{g1}, \ref{g2} e \ref{g3}.
+Embora entre os filtros de tamanho \(r = 5\) e \(r = 25\) a diferença seja grande, ela é quase imperceptível entre \(r = 25\) e \(r = 45\).
+\lstinputlisting[language=octave]{gaussian.m}
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{coringa.jpg}
+    \caption{coringa.jpg}\label{coringa}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{g1.jpg}
+        \caption{\(r = 5\)}\label{g1}
+    \end{minipage}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{g2.jpg}
+        \caption{\(r = 25\)}\label{g2}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.7\linewidth]{g3.jpg}
+        \caption{\(r = 45\)}\label{g3}
+    \end{minipage}
+\end{figure}
+
+\newpage
+\subsubsection{Filtros não Lineares}
+Esse tipo de filtros tem seus núcleos definidos pelos pixels contidos na região do filtro, o que caracteriza sua não linearidade.
+O exemplo mais conhecido é o filtro mediano, que usa a  mediana da vizinhança. 
+Ele é muito usado em redução de ruído.
+Segue o exemplo em Octave, usando a imagem com ruído da figura \ref{noised}.
+Note que a maior parte do ruído é removido (figura \ref{median})
+\lstinputlisting[language=octave]{median.m}
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.9\linewidth]{noised.jpg}
+    \caption{Imagem com ruído}\label{noised}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+  \includegraphics[width=.9\linewidth]{median.jpg}
+        \caption{Imagem após filtro mediano}\label{median}
+    \end{minipage}
+\end{figure}
+
+\newpage
+
+\subsection{Filtros Passa Alta}
+Filtros desse tipo destacam as transições em intensidade (sharpening).
+Eles são definidos por técnicas de ''diferenciação digital``.
+\subsubsection{Filtro Laplaciano}
+Discretamente, o \textit{Laplaciano} de duas variáveis é
+\begin{equation}
+    \nabla{f(x,y)} = f(x+1, y) + f(x-1, y) + f(x, y+1) + f(x, y-1) - 4f(x,y)
+\end{equation}
+Ele é usado portanto, da seguinte forma como filtro:
+\begin{equation}
+    g(x,y) = f(x,y) + c[\nabla{f(x,y)}] 
+\end{equation}
+
+Como o exemplo a seguir mostra, o filtro laplaciano destaca as transições de intensidade (figura \ref{lapla}), 
+mas muita informação da imagem original é perdida.
+Pode-se somar então a imagem original com este resultado, obtendo de volta as informações perdidas, mas mantendo o destaque de transições (figura \ref{added}).
+\newpage
+\lstinputlisting[language=octave]{laplacian.m}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=.7\linewidth]{landscape.jpg}
+    \end{center}
+    \caption{Original}\label{t2}
+\end{figure}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=.7\linewidth]{laplacian.jpg}
+    \end{center}
+    \caption{Laplaciano}\label{lapla}
+\end{figure}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=.7\linewidth]{added.jpg}
+    \end{center}
+    \caption{Soma}\label{added}
+\end{figure}
+
+\newpage
+\subsubsection{Unsharp Masking}
+Outro método de destacar transições de intensidade consiste em subtrair a imagem desfocada (usando um filtro passa baixa) da imagem original. 
+Então pode-se adicionar este resultado com a imagem original.
+
+\lstinputlisting[language=octave]{unsharp.m}
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[width=.7\linewidth]{landscape.jpg}
+    \end{center}
+    \caption{Original}\label{t2}
+\end{figure}
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[width=.7\linewidth]{mask.jpg}
+    \end{center}
+    \caption{Mask}\label{lapla}
+\end{figure}
+\begin{figure}[h!]
+    \begin{center}
+        \includegraphics[width=.7\linewidth]{unsharp.jpg}
+    \end{center}
+    \caption{Original + Mask}\label{added}
+\end{figure}
+ 
+\subsubsection{Gradiente}
+Por fim, ainda é possível usar o Gradiente como técnica de \textit{sharpening}.
+
+\subsection{Filtros passa alta, passa faixa, e rejeita faixa a partir de filtros passa baixa}
+Como mencionado anteriormente, filtros passa baixa \(lp\) podem ser usados para gerar outros filtros: (\(\delta\) é a imagem)
+
+\begin{center}
+\begin{tabular}{ |l|l| } 
+ \hline
+    Lowpass    & \( lp(x, y)                                                             \) \\
+    Highpass   & \( hp(x, y) = \delta(x, y) - lp(x, y)                                   \) \\
+    Bandreject & \( br(x, y) = lp_1(x, y) + [ \delta(x, y) - lp_2 (x, y) ]              \) \\
+    Bandpass   & \( bp(x, y) = \delta(x, y) - \big[lp 1 (x, y) + [ \delta(x , y) - lp_2(x, y )]\big] \) \\
+ \hline
+\end{tabular}
+\end{center}
+
+\printbibliography
+\end{document}

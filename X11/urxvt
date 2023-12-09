@@ -1,0 +1,65 @@
+!! FORMA
+    URxvt.geometry:        100x30+0+0
+    URxvt.depth:           32
+    URxvt.background:      [80]#000000
+    URxvt.font:            xft:mono:size=14,xft:Noto Color Emoji:pixelsize=16,xft:Hack Nerd Font Mono:pixelsize=14:antialias=true:autohint=true
+    URxvt.cursorColor:     yellow
+    URxvt.iso14755:        false
+    URxvt.iso14755_52:     false
+    URxvt.intensityStyles: false
+    URxvt.scrollBar:       false
+    URxvt.saveLines:       10000
+    URxvt.highlightColor:  #555555
+
+!! PERl EXTENSIONS
+    URxvt.perl-lib:             /home/lucas/.local/share/urxvt/
+    URxvt.perl-ext-common:  	default,keyboard-select,url-select-meu,font-size,callsh
+
+    URxvt.url-select-meu.launcher:   link_handler.sh
+    URxvt.url-select-meu.underline:  true
+    URxvt.url-select-meu.autocopy:  true
+    URxvt.keyboard-select.clipboard: true
+
+!! URL
+    URxvt.keysym.Meta-y:        url-select-meu:select_next
+    URxvt.keysym.Meta-Escape:   keyboard-select:activate
+!! font-size
+    URxvt.keysym.Control-equal: font-size:increase
+    URxvt.keysym.Control-minus: font-size:decrease
+    URxvt.keysym.Control-plus:  font-size:reset
+
+!! SCROLLBACK
+    URxvt.keysym.Control-F8: searchable-scrollback:start
+    URxvt.keysym.Meta-l:     command:\033]720;1\007
+    URxvt.keysym.Meta-k:     command:\033]721;1\007
+    URxvt.keysym.Meta-u:     command:\033]720;15\007
+    URxvt.keysym.Meta-d:     command:\033]721;15\007
+!! copy and paste
+    URxvt.keysym.Meta-v: eval:paste_clipboard
+    URxvt.keysym.Meta-c: eval:selection_to_clipboard
+!  URxvt.keysym.Control-Meta-c: builtin-string:
+!  URxvt.keysym.Control-Meta-v: builtin-string:
+
+!! OPACIDADE
+    URxvt.keysym.Control-F10: callsh:urxvt_alpha:=
+    URxvt.keysym.Control-F11: callsh:urxvt_alpha:-
+    URxvt.keysym.Control-F12: callsh:urxvt_alpha:+
+!! VIM !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! TABS e WINDOWS
+    URxvt.keysym.M-Tab:       callsh:vim:--servername:EDITOR:--remote-send:gt
+    URxvt.keysym.M-1:         callsh:vim:--servername:EDITOR:--remote-send:1gt
+    URxvt.keysym.M-2:         callsh:vim:--servername:EDITOR:--remote-send:2gt
+    URxvt.keysym.M-3:         callsh:vim:--servername:EDITOR:--remote-send:3gt
+    URxvt.keysym.M-4:         callsh:vim:--servername:EDITOR:--remote-send:4gt
+    URxvt.keysym.M-5:         callsh:vim:--servername:EDITOR:--remote-send:5gt
+    URxvt.keysym.M-6:         callsh:vim:--servername:EDITOR:--remote-send:6gt
+    URxvt.keysym.M-7:         callsh:vim:--servername:EDITOR:--remote-send:7gt
+    URxvt.keysym.M-8:         callsh:vim:--servername:EDITOR:--remote-send:8gt
+    URxvt.keysym.M-9:         callsh:vim:--servername:EDITOR:--remote-send:9gt
+!! Resize Windows
+    URxvt.keysym.Control-Shift-Left:  string:Rsh
+    URxvt.keysym.Control-Shift-Down:  string:Rsj
+    URxvt.keysym.Control-Shift-Up:    string:Rsk
+    URxvt.keysym.Control-Shift-Right: string:Rsl
+!! Set spell, Pop, Terminais dentro do VIM
+    URxvt.keysym.Control-s:           string:RsS
