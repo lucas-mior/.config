@@ -1,0 +1,59 @@
+## NAVEGAR NO INDEX
+map [index] J navigate_index collapse-all
+map [index] j navigate_index collapse
+map [index] k navigate_index down
+map [index] l navigate_index up
+map [index] ; navigate_index expand
+map [index] : navigate_index expand-all
+
+## NAVEGAR
+map j scroll left
+map k scroll down
+map l scroll up
+map ; scroll right
+
+map r       rotate rotate-ccw
+map R       rotate rotate-cw
+map -       zoom out
+map +       zoom in
+map =       adjust_window width
+map <C-->   zoom out
+map <C-+>   adjust_window width
+map <C-=>   zoom in
+map ,       navigate previous
+map .       navigate next
+map z       recolor
+map v       recolor
+
+# Janela
+map <C-l> reload
+map <F11> toggle_fullscreen
+map b     toggle_statusbar
+map <C-p> print
+
+## MARCAS
+map \" feedkeys :blist<Space>
+map <A-a> feedkeys :bmark<Space>a<Return>
+map <A-b> feedkeys :bmark<Space>b<Return>
+map <A-c> feedkeys :bmark<Space>c<Return>
+map <A-d> feedkeys :bmark<Space>d<Return>
+map <A-e> feedkeys :bmark<Space>e<Return>
+map <A-f> feedkeys :bmark<Space>f<Return>
+map <A-g> feedkeys :bmark<Space>g<Return>
+map <A-h> feedkeys :bmark<Space>h<Return>
+map <A-i> feedkeys :bmark<Space>i<Return>
+map <A-k> feedkeys :bmark<Space>k<Return>
+map <A-l> feedkeys :bmark<Space>l<Return>
+map <A-m> feedkeys :bmark<Space>m<Return>
+map <A-n> feedkeys :bmark<Space>n<Return>
+map <A-o> feedkeys :bmark<Space>o<Return>
+map <A-p> feedkeys :bmark<Space>p<Return>
+map <A-q> feedkeys :bmark<Space>q<Return>
+map <A-s> feedkeys :bmark<Space>s<Return>
+map <A-t> feedkeys :bmark<Space>t<Return>
+map <A-u> feedkeys :bmark<Space>u<Return>
+map <A-v> feedkeys :bmark<Space>v<Return>
+map <A-w> feedkeys :bmark<Space>w<Return>
+map <A-x> feedkeys :bmark<Space>x<Return>
+map <A-y> feedkeys :bmark<Space>y<Return>
+map <A-z> feedkeys :bmark<Space>z<Return>
