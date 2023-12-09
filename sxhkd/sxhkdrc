@@ -1,0 +1,85 @@
+## Xorg
+super + control + shift + d
+    {shutdown}
+super + control + shift + e
+    {kdwm.sh}
+super + {F11, F12}
+    {touchpad.sh, xkill}
+super + {F5, F6}
+    setkeymap.sh {br, br_lucas_mior}
+
+## ABRIR
+super + d
+    {dmenu_run}
+super + {z,                     shift+z,                     e}
+    {urxvtc -e clip1.sh --copy, urxvtc -e clip1.sh --remove, clip.sh qr}
+super + {shift + r,  shift + p}
+    {st -e trans -I, passmenu --type}
+super + {b,     Return,              r}
+    {$BROWSER, st -e tmux new-session -A -s zsh, st -e tmux new lfimg.bash}
+super + {n,                s}
+    {st -A 0.6 -e ncmpcpp, blue.bash}
+
+super + v
+    {st -e nmtui}
+super + shift + v
+    nmcli radio wifi off && sleep 1s && nmcli radio wifi on
+super + {control,         shift+control} + v
+    {nmcli radio wifi on, nmcli radio wifi off}
+
+super + o; {l, r,                h,          n}
+    {lingot,   transmission-gtk, st -e htop, st -e newsboat}
+super + o; {k, f}
+    {kicad,    sudo FreeFileSync_x86_64}
+control + alt + {m,             w}
+    {kcolorchooser, webcam.sh}
+super + {x,         c,              o; m,            shift + e}
+    {magic.sh tudo, magic.sh meta, magic.sh manual, magic.sh emoji}
+super + equal
+    {st -e python}
+
+## VOLUME
+{super + shift + n}
+    st -e pulsemixer
+super + a
+    audio_toggle.bash dwmblocks2
+{XF86AudioMute, super + shift + m}
+    vol_out.sh toggle dwmblocks2
+{XF86AudioLowerVolume, shift + Down}
+    vol_out.sh down dwmblocks2
+{XF86AudioRaiseVolume, shift + Up}
+    vol_out.sh up dwmblocks2
+super + shift + {Up, Down}
+    {browser_vol.bash 0, browser_vol.bash 1}
+
+## MÚSICA
+super + {control, alt} + p
+    {pause.bash, pause.bash mpv}
+{XF86AudioPrev, super + comma}
+    music_control.sh prev
+{XF86AudioPlay, control + Return}
+    music_control.sh toggle
+{XF86AudioNext, super + period}
+    music_control.sh next
+shift + XF86AudioMute
+    music_control.sh mute
+{shift + XF86AudioLowerVolume, control + Down}
+    music_control.sh down
+{shift + XF86AudioRaiseVolume, control + Up}
+    music_control.sh up
+
+## TELA
+super + {p, shift+d}
+    {xrandr.sh, killall dwmblocks; setsid -f dwmblocks}
+{XF86MonBrightnessDown, XF86MonBrightnessUp }
+    {bright {--less, --more} dwmblocks2}
+{_, control, super} + Print
+    print_screen.sh {tela, area, last}
+super + shift + s
+    {print_screen.sh area}
+super + shift + {a, q, w}
+    {clip.sh shot por, clip.sh shot deu, clip.sh write}
+super + F8
+    clip.sh shot eng
+super + o; {   s,          e,           Print, a,     0}
+    record.sh {screencast, screenaudio, video, audio, kill}

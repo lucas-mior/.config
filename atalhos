@@ -1,0 +1,165 @@
+# PASTAS
+..    ../
+hh    /home/lucas/
+
+## USBs
+me    /mnt/
+
+## docs
+do    /home/lucas/docs/
+dc    /home/lucas/docs/comprovantes/
+dp    /home/lucas/docs/ampera/
+po    /home/lucas/docs/polo/
+ps    /home/lucas/docs/pstu/
+so    /home/lucas/docs/solar_ratones/
+
+## livros
+ll    /home/lucas/livros/
+lf    /home/lucas/livros/FSC/
+lm    /home/lucas/livros/MTM/
+le    /home/lucas/livros/engenharia/
+lt    /home/lucas/livros/engenharia/eletrica/maquinas/
+
+## down
+ww    /home/lucas/down/
+wy    /home/lucas/vids/yt-dlp/
+
+## mídias
+mm    /home/lucas/mus/
+sp    /home/lucas/mus/SpeedFlows/
+vv    /home/lucas/vids/
+ii    /home/lucas/imgs/
+is    /home/lucas/imgs/fotos_samsung/
+iw    /home/lucas/imgs/wallpapers/
+ig    /home/lucas/imgs/telagravada/
+i0    /home/lucas/imgs/00teste/
+
+## .local
+lo    /home/lucas/.local/
+ls    /home/lucas/.local/share/
+lx    /home/lucas/.local/lixeira/
+ss    /home/lucas/.local/scripts/
+ap    /home/lucas/.local/share/applications/
+ca    /home/lucas/.cache/
+cy    /home/lucas/.cache/yay/
+cp    /home/lucas/.cache/previewer/
+
+## sourcecode
+sr    /home/lucas/.local/src/
+sa    /home/lucas/.local/src/000AUR/
+so    /home/lucas/.local/src/OpenModelica/
+sb    /home/lucas/.local/src/bright/
+sn    /home/lucas/.local/src/brn2/
+sc    /home/lucas/.local/src/clipsim/
+sd    /home/lucas/.local/src/dmenu/
+sw    /home/lucas/.local/src/dwm/
+sm    /home/lucas/.local/src/dwmblocks2/
+sl    /home/lucas/.local/src/lf/
+su    /home/lucas/.local/src/luke/
+sp    /home/lucas/.local/src/ncmpcpp/
+sx    /home/lucas/.local/src/nsxiv/
+si    /home/lucas/.local/src/piscou/
+se    /home/lucas/.local/src/sent/
+st    /home/lucas/.local/src/st/
+sv    /home/lucas/.local/src/stiv/
+sy    /home/lucas/.local/src/wapp/
+
+## .config
+kk    /home/lucas/.config/
+kl    /home/lucas/.config/lf/
+kz    /home/lucas/.config/zsh/
+kx    /home/lucas/.config/X11/
+kv    /home/lucas/.config/vim/
+kg    /home/lucas/.config/git/
+km    /home/lucas/.config/mpv/
+
+## UFSC
+ms    /home/lucas/docs/moto_schutz/
+bi    /home/lucas/docs/biocal/
+ic    /home/lucas/docs/IC/
+uu    /home/lucas/docs/UFSC/
+172   /home/lucas/docs/UFSC/2017.2/
+181   /home/lucas/docs/UFSC/2018.1/
+182   /home/lucas/docs/UFSC/2018.2/
+191   /home/lucas/docs/UFSC/2019.1/
+192   /home/lucas/docs/UFSC/2019.2/
+201   /home/lucas/docs/UFSC/2020.1/
+202   /home/lucas/docs/UFSC/2020.2/
+211   /home/lucas/docs/UFSC/2021.1/
+212   /home/lucas/docs/UFSC/2021.2/
+221   /home/lucas/docs/UFSC/2022.1/
+222   /home/lucas/docs/UFSC/2022.2/
+231   /home/lucas/docs/UFSC/2023.1/
+ua    /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
+ui    /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
+ub    /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
+ut    /home/lucas/docs/UFSC/0TCC/
+mt    /home/lucas/docs/UFSC_mestrado/
+zx    /home/lucas/docs/zerdax2/zerdax2/
+za    /home/lucas/docs/zerdax2/datasets/
+zb    /home/lucas/docs/zerdax2/blender/
+
+## ARQUIVOS
+nx    /etc/nginx/nginx.conf
+aa    /home/lucas/.config/atalhos
+as    /home/lucas/.local/scripts/texto/atalhos.awk
+
+pv    /home/lucas/.config/pistol/pistol.conf
+pu    /home/lucas/.config/piscou/piscou.conf
+pi    /home/lucas/.config/picom/picom.conf
+fo    /home/lucas/.config/fontconfig/fonts.conf
+x1    /home/lucas/.config/sxhkd/sxhkdrc
+dun   /home/lucas/.config/dunst/dunstrc
+key   /home/lucas/.config/X11/remaps
+xi    /home/lucas/.config/X11/xinitrc
+xr    /home/lucas/.config/X11/Xresources
+xk    /home/lucas/.config/X11/keyboard_mouse
+rx    /home/lucas/.config/X11/urxvt
+gi    /home/lucas/.config/git/config
+tm    /home/lucas/.config/tmux/tmux.conf
+cl    /home/lucas/.config/clangd/config.yaml
+
+zi    /home/lucas/.config/zsh/zprofile.zsh
+ze    /home/lucas/.config/zsh/zshenv.zsh
+z0    /home/lucas/.config/zsh/zshrc.zsh
+z1    /home/lucas/.config/zsh/mappings.zsh
+z2    /home/lucas/.config/zsh/comandos.zsh
+za    /home/lucas/.config/zsh/aliases.zsh
+zl    /home/lucas/.config/lf_icons.conf
+zc    /home/lucas/.config/zsh/cores.zsh
+ls    /home/lucas/.config/ls_colors.css
+
+mi    /home/lucas/.config/mimeapps.list
+
+l0    /home/lucas/.config/lf/lfrc
+l1    /home/lucas/.config/lf/mappings
+l2    /home/lucas/.config/lf/comandos
+
+zt0   /home/lucas/.config/zathura/zathurarc
+zt1   /home/lucas/.config/zathura/mappings
+ztc   /home/lucas/.config/zathura/colores
+
+oc0   /home/lucas/.config/octave/octaverc
+mp0   /home/lucas/.config/mpv/mpv.conf
+mp1   /home/lucas/.config/mpv/input.conf
+
+yd    /home/lucas/.config/yt-dlp/config
+n0    /home/lucas/.config/ncmpcpp/config
+n1    /home/lucas/.config/ncmpcpp/bindings
+mpd   /home/lucas/.config/mpd/mpd.conf
+
+r0    /home/lucas/.config/newsboat/config
+r1    /home/lucas/.config/newsboat/mappings
+ru    /home/lucas/.config/newsboat/urls
+rc    /home/lucas/.config/newsboat/colors
+
+v0    /home/lucas/.config/vim/vimrc
+v1    /home/lucas/.config/vim/mappings.vim
+vs    /home/lucas/.config/vim/settings.vim
+vc    /home/lucas/.config/vim/cores.vim
+vp    /home/lucas/.config/vim/plugins.vim
+va    /home/lucas/.config/vim/autocmds.vim
+
+sx1   /home/lucas/.config/nsxiv/exec/key-handler
+
+bi    /home/lucas/docs/latex/bibliografia.bib

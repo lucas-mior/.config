@@ -1,0 +1,33 @@
+#include "/home/lucas/.config/X11/urxvt"
+
+!! Nsxiv
+Nsxiv.window.alpha:      0.7
+Nsxiv.window.background: #000000
+Nsxiv.window.foreground: #ffff00
+Nsxiv.mark.foreground:   #ff0000
+Nsxiv.bar.background:    #000000
+Nsxiv.bar.foreground:    #ffffff
+Nsxiv.bar.font:          monospace:size=18
+
+*background:      #000000
+*foreground:      #ffffff
+*foreground_bold: #ffffff
+*font:            monospace:size=14
+
+!! CORES
+*color0:  #000000
+*color1:  #ff0000
+*color2:  #00ff00
+*color3:  #ffff00
+*color4:  #0088ff
+*color5:  #ff00ff
+*color6:  #00aaaa
+*color7:  #ffffff
+*color8:  #333333
+*color9:  #ff6600
+*color10: #00cc00
+*color11: #ffbb00
+*color12: #0000ff
+*color13: #c600c6
+*color14: #0066aa
+*color15: #eeeeee
