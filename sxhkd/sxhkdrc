@@ -7,6 +7,8 @@ super + {F11, F12}
     {touchpad.sh, xkill}
 super + {F5, F6}
     setkeymap.sh {br, br_lucas_mior}
+super + {f}
+    {exec warpd --hint}
 
 ## ABRIR
 super + d

@@ -1,8 +1,9 @@
 #!/bin/sh
 
 redshift -P -O 6000 && echo 6000 > "$REDSHIFT_CACHE"
-wall_random.bash
 xrdb /home/lucas/.config/X11/Xresources
+
+xrandr.sh auto
 
 dunst &
 picom &
@@ -26,7 +27,8 @@ xset m 1 1 &
 #     Option "AutoRepeat" "0 0"
 # EndSection
 
-xrandr.sh auto
+sleep 1
+wall_random.bash
 exec dwm
 
 # export DESKTOP_SESSION=plasma
