@@ -76,6 +76,7 @@ gui="pushd  /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/" \
 gub="pushd  /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/" \
 gut="pushd  /home/lucas/docs/UFSC/0TCC/" \
 gmt="pushd  /home/lucas/docs/UFSC_mestrado/" \
+gmd="pushd  /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/" \
 gzx="pushd  /home/lucas/docs/zerdax2/zerdax2/" \
 gza="pushd  /home/lucas/docs/zerdax2/datasets/" \
 gzb="pushd  /home/lucas/docs/zerdax2/blender/" \
