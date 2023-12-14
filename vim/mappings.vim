@@ -3,6 +3,8 @@
     map Q <Nop>
 " :help map-modes
     nnoremap U u
+    nnoremap <C-z> u
+    inoremap <C-z> <esc>ui
     nnoremap S :%s/
 " hjkl;
     " h é mapeado para f next (ver plugins)
@@ -16,6 +18,7 @@
     nnoremap cd 0D
     nnoremap ' `
     nnoremap ` '
+    inoremap <C-h> <esc>dbxi
 " janela
     nnoremap <C-k>  <C-w>w
     nnoremap <C-l>  <C-l><C-w>w
