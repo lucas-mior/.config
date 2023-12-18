@@ -5,14 +5,14 @@ LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;250;000:ln=01;38;2;128;12
 
 { /* bold      color            extensions */
      0   : rgb(250, 250, 250) : txt
-     1   : rgb(250, 250, 250) : tab
+     0   : rgb(200, 250, 230) : tab
      1   : rgb(230, 230, 000) : tex md sent 1
-     1   : rgb(205, 036, 036) : pdf djvu epub ps
-     1   : rgb(095, 000, 250) : odt docx ino
-     0   : rgb(095, 000, 250) : doc
-     1   : rgb(000, 170, 000) : ods xlsx
-     0   : rgb(000, 170, 000) : xls
-     0   : rgb(000, 170, 000) : csv tsv
+     1   : rgb(205, 040, 040) : pdf djvu epub ps
+     1   : rgb(070, 010, 250) : odt docx
+     0   : rgb(070, 010, 250) : doc
+     1   : rgb(000, 160, 000) : ods xlsx
+     0   : rgb(000, 160, 000) : xls
+     0   : rgb(000, 160, 000) : csv tsv
      1   : rgb(250, 085, 000) : odp pptx
      0   : rgb(250, 085, 000) : ppt
      1   : rgb(000, 135, 250) : jpg jpeg gif bmp png ff svg tif tiff xcf webp hdr
@@ -20,8 +20,8 @@ LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;250;000:ln=01;38;2;128;12
      1   : rgb(240, 000, 240) : mov mpg mpeg mkv webm 3gp mp4 wmv avi
      1   : rgb(250, 165, 000) : iso img tar.bz tar.bz2 tbz tbz2 tar.gz tgz zip nar rar gz 7z zstd
      1   : rgb(000, 160, 000) : kicad_pro
-     1   : rgb(250, 250, 250) : kicad_pcb kicad_sch
-     1   : rgb(250, 250, 250) : pgn bib dll fmu
+     1   : rgb(210, 250, 210) : kicad_pcb kicad_sch
+     1   : rgb(210, 250, 210) : pgn bib dll fmu
      0   : rgb(000, 160, 000) : diff patch
      0   : rgb(210, 180, 120) : orig
      0   : rgb(120, 180, 120) : rej
@@ -29,5 +29,5 @@ LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;250;000:ln=01;38;2;128;12
      1   : rgb(250, 100, 000) : awk pl m vim plt py lua sh zsh bash fish vhd mo mos
      0   : rgb(250, 100, 000) : h hpp rlib
      1   : rgb(200, 150, 050) : part torrent
-     1   : rgb(000, 200, 000) : exe
+     1   : rgb(000, 190, 000) : exe
 }
