@@ -1,15 +1,7 @@
 ## Liberar <C-s>
     stty -ixon
 
-zle -N stivclear
-stivclear () {
-    stiv -c
-    clear
-    zle reset-prompt
-}
-
 ## Atalhos
-    bindkey '^L' stivclear
     bindkey '^e' edit-command-line
     bindkey '^I' first-tab
     bindkey '^H' backward-delete-word

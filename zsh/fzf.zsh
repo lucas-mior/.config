@@ -44,7 +44,7 @@ fzf-file-widget() {
   LBUFFER="${LBUFFER}$(__fsel)"
   local ret=$?
   zle reset-prompt
-  stiv -c
+  stiv_clear
   return $ret
 }
 zle     -N   fzf-file-widget
