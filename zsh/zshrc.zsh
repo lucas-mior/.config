@@ -31,18 +31,23 @@
     zle-keymap-select () {
         if [[ ${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
             echo -ne '\e[2 q\e]12;yellow\x7'
-        elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] || [[ ${KEYMAP} = '' ]] || [[ $1 = 'beam' ]]; then
+        elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] \
+            || [[ ${KEYMAP} = '' ]] || [[ $1 = 'beam' ]]; then
             echo -ne '\e[6 q\e]12;blue\x7'
         fi
     }
     zle -N zle-keymap-select
     zle-line-init() {
-        zle -K viins                               # initiate `vi insert` as keymap
+        zle -K viins                               
         echo -ne "\e[6 q\e]12;blue\x7"
     }
     zle -N zle-line-init
-    echo -ne '\e[6 q\e]12;blue\x7'                 # Use beam shape cursor on startup.
-    preexec() { echo -ne '\e[6 q\e]12;blue\x7' ;}  # Use beam shape cursor for each new prompt.
+    # Use beam shape cursor on startup.
+    echo -ne '\e[6 q\e]12;blue\x7'                 
+    preexec() {
+        # Use beam shape cursor for each new prompt.
+        echo -ne '\e[6 q\e]12;blue\x7'
+    }
 
     autoload edit-command-line; zle -N edit-command-line
 
@@ -70,8 +75,8 @@
 
 ## algumas opções
     chpwd () {
-        ls -A                                                  ## lista diretório automaticamente ao chdir
-        printf "\033]0;${PWD/\/home\/lucas/~}/\007" > /dev/tty ## seta o title do terminal ao mudar de pasta
+        ls -A
+        printf "\033]0;${PWD/\/home\/lucas/~}/\007" > /dev/tty
     }
     setopt autocd             #cd sem digitar cd, apenas dirname
     setopt cshjunkiequotes
