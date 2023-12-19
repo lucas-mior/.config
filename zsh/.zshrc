@@ -80,17 +80,38 @@
     setopt interactivecomments
     # set -o ignoreeof # dont exit on ctrl-d
 
-    cleanlf () {
-        stiv -c
-        [ -e "${UEBERZUG_FIFO}.drawed" ] && rm "${UEBERZUG_FIFO}.drawed"
+    _zlf() {
+        emulate -L zsh
+        local d=$(mktemp -d) || return 1
+        {
+            mkfifo -m 600 $d/fifo || return 1
+            tmux split -bf zsh -c "exec {ZLE_FIFO}>$d/fifo; export ZLE_FIFO; exec lf" || return 1
+            local fd
+            exec {fd}<$d/fifo
+            zle -Fw $fd _zlf_handler
+        } always {
+            rm -rf $d
+        }
     }
+    zle -N _zlf
+    bindkey '\ek' _zlf
+
+    _zlf_handler() {
+        emulate -L zsh
+        local line
+        if ! read -r line <&$1; then
+            zle -F $1
+            exec {1}<&-
+            return 1
+        fi
+        eval $line
+        zle -R
+    }
+    zle -N _zlf_handler
+
 ## PLUGINS
     source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-    if [[ "$(ps -p $PPID -o cmd=)" != "lf" ]]; then
-        source start_ueberzug.sh zsh
-    else
-        trap cleanlf EXIT
-    fi
     printf "\033]0;${PWD/\/home\/lucas/~}/\007" > /dev/tty ## seta o title do terminal
 	source /home/lucas/.config/zsh/.arquivos.zsh
 	source /home/lucas/.config/zsh/.pastas.zsh
+    stiv_clear

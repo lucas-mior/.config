@@ -33,7 +33,7 @@ fzfconfig () {
 
 fzf-cd-file() {
     # source start_ueberzug.sh "zsh" 2> /dev/null
-    stiv -c
+    stiv_clear
     oque=$(find . 2> /dev/null \
         | fzf --print0 --preview='wrap.sh {} $FZF_PREVIEW_COLUMNS $FZF_PREVIEW_LINES 2> /dev/null' --reverse --header='Pesquisar: ' \
         | xargs -0 -I{} realpath "{}")
@@ -41,7 +41,7 @@ fzf-cd-file() {
     [[ -d "$oque" ]] && cd "$oque"
     [[ -f "$oque" ]] && cd "${oque%/*}"
     zle fzf-redraw-prompt
-    stiv -c
+    stiv_clear
 }
 zle     -N   fzf-cd-file
 bindkey '^F' fzf-cd-file

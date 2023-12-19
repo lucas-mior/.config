@@ -17,8 +17,10 @@ super + {z,                     shift+z,                     e}
     {urxvtc -e clip1.sh --copy, urxvtc -e clip1.sh --remove, clip.sh qr}
 super + {shift + r,  shift + p}
     {st -e trans -I, passmenu --type}
-super + {b,     Return,              r}
-    {$BROWSER, st -e tmux new-session -A -s zsh, st -e tmux new lfimg.bash}
+super + {b,    Return}
+    {$BROWSER, st -e tmux new-session -A -s zsh}
+super + r
+    st -e tmux new lfimg.bash
 super + {n,                s}
     {st -A 0.6 -e ncmpcpp, blue.bash}
 
