@@ -58,7 +58,6 @@ alias dmenu='dmenu -i'
 # alias diff='diff --color=auto --tabsize=4'
 alias yv='yt-dlp.sh video'
 alias ya='yt-dlp.sh audio'
-alias uber='stiv -c'
 
 alias blue='bluetoothctl'
 alias qute='qutebrowser'
