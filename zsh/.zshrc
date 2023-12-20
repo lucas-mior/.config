@@ -90,7 +90,10 @@
         local d=$(mktemp -d) || return 1
         {
             mkfifo -m 600 $d/fifo || return 1
-            tmux split -bf zsh -c "exec {ZLE_FIFO}>$d/fifo; export ZLE_FIFO; exec lf" || return 1
+            tmux split -bf zsh -c \
+                "exec {ZLE_FIFO}>$d/fifo; export ZLE_FIFO; exec lfimg" \
+                || return 1
+            tmux resize-pane -y 80%
             local fd
             exec {fd}<$d/fifo
             zle -Fw $fd _zlf_handler
