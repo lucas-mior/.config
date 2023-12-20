@@ -1,10 +1,20 @@
 ## Liberar <C-s>
     stty -ixon
 
+lastpane () {
+    if [ -n "$ZLE_FIFO" ]; then
+        tmux last-pane
+    fi
+    clear
+    zle reset-prompt
+}
+zle -N lastpane
+
 ## Atalhos
     bindkey '^e' edit-command-line
     bindkey '^I' first-tab
     bindkey '^H' backward-delete-word
+    bindkey '^L' lastpane
 
 ## vi mode jkl;
     bindkey -M vicmd j  vi-backward-char
