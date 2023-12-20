@@ -64,8 +64,6 @@
 ## primeira tabula auto completa
     first-tab() {
         if [[ $#BUFFER == 0 ]]; then
-            export BUFFER="cd "
-            export CURSOR=3
             zle list-choices
         else
             zle expand-or-complete
@@ -75,7 +73,6 @@
 
 ## algumas opções
     chpwd () {
-        ls -A
         printf "\033]0;${PWD/\/home\/lucas/~}/\007" > /dev/tty
     }
     setopt autocd             #cd sem digitar cd, apenas dirname
@@ -84,38 +81,6 @@
     setopt histignorespace
     setopt interactivecomments
     # set -o ignoreeof # dont exit on ctrl-d
-
-    _zlf() {
-        emulate -L zsh
-        local d=$(mktemp -d) || return 1
-        {
-            mkfifo -m 600 $d/fifo || return 1
-            tmux split -bf zsh -c \
-                "exec {ZLE_FIFO}>$d/fifo; export ZLE_FIFO; exec lfimg" \
-                || return 1
-            tmux resize-pane -y 80%
-            local fd
-            exec {fd}<$d/fifo
-            zle -Fw $fd _zlf_handler
-        } always {
-            rm -rf $d
-        }
-    }
-    zle -N _zlf
-    bindkey '\ek' _zlf
-
-    _zlf_handler() {
-        emulate -L zsh
-        local line
-        if ! read -r line <&$1; then
-            zle -F $1
-            exec {1}<&-
-            return 1
-        fi
-        eval $line
-        zle -R
-    }
-    zle -N _zlf_handler
 
 ## PLUGINS
     source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
