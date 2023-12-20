@@ -3,6 +3,7 @@
 
 lastpane () {
     if [ -n "$ZLE_FIFO" ]; then
+        lf -remote "send reload"
         tmux last-pane
     fi
     clear
