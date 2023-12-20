@@ -42,7 +42,7 @@ ss    /home/lucas/.local/scripts/
 ap    /home/lucas/.local/share/applications/
 ca    /home/lucas/.cache/
 cy    /home/lucas/.cache/yay/
-cp    /home/lucas/.cache/previewer/
+cp    /home/lucas/.cache/preview/
 
 ## sourcecode
 sr    /home/lucas/.local/src/
