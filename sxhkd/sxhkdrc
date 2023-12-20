@@ -20,7 +20,7 @@ super + {shift + r,  shift + p}
 super + {b,    Return}
     {$BROWSER, st -e tmux new-session -A -s zsh}
 super + r
-    st -e tmux new lfimg.bash
+    st -e tmux new lfimg.zsh
 super + {n,                s}
     {st -A 0.6 -e ncmpcpp, blue.bash}
 
