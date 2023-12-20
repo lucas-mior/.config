@@ -18,7 +18,7 @@ super + {z,                     shift+z,                     e}
 super + {shift + r,  shift + p}
     {st -e trans -I, passmenu --type}
 super + {b,    Return}
-    {$BROWSER, st -e tmux new-session -A -s zsh}
+    {$BROWSER, st -e tmux new-session -A -s zsh zsh}
 super + r
     st -e tmux new lfimg.zsh
 super + {n,                s}
