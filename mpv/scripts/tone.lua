@@ -3,7 +3,7 @@ local function print(s)
 	mp.osd_message(s)
 end
 
-function tonar_menos()
+function tone_decrease()
     local arate = mp.get_property_number("audio-params/samplerate")
     local filter = string.format("asetrate=%d*(15/16)," ..
                                  "aresample=%d," ..
@@ -12,7 +12,7 @@ function tonar_menos()
     mp.command("af toggle " .. filter)
 end
 
-function tonar_mais()
+function tone_increase()
     local arate = mp.get_property_number("audio-params/samplerate")
     local filter = string.format("asetrate=%d*(16/15)," ..
                                  "aresample=%d," ..
@@ -21,5 +21,5 @@ function tonar_mais()
     mp.command("af toggle " .. filter)
 end
 
-mp.add_key_binding(nil, "tone_increase", tonar_mais)
-mp.add_key_binding(nil, "tone_decrease", tonar_menos)
+mp.add_key_binding(nil, "tone_increase", tone_increase)
+mp.add_key_binding(nil, "tone_decrease", tone_decrease)
