@@ -1,0 +1,302 @@
+cmd on-cd &{{
+    name="${PWD/#$HOME/'~'}"
+    printf "\033]0;${name}/\007" > /dev/tty
+    tmux rename-window "$name"
+    [ -n "$ZLE_FIFO" ] && printf "cd $PWD\n zle reset-prompt\n" >&$ZLE_FIFO
+    for fi in *; do
+        mime="$(file -b --mime-type "$fi")"
+        echo "$mime" | grep -Eq "video/.*" \
+            && setsid -f vid.sh "$fi" cache
+        echo "$mime" | grep -Eq "audio/.*" \
+            && setsid -f vid.sh "$fi" cache
+        echo "$mime" | grep -Fq "application/pdf" \
+            && setsid -f pdf.sh "$fi" cache
+    done
+}}
+
+cmd on-quit &{{
+    [ -n "$ZLE_FIFO" ] && printf "exit\n" >&$ZLE_FIFO
+}}
+
+cmd on-redraw &{{
+    if [ $lf_width -lt 90 ]; then
+        lf -remote "send $id set preview false"
+        lf -remote "send $id set ratios 1"
+        $lf_cleaner
+    elif [ $lf_width -lt 110 ]; then
+        lf -remote "send $id set ratios 1:1"
+        lf -remote "send $id set preview true"
+    else
+        lf -remote "send $id set ratios 3:5"
+        lf -remote "send $id set preview true"
+    fi
+}}
+
+## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
+cmd move $ mv -vn  -t "$1" $fx
+cmd copi $ cp -rvn -t "$1" $fx
+cmd link % ln -sv  -t "$1" $fx
+cmd go %{{
+    qual=$(head -n 1 <<< $fx)
+    qual="${qual##*/}"
+    case "$1" in
+         mv) mv  -vn -t "$2" $fx ;;
+         cp) cp -rvn -t "$2" $fx ;;
+         ln) for fi in $fx; do
+                 [[ "$(file -b "$fi")" = "directory" ]] && link="-s" || link=""
+                 ln $link -v -t "$2" "$fi"
+             done
+    esac \
+    && lf -remote "send $id cd \"$2\""        \
+    && lf -remote "send $id select \"$qual\""
+}}
+cmd trans ${{
+    [[ -z "$TRANSFILES"  ]] && exit
+    [[ -f "$TRANSFILES"  ]] && echo "" > "$TRANSFILES"
+
+    echo "$fx" > "$TRANSFILES"
+    prim=$(head -n 1 "$TRANSFILES")
+    prim="${prim##*/}"
+
+    mvcpln.sh $1
+
+    destino="$(cat $MAGIC_TMP_FILE)"
+    [[ ! -d $destino ]] && exit
+    lf -remote "send $id cd \"$destino\""
+    lf -remote "send $id select \"$prim\""
+}}
+cmd retirar ${{
+    lf -remote 'send unselect; clear'
+    [[ -d "$f" ]] \
+    && find "$f" -maxdepth 1 -mindepth 1 -exec mv -nv -t ./ {} + \
+    && rmdir "$f"
+    lf -remote "send $id push gg"
+}}
+cmd retirarf ${{
+    lf -remote 'send unselect; clear'
+    [[ -d $f ]] \
+    && find $f -maxdepth 1 -mindepth 1 -exec mv -nv -t ./ {} + \
+    && rmdir $f
+}}
+
+cmd colar ${{
+    load=$(cat $XDG_DATA_HOME/lf/files)
+    list=$(sed    '1d' <<< "$load")
+    mode=$(sed -n '1p' <<< "$load")
+    prim=$(sed -n '2p' <<< "$load")
+    prim="${prim##*/}"
+
+    [[ $mode == copy ]] && cp -rvn -t ./ $list
+    [[ $mode == move ]] && mv  -vn -t ./ $list
+
+    lf -remote 'send load'
+    lf -remote 'send clear'
+    lf -remote "send $id select \"$prim\""
+}}
+cmd paste_select %{{
+    prim=$(sed -n '2p' $XDG_DATA_HOME/lf/files)
+    prim="${prim##*/}"
+    lf -remote "send $id paste"
+    lf -remote "send $id select \"$prim\""
+    lf -remote "send $id clear"
+}}
+cmd paste_link !{{
+    list=$(sed '1d' $XDG_DATA_HOME/lf/files)
+
+    for fi in $list; do
+        [[ "$(file -b "$fi")" == "directory" ]] && link="-s" || link=""
+        ln $link -v -t ./ "$fi"
+    done
+    name="$(basename "$fi")"
+    lf -remote 'send clear'
+    lf -remote "send select \"$name\""
+}}
+cmd rm_duplas %{{
+    lf -remote "send unselect; clear"
+    sleep 0.2
+    lf -remote "send $id glob-select \"*.~[1-9]~\""
+    sleep 0.2
+    lf -remote "send $id load"
+    sleep 0.2
+    lf -remote "send $id delete"
+}}
+cmd rename_A &{{
+    nome="${f##*/}."
+    ext="${nome#*.}"
+    lf -remote "send $id rename"
+    lf -remote "send $id cmd-end"
+}}
+cmd rename_I &{{
+    lf -remote "send $id rename"
+    lf -remote "send $id cmd-home"
+}}
+cmd rename_cw &{{
+    nome="${f##*/}."
+    ext="${nome#*.}"
+    lf -remote "send $id rename"
+    lf -remote "send $id cmd-delete-home"
+}}
+
+cmd link_hard !{{
+    [ ! -L "$f" ] && exit
+    simb="$(basename "$f")"
+    target="$(readlink "$simb")"
+    ln -vn "$target" "./${simb}.new" && rm "$simb" && mv -vn "./${simb}.new" "$simb"
+}}
+
+## TOUCH e MKDIR
+cmd touch ${{
+    ext="${1##*.}"
+    cp "${XDG_TEMPLATES_DIR}/touch.${ext}" "$1" || touch "$1"
+    sleep 0.02s
+    lf -remote "send $id load"
+    lf -remote "send $id select \"$(pwd)//$1\""
+}}
+cmd mkdir %{{
+    mkdir -p "$1"
+    lf -remote "send $id load"
+    lf -remote "send $id select \"$(pwd)//$1\""
+}}
+
+## MUDANÇAS
+cmd chmod ${{
+    chmod $1 $fx
+    lf -remote "send $id reload"
+}}
+cmd chown ${{
+    sudo chown lucas:lucas $fx
+    lf -remote "send $id reload"
+}}
+cmd patch $ patch -p1 < $f
+cmd mk $ make && sudo make install
+cmd diff  !{{
+    num="$(wc -l <<< $fx)"
+    if [[ $num -gt 2 ]]; then
+        vim -d $fx
+    else
+        old="$(basename "$(sed -n '1p' <<< $fx)")"
+        new="$(basename "$(sed -n '2p' <<< $fx)")"
+        lines="$(/usr/bin/diff $fx)"
+        if [ $? = 0 ]; then
+            lf -remote "send $id echomsg \"$GRE $old == $new $RES\" "
+        else
+            lf -remote "send $id echomsg \"$RED $old != $new $RES\" "
+            echo "$lines" > "${old%.*}${new%.*}.diff"
+        fi
+    fi
+}}
+cmd html  $ markdown $f > ${f%%.*}.html
+cmd cue   $ cuesplit.sh
+
+## CONVERSÕES
+cmd rot+ $ av.bash     rodar + $fx
+cmd rot- $ av.bash     rodar - $fx
+cmd jpg  $ imagem.bash jpg     $fx
+cmd png  $ imagem.bash png     $fx
+cmd webp $ imagem.bash webp    $fx
+cmd tes  $ texto.bash  tes $1  $fx
+cmd txt  $ texto.bash  txt     $fx
+cmd utf  $ texto.bash  utf     $fx
+cmd cat  $ texto.bash  cat     $fx
+cmd pdf  $ word.bash  pdf      $fx
+cmd odf  $ word.bash  odf      $fx
+cmd ods  $ word.bash  odf      $fx
+cmd odp  $ word.bash  odf      $fx
+cmd odt  $ word.bash  odf      $fx
+cmd oxml $ word.bash  oxml     $fx
+cmd csv  $ word.bash  csv      $fx
+
+## FZF PROCURAR
+cmd fzf_jump ${{
+    if [[ $lf_hidden == false ]]; then
+        oque="$(arqs.zsh lf_arquivos | xargs -0 -I % realpath "%")"
+    else
+        oque="$(arqs.zsh lf_meta | xargs -0 -I % realpath "%")"
+    fi
+    [[ ! -e $oque ]] && exit
+
+    pasta="$(dirname "$oque")"
+    lf -remote "send $id cd     \"$pasta\""
+    lf -remote "send $id select \"$oque\""
+}}
+
+cmd echomime %{{
+   lf -remote "send $id echomsg \"$ORA $(file --mime-type $f) $RES\""
+}}
+## EXTRAIR E COMPRIMIR
+cmd extract ${{
+    dir="${f}.extract"
+    mkdir -p "$dir"
+    cd "$dir"
+    extract.sh "${f}"
+    lf -remote "send $id select $dir"
+}}
+cmd zip !{{
+    mkdir $1
+    cp -r $fx $1
+    zip -r ${1}.zip ${1}
+    rm -rf $1
+}}
+
+cmd draw_labels_yolo ${{
+    python ../scripts/draw_labels_yolo.py "$fx"
+}}
+
+cmd run !{{
+    if [[ -x "$f" ]]; then
+        $f
+    else
+        ext="${f##*.}"
+        case $ext in
+            bash) interpreter=bash     ;;
+              ly) interpreter=lilypond ;;
+             zsh) interpreter=zsh      ;;
+              sh) interpreter=dash     ;;
+              py) interpreter=python   ;;
+               m) interpreter=octave   ;;
+             awk) interpreter=awk -f   ;;
+              pl) interpreter=perl     ;;
+             plt) interpreter=gnuplot  ;;
+              sp) interpreter=ngspice  ;;
+             lua) interpreter=lua      ;;
+               1) interpreter=man      ;;
+               *) lf -remote "send $id echomsg \" Inclua extensão ou torne o arquivo executável\"" ;;
+        esac
+        [[ -n "$interpreter" ]] && $interpreter $f 2>&1 | less -r
+    fi
+}}
+
+## ABRIR
+cmd pdfa $ setsid pdfarranger $f > /dev/null 2>&1 &
+cmd kid  $ setsid kid3-qt  $f > /dev/null 2>&1 &
+cmd auda $ setsid audacity $f > /dev/null 2>&1 &
+cmd gimp $ setsid gimp     $f > /dev/null 2>&1 &
+cmd shot $ setsid shotwell $f > /dev/null 2>&1 &
+cmd gthu $ setsid gthumb   $f > /dev/null 2>&1 &
+cmd du   $ ncdu -e --color dark
+cmd openwith $ setsid -f openwith.sh $f > /dev/null 2>&1 &
+
+cmd open $ abridor.sh $fx
+
+cmd zle-insert-relative %{{
+    if [ -n "$ZLE_FIFO" ]; then
+        for f in $fx; do
+            printf 'LBUFFER+="${LBUFFER:+ }${(q)$(realpath %q --relative-to=$PWD)}"\n' "$f" >&$ZLE_FIFO
+        done
+    fi
+}}
+
+cmd lastpane %{{
+    lf -remote "send $id reload"
+    if [ -n "$ZLE_FIFO" ]; then
+        tmux last-pane
+    fi
+}}
+
+cmd restartlf ${{
+    lfimg
+}}
+
+cmd split ${{
+    tmux new-window lfimg.zsh $UEBERZUG_FIFO
+}}

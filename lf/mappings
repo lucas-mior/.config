@@ -1,0 +1,114 @@
+## deixar livre
+map <home>
+map <end>
+map <pgdn>
+map <pgup>
+map d
+map p
+map y
+map m
+map M
+map y
+map g
+map c
+map u
+map h
+map t
+map <c-m>
+map <c-x>
+map <c-e>
+map w
+map <c-n>
+map <c-p>
+cmap <c-n>
+cmap <c-p>
+
+map <f-9> $stiv
+
+## RENOMEAR
+map I  rename_I
+map a  rename
+map A  rename_A
+map cw rename_cw
+map br $ brn2 $fs
+
+map r mark-save
+
+## COPIAR, COLAR, MOVER, LINK SIMBÓLICO, DELETAR
+map yy copy
+map dd cut
+map <c-x>m trans mv
+map <c-x>y trans cp
+map <c-x>k trans ln
+map <c-x>L link_hard
+
+map ud clear
+map us unselect
+map uu :unselect; clear
+map <c-l> lastpane
+
+map S push :glob-select<space>
+map <c-space> push <space><up><up>
+map pp paste_select
+map pP colar
+map pk paste_link
+
+map dD       rm_duplas
+map D        delete
+map <delete> lixeira
+
+cmap <up>   cmd-history-prev
+cmap <down> cmd-history-next
+cmap <c-h>  cmd-delete-word-back
+
+map <tab> $tmux next-window
+map du du
+map ds $ subdl $f
+map z extract
+map Z push :zip<space>
+map <enter> shell
+map <c-o> retirar
+map <c-0> retirarf
+map <c-n> restartlf
+map o openwith
+
+map ; open
+map j updir
+map k down
+map l up
+
+map cm push :chmod<space>
+map co chown
+map tt push :touch<space>
+map td push :mkdir<space>
+map pa patch
+map df diff
+
+map wb :set number!; set relativenumber!
+map wh :set hidden!
+map wr :set reverse!; push gg
+map wn :set sortby name;  set info size
+map ws :set sortby size;  set info size
+map wt :set sortby time;  set info time
+map wa :set sortby atime; set info atime
+map wc :set sortby ctime; set info ctime
+map we :set sortby ext
+
+## executar scripts
+map s $ zsh
+map xx run
+map xz draw_labels_yolo
+
+map <c-f> fzf_jump
+map <c-s> fzf_multi
+
+# map <m-1> down  # primary
+# map <m-2> down  # secondary
+# map <m-3> down  # middle
+
+# map <m-up>    down
+# map <m-down>  down
+# map <m-left>  down
+# map <m-right> down
+map T tag-toggle
+map i zle-insert-relative
