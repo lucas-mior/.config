@@ -1,0 +1,56 @@
+source /home/lucas/.config/lf/comandos
+source /home/lucas/.config/lf/mappings
+source /home/lucas/.config/lf/nsxiv
+
+set ignorecase
+set ignoredia
+set incsearch
+set smartcase
+set dircounts
+
+set number
+set relativenumber
+set icons
+set ratios '3:5'
+set tabstop 4
+set scrolloff 5
+set promptfmt "\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
+set mouse
+
+set preview
+set previewer piscou
+set cleaner /usr/local/bin/stiv_clear
+# $1 previous file name,
+# $2 width $3 height
+# $4 horizontal position $5 vertical position of preview pane
+# $6 current filename to be previewed
+
+set dircounts
+set smartdia
+set wrapscan
+
+set hiddenfiles ".*:*.so:*.o:*.pro:*.data:tags:*.bak:*-bak:*-cache:
+:*.aux:*.log:*.log:*.loq:*.lot:*.lof:*.bbl:*.bcf:*.blg:*.run.xml:*.toc:
+:*.idx:*.bin:*.scout:*.sqlite:*.orig:*.synctex:*__pycache__:compile_commands.json:
+:Ambiente de*:Menu *:Meus Doc*:AppData:3D Obj*:Configurações Locais:Cookies:Dados de Aplicativos:
+:OneDrive:*.ini:*.DAT:*-ms:Modelos:Recent:SendTo:*.LOG*:*.blf:Meus Ví*:Minhas I*:Minhas M*:
+:$RECYCLE*:System Volume*:Contacts:Favorites:Links:Saved Games:Searches
+:*.kicad_prl:*.kicad_pro-bak"
+
+set dirtyfiles "*.kicad_sch:*.kicad_pcb
+:*.jpg:*.jpeg:*.png:*.ico:*.gif:*.bmp:*.ff:*.webp:
+:*.mkv:*.mp4:*.mov:*.avi:*.wmv:*.webm:*.mpeg:*.3gp:
+:*.mp3:*.flac:*.opus:*.aac:*.ogg:*.wav:*.m3u:
+:*.hdr"
+
+# set shellopts '-eu'
+set shell bash
+set ifs "\n"
+set filesep "\n"
+
+set period 60
+
+set sortby name; set info size
+
+:on-cd
+source /home/lucas/.config/lf/.pastas
