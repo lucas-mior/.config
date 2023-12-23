@@ -1,0 +1,492 @@
+map g..   cd     ../
+map m..   move   ../
+map y..   copi   ../
+map K..   go ln  ../
+map M..   go mv  ../
+map Y..   go cp  ../
+map ghh   cd     /home/lucas/
+map mhh   move   /home/lucas/
+map yhh   copi   /home/lucas/
+map Khh   go ln  /home/lucas/
+map Mhh   go mv  /home/lucas/
+map Yhh   go cp  /home/lucas/
+map gme   cd     /mnt/
+map mme   move   /mnt/
+map yme   copi   /mnt/
+map Kme   go ln  /mnt/
+map Mme   go mv  /mnt/
+map Yme   go cp  /mnt/
+map gdo   cd     /home/lucas/docs/
+map mdo   move   /home/lucas/docs/
+map ydo   copi   /home/lucas/docs/
+map Kdo   go ln  /home/lucas/docs/
+map Mdo   go mv  /home/lucas/docs/
+map Ydo   go cp  /home/lucas/docs/
+map gdc   cd     /home/lucas/docs/comprovantes/
+map mdc   move   /home/lucas/docs/comprovantes/
+map ydc   copi   /home/lucas/docs/comprovantes/
+map Kdc   go ln  /home/lucas/docs/comprovantes/
+map Mdc   go mv  /home/lucas/docs/comprovantes/
+map Ydc   go cp  /home/lucas/docs/comprovantes/
+map gdp   cd     /home/lucas/docs/ampera/
+map mdp   move   /home/lucas/docs/ampera/
+map ydp   copi   /home/lucas/docs/ampera/
+map Kdp   go ln  /home/lucas/docs/ampera/
+map Mdp   go mv  /home/lucas/docs/ampera/
+map Ydp   go cp  /home/lucas/docs/ampera/
+map gpo   cd     /home/lucas/docs/polo/
+map mpo   move   /home/lucas/docs/polo/
+map ypo   copi   /home/lucas/docs/polo/
+map Kpo   go ln  /home/lucas/docs/polo/
+map Mpo   go mv  /home/lucas/docs/polo/
+map Ypo   go cp  /home/lucas/docs/polo/
+map gps   cd     /home/lucas/docs/pstu/
+map mps   move   /home/lucas/docs/pstu/
+map yps   copi   /home/lucas/docs/pstu/
+map Kps   go ln  /home/lucas/docs/pstu/
+map Mps   go mv  /home/lucas/docs/pstu/
+map Yps   go cp  /home/lucas/docs/pstu/
+map gso   cd     /home/lucas/docs/solar_ratones/
+map mso   move   /home/lucas/docs/solar_ratones/
+map yso   copi   /home/lucas/docs/solar_ratones/
+map Kso   go ln  /home/lucas/docs/solar_ratones/
+map Mso   go mv  /home/lucas/docs/solar_ratones/
+map Yso   go cp  /home/lucas/docs/solar_ratones/
+map gll   cd     /home/lucas/livros/
+map mll   move   /home/lucas/livros/
+map yll   copi   /home/lucas/livros/
+map Kll   go ln  /home/lucas/livros/
+map Mll   go mv  /home/lucas/livros/
+map Yll   go cp  /home/lucas/livros/
+map glf   cd     /home/lucas/livros/FSC/
+map mlf   move   /home/lucas/livros/FSC/
+map ylf   copi   /home/lucas/livros/FSC/
+map Klf   go ln  /home/lucas/livros/FSC/
+map Mlf   go mv  /home/lucas/livros/FSC/
+map Ylf   go cp  /home/lucas/livros/FSC/
+map glm   cd     /home/lucas/livros/MTM/
+map mlm   move   /home/lucas/livros/MTM/
+map ylm   copi   /home/lucas/livros/MTM/
+map Klm   go ln  /home/lucas/livros/MTM/
+map Mlm   go mv  /home/lucas/livros/MTM/
+map Ylm   go cp  /home/lucas/livros/MTM/
+map gle   cd     /home/lucas/livros/engenharia/
+map mle   move   /home/lucas/livros/engenharia/
+map yle   copi   /home/lucas/livros/engenharia/
+map Kle   go ln  /home/lucas/livros/engenharia/
+map Mle   go mv  /home/lucas/livros/engenharia/
+map Yle   go cp  /home/lucas/livros/engenharia/
+map glt   cd     /home/lucas/livros/engenharia/eletrica/maquinas/
+map mlt   move   /home/lucas/livros/engenharia/eletrica/maquinas/
+map ylt   copi   /home/lucas/livros/engenharia/eletrica/maquinas/
+map Klt   go ln  /home/lucas/livros/engenharia/eletrica/maquinas/
+map Mlt   go mv  /home/lucas/livros/engenharia/eletrica/maquinas/
+map Ylt   go cp  /home/lucas/livros/engenharia/eletrica/maquinas/
+map gww   cd     /home/lucas/down/
+map mww   move   /home/lucas/down/
+map yww   copi   /home/lucas/down/
+map Kww   go ln  /home/lucas/down/
+map Mww   go mv  /home/lucas/down/
+map Yww   go cp  /home/lucas/down/
+map gwy   cd     /home/lucas/vids/yt-dlp/
+map mwy   move   /home/lucas/vids/yt-dlp/
+map ywy   copi   /home/lucas/vids/yt-dlp/
+map Kwy   go ln  /home/lucas/vids/yt-dlp/
+map Mwy   go mv  /home/lucas/vids/yt-dlp/
+map Ywy   go cp  /home/lucas/vids/yt-dlp/
+map gmm   cd     /home/lucas/mus/
+map mmm   move   /home/lucas/mus/
+map ymm   copi   /home/lucas/mus/
+map Kmm   go ln  /home/lucas/mus/
+map Mmm   go mv  /home/lucas/mus/
+map Ymm   go cp  /home/lucas/mus/
+map gsp   cd     /home/lucas/mus/SpeedFlows/
+map msp   move   /home/lucas/mus/SpeedFlows/
+map ysp   copi   /home/lucas/mus/SpeedFlows/
+map Ksp   go ln  /home/lucas/mus/SpeedFlows/
+map Msp   go mv  /home/lucas/mus/SpeedFlows/
+map Ysp   go cp  /home/lucas/mus/SpeedFlows/
+map gvv   cd     /home/lucas/vids/
+map mvv   move   /home/lucas/vids/
+map yvv   copi   /home/lucas/vids/
+map Kvv   go ln  /home/lucas/vids/
+map Mvv   go mv  /home/lucas/vids/
+map Yvv   go cp  /home/lucas/vids/
+map gii   cd     /home/lucas/imgs/
+map mii   move   /home/lucas/imgs/
+map yii   copi   /home/lucas/imgs/
+map Kii   go ln  /home/lucas/imgs/
+map Mii   go mv  /home/lucas/imgs/
+map Yii   go cp  /home/lucas/imgs/
+map gis   cd     /home/lucas/imgs/fotos_samsung/
+map mis   move   /home/lucas/imgs/fotos_samsung/
+map yis   copi   /home/lucas/imgs/fotos_samsung/
+map Kis   go ln  /home/lucas/imgs/fotos_samsung/
+map Mis   go mv  /home/lucas/imgs/fotos_samsung/
+map Yis   go cp  /home/lucas/imgs/fotos_samsung/
+map giw   cd     /home/lucas/imgs/wallpapers/
+map miw   move   /home/lucas/imgs/wallpapers/
+map yiw   copi   /home/lucas/imgs/wallpapers/
+map Kiw   go ln  /home/lucas/imgs/wallpapers/
+map Miw   go mv  /home/lucas/imgs/wallpapers/
+map Yiw   go cp  /home/lucas/imgs/wallpapers/
+map gig   cd     /home/lucas/imgs/telagravada/
+map mig   move   /home/lucas/imgs/telagravada/
+map yig   copi   /home/lucas/imgs/telagravada/
+map Kig   go ln  /home/lucas/imgs/telagravada/
+map Mig   go mv  /home/lucas/imgs/telagravada/
+map Yig   go cp  /home/lucas/imgs/telagravada/
+map gi0   cd     /home/lucas/imgs/00teste/
+map mi0   move   /home/lucas/imgs/00teste/
+map yi0   copi   /home/lucas/imgs/00teste/
+map Ki0   go ln  /home/lucas/imgs/00teste/
+map Mi0   go mv  /home/lucas/imgs/00teste/
+map Yi0   go cp  /home/lucas/imgs/00teste/
+map glo   cd     /home/lucas/.local/
+map mlo   move   /home/lucas/.local/
+map ylo   copi   /home/lucas/.local/
+map Klo   go ln  /home/lucas/.local/
+map Mlo   go mv  /home/lucas/.local/
+map Ylo   go cp  /home/lucas/.local/
+map gls   cd     /home/lucas/.local/share/
+map mls   move   /home/lucas/.local/share/
+map yls   copi   /home/lucas/.local/share/
+map Kls   go ln  /home/lucas/.local/share/
+map Mls   go mv  /home/lucas/.local/share/
+map Yls   go cp  /home/lucas/.local/share/
+map glx   cd     /home/lucas/.local/lixeira/
+map mlx   move   /home/lucas/.local/lixeira/
+map ylx   copi   /home/lucas/.local/lixeira/
+map Klx   go ln  /home/lucas/.local/lixeira/
+map Mlx   go mv  /home/lucas/.local/lixeira/
+map Ylx   go cp  /home/lucas/.local/lixeira/
+map gss   cd     /home/lucas/.local/scripts/
+map mss   move   /home/lucas/.local/scripts/
+map yss   copi   /home/lucas/.local/scripts/
+map Kss   go ln  /home/lucas/.local/scripts/
+map Mss   go mv  /home/lucas/.local/scripts/
+map Yss   go cp  /home/lucas/.local/scripts/
+map gap   cd     /home/lucas/.local/share/applications/
+map map   move   /home/lucas/.local/share/applications/
+map yap   copi   /home/lucas/.local/share/applications/
+map Kap   go ln  /home/lucas/.local/share/applications/
+map Map   go mv  /home/lucas/.local/share/applications/
+map Yap   go cp  /home/lucas/.local/share/applications/
+map gca   cd     /home/lucas/.cache/
+map mca   move   /home/lucas/.cache/
+map yca   copi   /home/lucas/.cache/
+map Kca   go ln  /home/lucas/.cache/
+map Mca   go mv  /home/lucas/.cache/
+map Yca   go cp  /home/lucas/.cache/
+map gcy   cd     /home/lucas/.cache/yay/
+map mcy   move   /home/lucas/.cache/yay/
+map ycy   copi   /home/lucas/.cache/yay/
+map Kcy   go ln  /home/lucas/.cache/yay/
+map Mcy   go mv  /home/lucas/.cache/yay/
+map Ycy   go cp  /home/lucas/.cache/yay/
+map gcp   cd     /home/lucas/.cache/preview/
+map mcp   move   /home/lucas/.cache/preview/
+map ycp   copi   /home/lucas/.cache/preview/
+map Kcp   go ln  /home/lucas/.cache/preview/
+map Mcp   go mv  /home/lucas/.cache/preview/
+map Ycp   go cp  /home/lucas/.cache/preview/
+map gsr   cd     /home/lucas/.local/src/
+map msr   move   /home/lucas/.local/src/
+map ysr   copi   /home/lucas/.local/src/
+map Ksr   go ln  /home/lucas/.local/src/
+map Msr   go mv  /home/lucas/.local/src/
+map Ysr   go cp  /home/lucas/.local/src/
+map gsa   cd     /home/lucas/.local/src/000AUR/
+map msa   move   /home/lucas/.local/src/000AUR/
+map ysa   copi   /home/lucas/.local/src/000AUR/
+map Ksa   go ln  /home/lucas/.local/src/000AUR/
+map Msa   go mv  /home/lucas/.local/src/000AUR/
+map Ysa   go cp  /home/lucas/.local/src/000AUR/
+map gso   cd     /home/lucas/.local/src/OpenModelica/
+map mso   move   /home/lucas/.local/src/OpenModelica/
+map yso   copi   /home/lucas/.local/src/OpenModelica/
+map Kso   go ln  /home/lucas/.local/src/OpenModelica/
+map Mso   go mv  /home/lucas/.local/src/OpenModelica/
+map Yso   go cp  /home/lucas/.local/src/OpenModelica/
+map gsb   cd     /home/lucas/.local/src/bright/
+map msb   move   /home/lucas/.local/src/bright/
+map ysb   copi   /home/lucas/.local/src/bright/
+map Ksb   go ln  /home/lucas/.local/src/bright/
+map Msb   go mv  /home/lucas/.local/src/bright/
+map Ysb   go cp  /home/lucas/.local/src/bright/
+map gsn   cd     /home/lucas/.local/src/brn2/
+map msn   move   /home/lucas/.local/src/brn2/
+map ysn   copi   /home/lucas/.local/src/brn2/
+map Ksn   go ln  /home/lucas/.local/src/brn2/
+map Msn   go mv  /home/lucas/.local/src/brn2/
+map Ysn   go cp  /home/lucas/.local/src/brn2/
+map gsc   cd     /home/lucas/.local/src/clipsim/
+map msc   move   /home/lucas/.local/src/clipsim/
+map ysc   copi   /home/lucas/.local/src/clipsim/
+map Ksc   go ln  /home/lucas/.local/src/clipsim/
+map Msc   go mv  /home/lucas/.local/src/clipsim/
+map Ysc   go cp  /home/lucas/.local/src/clipsim/
+map gsd   cd     /home/lucas/.local/src/dmenu/
+map msd   move   /home/lucas/.local/src/dmenu/
+map ysd   copi   /home/lucas/.local/src/dmenu/
+map Ksd   go ln  /home/lucas/.local/src/dmenu/
+map Msd   go mv  /home/lucas/.local/src/dmenu/
+map Ysd   go cp  /home/lucas/.local/src/dmenu/
+map gsw   cd     /home/lucas/.local/src/dwm/
+map msw   move   /home/lucas/.local/src/dwm/
+map ysw   copi   /home/lucas/.local/src/dwm/
+map Ksw   go ln  /home/lucas/.local/src/dwm/
+map Msw   go mv  /home/lucas/.local/src/dwm/
+map Ysw   go cp  /home/lucas/.local/src/dwm/
+map gsm   cd     /home/lucas/.local/src/dwmblocks2/
+map msm   move   /home/lucas/.local/src/dwmblocks2/
+map ysm   copi   /home/lucas/.local/src/dwmblocks2/
+map Ksm   go ln  /home/lucas/.local/src/dwmblocks2/
+map Msm   go mv  /home/lucas/.local/src/dwmblocks2/
+map Ysm   go cp  /home/lucas/.local/src/dwmblocks2/
+map gsl   cd     /home/lucas/.local/src/lf/
+map msl   move   /home/lucas/.local/src/lf/
+map ysl   copi   /home/lucas/.local/src/lf/
+map Ksl   go ln  /home/lucas/.local/src/lf/
+map Msl   go mv  /home/lucas/.local/src/lf/
+map Ysl   go cp  /home/lucas/.local/src/lf/
+map gsu   cd     /home/lucas/.local/src/luke/
+map msu   move   /home/lucas/.local/src/luke/
+map ysu   copi   /home/lucas/.local/src/luke/
+map Ksu   go ln  /home/lucas/.local/src/luke/
+map Msu   go mv  /home/lucas/.local/src/luke/
+map Ysu   go cp  /home/lucas/.local/src/luke/
+map gsp   cd     /home/lucas/.local/src/ncmpcpp/
+map msp   move   /home/lucas/.local/src/ncmpcpp/
+map ysp   copi   /home/lucas/.local/src/ncmpcpp/
+map Ksp   go ln  /home/lucas/.local/src/ncmpcpp/
+map Msp   go mv  /home/lucas/.local/src/ncmpcpp/
+map Ysp   go cp  /home/lucas/.local/src/ncmpcpp/
+map gsx   cd     /home/lucas/.local/src/nsxiv/
+map msx   move   /home/lucas/.local/src/nsxiv/
+map ysx   copi   /home/lucas/.local/src/nsxiv/
+map Ksx   go ln  /home/lucas/.local/src/nsxiv/
+map Msx   go mv  /home/lucas/.local/src/nsxiv/
+map Ysx   go cp  /home/lucas/.local/src/nsxiv/
+map gsi   cd     /home/lucas/.local/src/piscou/
+map msi   move   /home/lucas/.local/src/piscou/
+map ysi   copi   /home/lucas/.local/src/piscou/
+map Ksi   go ln  /home/lucas/.local/src/piscou/
+map Msi   go mv  /home/lucas/.local/src/piscou/
+map Ysi   go cp  /home/lucas/.local/src/piscou/
+map gse   cd     /home/lucas/.local/src/sent/
+map mse   move   /home/lucas/.local/src/sent/
+map yse   copi   /home/lucas/.local/src/sent/
+map Kse   go ln  /home/lucas/.local/src/sent/
+map Mse   go mv  /home/lucas/.local/src/sent/
+map Yse   go cp  /home/lucas/.local/src/sent/
+map gst   cd     /home/lucas/.local/src/st/
+map mst   move   /home/lucas/.local/src/st/
+map yst   copi   /home/lucas/.local/src/st/
+map Kst   go ln  /home/lucas/.local/src/st/
+map Mst   go mv  /home/lucas/.local/src/st/
+map Yst   go cp  /home/lucas/.local/src/st/
+map gsv   cd     /home/lucas/.local/src/stiv/
+map msv   move   /home/lucas/.local/src/stiv/
+map ysv   copi   /home/lucas/.local/src/stiv/
+map Ksv   go ln  /home/lucas/.local/src/stiv/
+map Msv   go mv  /home/lucas/.local/src/stiv/
+map Ysv   go cp  /home/lucas/.local/src/stiv/
+map gsy   cd     /home/lucas/.local/src/wapp/
+map msy   move   /home/lucas/.local/src/wapp/
+map ysy   copi   /home/lucas/.local/src/wapp/
+map Ksy   go ln  /home/lucas/.local/src/wapp/
+map Msy   go mv  /home/lucas/.local/src/wapp/
+map Ysy   go cp  /home/lucas/.local/src/wapp/
+map gkk   cd     /home/lucas/.config/
+map mkk   move   /home/lucas/.config/
+map ykk   copi   /home/lucas/.config/
+map Kkk   go ln  /home/lucas/.config/
+map Mkk   go mv  /home/lucas/.config/
+map Ykk   go cp  /home/lucas/.config/
+map gkl   cd     /home/lucas/.config/lf/
+map mkl   move   /home/lucas/.config/lf/
+map ykl   copi   /home/lucas/.config/lf/
+map Kkl   go ln  /home/lucas/.config/lf/
+map Mkl   go mv  /home/lucas/.config/lf/
+map Ykl   go cp  /home/lucas/.config/lf/
+map gkz   cd     /home/lucas/.config/zsh/
+map mkz   move   /home/lucas/.config/zsh/
+map ykz   copi   /home/lucas/.config/zsh/
+map Kkz   go ln  /home/lucas/.config/zsh/
+map Mkz   go mv  /home/lucas/.config/zsh/
+map Ykz   go cp  /home/lucas/.config/zsh/
+map gkx   cd     /home/lucas/.config/X11/
+map mkx   move   /home/lucas/.config/X11/
+map ykx   copi   /home/lucas/.config/X11/
+map Kkx   go ln  /home/lucas/.config/X11/
+map Mkx   go mv  /home/lucas/.config/X11/
+map Ykx   go cp  /home/lucas/.config/X11/
+map gkv   cd     /home/lucas/.config/vim/
+map mkv   move   /home/lucas/.config/vim/
+map ykv   copi   /home/lucas/.config/vim/
+map Kkv   go ln  /home/lucas/.config/vim/
+map Mkv   go mv  /home/lucas/.config/vim/
+map Ykv   go cp  /home/lucas/.config/vim/
+map gkg   cd     /home/lucas/.config/git/
+map mkg   move   /home/lucas/.config/git/
+map ykg   copi   /home/lucas/.config/git/
+map Kkg   go ln  /home/lucas/.config/git/
+map Mkg   go mv  /home/lucas/.config/git/
+map Ykg   go cp  /home/lucas/.config/git/
+map gkm   cd     /home/lucas/.config/mpv/
+map mkm   move   /home/lucas/.config/mpv/
+map ykm   copi   /home/lucas/.config/mpv/
+map Kkm   go ln  /home/lucas/.config/mpv/
+map Mkm   go mv  /home/lucas/.config/mpv/
+map Ykm   go cp  /home/lucas/.config/mpv/
+map gms   cd     /home/lucas/docs/moto_schutz/
+map mms   move   /home/lucas/docs/moto_schutz/
+map yms   copi   /home/lucas/docs/moto_schutz/
+map Kms   go ln  /home/lucas/docs/moto_schutz/
+map Mms   go mv  /home/lucas/docs/moto_schutz/
+map Yms   go cp  /home/lucas/docs/moto_schutz/
+map gbi   cd     /home/lucas/docs/biocal/
+map mbi   move   /home/lucas/docs/biocal/
+map ybi   copi   /home/lucas/docs/biocal/
+map Kbi   go ln  /home/lucas/docs/biocal/
+map Mbi   go mv  /home/lucas/docs/biocal/
+map Ybi   go cp  /home/lucas/docs/biocal/
+map gic   cd     /home/lucas/docs/IC/
+map mic   move   /home/lucas/docs/IC/
+map yic   copi   /home/lucas/docs/IC/
+map Kic   go ln  /home/lucas/docs/IC/
+map Mic   go mv  /home/lucas/docs/IC/
+map Yic   go cp  /home/lucas/docs/IC/
+map guu   cd     /home/lucas/docs/UFSC/
+map muu   move   /home/lucas/docs/UFSC/
+map yuu   copi   /home/lucas/docs/UFSC/
+map Kuu   go ln  /home/lucas/docs/UFSC/
+map Muu   go mv  /home/lucas/docs/UFSC/
+map Yuu   go cp  /home/lucas/docs/UFSC/
+map g172   cd     /home/lucas/docs/UFSC/2017.2/
+map m172   move   /home/lucas/docs/UFSC/2017.2/
+map y172   copi   /home/lucas/docs/UFSC/2017.2/
+map K172   go ln  /home/lucas/docs/UFSC/2017.2/
+map M172   go mv  /home/lucas/docs/UFSC/2017.2/
+map Y172   go cp  /home/lucas/docs/UFSC/2017.2/
+map g181   cd     /home/lucas/docs/UFSC/2018.1/
+map m181   move   /home/lucas/docs/UFSC/2018.1/
+map y181   copi   /home/lucas/docs/UFSC/2018.1/
+map K181   go ln  /home/lucas/docs/UFSC/2018.1/
+map M181   go mv  /home/lucas/docs/UFSC/2018.1/
+map Y181   go cp  /home/lucas/docs/UFSC/2018.1/
+map g182   cd     /home/lucas/docs/UFSC/2018.2/
+map m182   move   /home/lucas/docs/UFSC/2018.2/
+map y182   copi   /home/lucas/docs/UFSC/2018.2/
+map K182   go ln  /home/lucas/docs/UFSC/2018.2/
+map M182   go mv  /home/lucas/docs/UFSC/2018.2/
+map Y182   go cp  /home/lucas/docs/UFSC/2018.2/
+map g191   cd     /home/lucas/docs/UFSC/2019.1/
+map m191   move   /home/lucas/docs/UFSC/2019.1/
+map y191   copi   /home/lucas/docs/UFSC/2019.1/
+map K191   go ln  /home/lucas/docs/UFSC/2019.1/
+map M191   go mv  /home/lucas/docs/UFSC/2019.1/
+map Y191   go cp  /home/lucas/docs/UFSC/2019.1/
+map g192   cd     /home/lucas/docs/UFSC/2019.2/
+map m192   move   /home/lucas/docs/UFSC/2019.2/
+map y192   copi   /home/lucas/docs/UFSC/2019.2/
+map K192   go ln  /home/lucas/docs/UFSC/2019.2/
+map M192   go mv  /home/lucas/docs/UFSC/2019.2/
+map Y192   go cp  /home/lucas/docs/UFSC/2019.2/
+map g201   cd     /home/lucas/docs/UFSC/2020.1/
+map m201   move   /home/lucas/docs/UFSC/2020.1/
+map y201   copi   /home/lucas/docs/UFSC/2020.1/
+map K201   go ln  /home/lucas/docs/UFSC/2020.1/
+map M201   go mv  /home/lucas/docs/UFSC/2020.1/
+map Y201   go cp  /home/lucas/docs/UFSC/2020.1/
+map g202   cd     /home/lucas/docs/UFSC/2020.2/
+map m202   move   /home/lucas/docs/UFSC/2020.2/
+map y202   copi   /home/lucas/docs/UFSC/2020.2/
+map K202   go ln  /home/lucas/docs/UFSC/2020.2/
+map M202   go mv  /home/lucas/docs/UFSC/2020.2/
+map Y202   go cp  /home/lucas/docs/UFSC/2020.2/
+map g211   cd     /home/lucas/docs/UFSC/2021.1/
+map m211   move   /home/lucas/docs/UFSC/2021.1/
+map y211   copi   /home/lucas/docs/UFSC/2021.1/
+map K211   go ln  /home/lucas/docs/UFSC/2021.1/
+map M211   go mv  /home/lucas/docs/UFSC/2021.1/
+map Y211   go cp  /home/lucas/docs/UFSC/2021.1/
+map g212   cd     /home/lucas/docs/UFSC/2021.2/
+map m212   move   /home/lucas/docs/UFSC/2021.2/
+map y212   copi   /home/lucas/docs/UFSC/2021.2/
+map K212   go ln  /home/lucas/docs/UFSC/2021.2/
+map M212   go mv  /home/lucas/docs/UFSC/2021.2/
+map Y212   go cp  /home/lucas/docs/UFSC/2021.2/
+map g221   cd     /home/lucas/docs/UFSC/2022.1/
+map m221   move   /home/lucas/docs/UFSC/2022.1/
+map y221   copi   /home/lucas/docs/UFSC/2022.1/
+map K221   go ln  /home/lucas/docs/UFSC/2022.1/
+map M221   go mv  /home/lucas/docs/UFSC/2022.1/
+map Y221   go cp  /home/lucas/docs/UFSC/2022.1/
+map g222   cd     /home/lucas/docs/UFSC/2022.2/
+map m222   move   /home/lucas/docs/UFSC/2022.2/
+map y222   copi   /home/lucas/docs/UFSC/2022.2/
+map K222   go ln  /home/lucas/docs/UFSC/2022.2/
+map M222   go mv  /home/lucas/docs/UFSC/2022.2/
+map Y222   go cp  /home/lucas/docs/UFSC/2022.2/
+map g231   cd     /home/lucas/docs/UFSC/2023.1/
+map m231   move   /home/lucas/docs/UFSC/2023.1/
+map y231   copi   /home/lucas/docs/UFSC/2023.1/
+map K231   go ln  /home/lucas/docs/UFSC/2023.1/
+map M231   go mv  /home/lucas/docs/UFSC/2023.1/
+map Y231   go cp  /home/lucas/docs/UFSC/2023.1/
+map gua   cd     /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
+map mua   move   /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
+map yua   copi   /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
+map Kua   go ln  /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
+map Mua   go mv  /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
+map Yua   go cp  /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
+map gui   cd     /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
+map mui   move   /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
+map yui   copi   /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
+map Kui   go ln  /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
+map Mui   go mv  /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
+map Yui   go cp  /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
+map gub   cd     /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
+map mub   move   /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
+map yub   copi   /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
+map Kub   go ln  /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
+map Mub   go mv  /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
+map Yub   go cp  /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
+map gut   cd     /home/lucas/docs/UFSC/0TCC/
+map mut   move   /home/lucas/docs/UFSC/0TCC/
+map yut   copi   /home/lucas/docs/UFSC/0TCC/
+map Kut   go ln  /home/lucas/docs/UFSC/0TCC/
+map Mut   go mv  /home/lucas/docs/UFSC/0TCC/
+map Yut   go cp  /home/lucas/docs/UFSC/0TCC/
+map gmt   cd     /home/lucas/docs/UFSC_mestrado/
+map mmt   move   /home/lucas/docs/UFSC_mestrado/
+map ymt   copi   /home/lucas/docs/UFSC_mestrado/
+map Kmt   go ln  /home/lucas/docs/UFSC_mestrado/
+map Mmt   go mv  /home/lucas/docs/UFSC_mestrado/
+map Ymt   go cp  /home/lucas/docs/UFSC_mestrado/
+map gmd   cd     /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/
+map mmd   move   /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/
+map ymd   copi   /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/
+map Kmd   go ln  /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/
+map Mmd   go mv  /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/
+map Ymd   go cp  /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/
+map gzx   cd     /home/lucas/docs/zerdax2/zerdax2/
+map mzx   move   /home/lucas/docs/zerdax2/zerdax2/
+map yzx   copi   /home/lucas/docs/zerdax2/zerdax2/
+map Kzx   go ln  /home/lucas/docs/zerdax2/zerdax2/
+map Mzx   go mv  /home/lucas/docs/zerdax2/zerdax2/
+map Yzx   go cp  /home/lucas/docs/zerdax2/zerdax2/
+map gza   cd     /home/lucas/docs/zerdax2/datasets/
+map mza   move   /home/lucas/docs/zerdax2/datasets/
+map yza   copi   /home/lucas/docs/zerdax2/datasets/
+map Kza   go ln  /home/lucas/docs/zerdax2/datasets/
+map Mza   go mv  /home/lucas/docs/zerdax2/datasets/
+map Yza   go cp  /home/lucas/docs/zerdax2/datasets/
+map gzb   cd     /home/lucas/docs/zerdax2/blender/
+map mzb   move   /home/lucas/docs/zerdax2/blender/
+map yzb   copi   /home/lucas/docs/zerdax2/blender/
+map Kzb   go ln  /home/lucas/docs/zerdax2/blender/
+map Mzb   go mv  /home/lucas/docs/zerdax2/blender/
+map Yzb   go cp  /home/lucas/docs/zerdax2/blender/
