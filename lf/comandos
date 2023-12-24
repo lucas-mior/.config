@@ -2,7 +2,7 @@ cmd on-cd &{{
     name="${PWD/#$HOME/'~'}"
     printf "\033]0;${name}/\007" > /dev/tty
     tmux rename-window "$name"
-    [ -n "$ZLE_FIFO" ] && printf "cd $PWD\n zle reset-prompt\n" >&$ZLE_FIFO
+    [ -n "$ZLE_FIFO" ] && printf "cd \"$PWD\"\n zle reset-prompt\n" >&$ZLE_FIFO
     for fi in *; do
         mime="$(file -b --mime-type "$fi")"
         echo "$mime" | grep -Eq "video/.*" \
@@ -11,6 +11,8 @@ cmd on-cd &{{
             && setsid -f vid.sh "$fi" cache
         echo "$mime" | grep -Fq "application/pdf" \
             && setsid -f pdf.sh "$fi" cache
+        echo "$mime" | grep -Eq "image/.*" \
+            && setsid -f stiv_draw "$fi" cache
     done
 }}
 
@@ -251,6 +253,8 @@ cmd draw_labels_yolo ${{
 cmd run !{{
     if [[ -x "$f" ]]; then
         $f
+    elif [[ "$f" =~ "Makefile" ]]; then
+        make && sudo make install 2>&1 | less -r
     else
         ext="${f##*.}"
         case $ext in
