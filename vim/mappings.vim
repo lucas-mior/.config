@@ -70,3 +70,4 @@
 " my_functions
     " <C-@> is <C-Space> (for whatever reason)
     nnoremap <C-@> :ToggleMarkdownListItem<CR>
+    nnoremap <leader>g :Git<CR>
