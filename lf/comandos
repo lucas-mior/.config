@@ -5,14 +5,12 @@ cmd on-cd &{{
     [ -n "$ZLE_FIFO" ] && printf "cd \"$PWD\"\n zle reset-prompt\n" >&$ZLE_FIFO
     for fi in *; do
         mime="$(file -b --mime-type "$fi")"
-        echo "$mime" | grep -Eq "video/.*" \
-            && setsid -f vid.sh "$fi" cache
-        echo "$mime" | grep -Eq "audio/.*" \
-            && setsid -f vid.sh "$fi" cache
-        echo "$mime" | grep -Fq "application/pdf" \
-            && setsid -f pdf.sh "$fi" cache
-        echo "$mime" | grep -Eq "image/.*" \
-            && setsid -f stiv_draw "$fi" cache
+        case "$mime" in
+            video/*) setsid -f vid.sh "$fi" cache ;;
+            audio/*) setsid -f vid.sh "$fi" cache ;;
+            */pdf)   setsid -f pdf.sh "$fi" cache ;;
+            image/*) setsid -f stiv_draw "$fi" cache ;;
+        esac
     done
 }}
 
@@ -38,6 +36,7 @@ cmd on-redraw &{{
         lf -remote "send $id set ratios 3:5"
         lf -remote "send $id set preview true"
     fi
+    tmux resize-pane -y 85%
 }}
 
 ## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
