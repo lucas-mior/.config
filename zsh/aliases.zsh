@@ -1,6 +1,5 @@
 #!/bin/zsh
 
-alias make='make && sudo make install'
 alias :q='exit'
 alias x='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
 alias X='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
@@ -48,6 +47,16 @@ cat () {
         piscou "$file" $COLUMNS $LINES 2> /dev/null
     done
 }
+
+makeee () {
+    if [ -n "$1" ]; 
+        make "$@"
+    else
+        make && sudo make install
+    fi
+}
+alias make=makeee
+
 alias du='du -h'
 alias ncdu='ncdu --color dark'
 alias df='df -h'

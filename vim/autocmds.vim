@@ -10,6 +10,7 @@ vim9script
     au BufRead */Makefile,*.mk,
                \*/src/dmenu/*,*/src/dwm/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
                \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
+    au BufRead */Makefile setlocal textwidth=100
 # compilações
     au BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
     au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
