@@ -1,4 +1,7 @@
-enpt () { trans en:pt "$@" ; }
+enpt () {
+    trans en:pt "$@"
+}
+
 restart () {
     killall "$1"; setsid -f "$1" 2>&1 > /dev/null
 }
@@ -20,9 +23,11 @@ fzfscripts () {
         popd
 	fi
 }
+
 fzfconfig () { 
     pushd ~
-	arqui=$(find .config/ .local/scripts/ .local/sourcecode/ 2> /dev/null | fzf --preview='wrap.sh {} $FZF_PREVIEW_COLUMNS $FZF_PREVIEW_LINES 2> /dev/null') ;
+	arqui=$(find .config/ .local/scripts/ .local/sourcecode/ 2> /dev/null \
+            | fzf --preview='wrap.sh {} $FZF_PREVIEW_COLUMNS $FZF_PREVIEW_LINES 2> /dev/null') ;
 	if [[ -f "$arqui" ]]; then
 		vim "$arqui"
         popd

@@ -46,6 +46,7 @@ map ud clear
 map us unselect
 map uu :unselect; clear
 map <c-l> lastpane
+map <c-k> lastpane
 
 map S push :glob-select<space>
 map <c-space> push <space><up><up>
