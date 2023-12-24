@@ -1,5 +1,6 @@
 #!/bin/zsh
 
+alias make='make && sudo make install'
 alias :q='exit'
 alias x='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
 alias X='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
