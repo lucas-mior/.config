@@ -14,6 +14,12 @@ cmd on-cd &{{
     done
 }}
 
+cmd clear_preview_cache &{{
+    mime="$(file -b --mime-type "$fx")"
+    echo "$mime" | grep -Fq "application/pdf" \
+        && pdf.sh "$fi" clear
+}}
+
 cmd on-quit &{{
     [ -n "$ZLE_FIFO" ] && printf "exit\n" >&$ZLE_FIFO
 }}

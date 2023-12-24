@@ -16,6 +16,7 @@ zle -N lastpane
     bindkey '^I' first-tab
     bindkey '^H' backward-delete-word
     bindkey '^L' lastpane
+    bindkey '^K' lastpane
 
 ## vi mode jkl;
     bindkey -M vicmd j  vi-backward-char

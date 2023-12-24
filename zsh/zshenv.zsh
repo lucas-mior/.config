@@ -128,7 +128,7 @@ export PATH
 ## FZF CONFIG
 FZFO+=" --bind=ctrl-k:down,ctrl-l:up,alt-k:down,alt-l:up,ctrl-h:backward-kill-word"
 FZFO+=" --tiebreak=end --scroll-off=5 --bind change:first"
-FZFO+=" --bind=f8:down,f9:up"
+FZFO+=" --bind=f8:down,f9:up --border=none --no-scrollbar"
 FZFO+=" --preview-window=:noborder:wrap --color=fg:248,fg+:007,bg+:000,preview-fg:007,hl:009,hl+:009"
 FZFO+=" --color=gutter:-1,info:006,border:246,prompt:110,pointer:199,marker:011,spinner:190,header:007"
 export FZF_DEFAULT_OPTS=$FZFO
