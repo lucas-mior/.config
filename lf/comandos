@@ -4,6 +4,9 @@ cmd on-cd &{{
     tmux rename-window "$name"
     [ -n "$ZLE_FIFO" ] && printf "cd \"$PWD\"\n zle reset-prompt\n" >&$ZLE_FIFO
     for fi in *; do
+        if [ $(cpu_usage.sh) -gt 50 ]; then
+            break
+        fi
         mime="$(file -b --mime-type "$fi")"
         case "$mime" in
             video/*) setsid -f vid.sh "$fi" cache ;;
