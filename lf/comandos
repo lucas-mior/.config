@@ -3,6 +3,8 @@ cmd on-cd &{{
     printf "\033]0;${name}/\007" > /dev/tty
     tmux rename-window "$name"
     [ -n "$ZLE_FIFO" ] && printf "cd \"$PWD\"\n zle reset-prompt\n" >&$ZLE_FIFO
+    lf -remote "send $id reload"
+
     for fi in *; do
         if [ $(cpu_usage.sh) -gt 50 ]; then
             break
@@ -15,12 +17,6 @@ cmd on-cd &{{
             image/*) setsid -f stiv_draw "$fi" cache ;;
         esac
     done
-}}
-
-cmd clear_preview_cache &{{
-    mime="$(file -b --mime-type "$fx")"
-    echo "$mime" | grep -Fq "application/pdf" \
-        && pdf.sh "$fi" clear
 }}
 
 cmd on-quit &{{
