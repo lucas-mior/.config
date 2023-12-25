@@ -49,7 +49,7 @@ cat () {
 }
 
 makeee () {
-    if [ -n "$1" ]; 
+    if [ -n "$1" ]; then
         make "$@"
     else
         make && sudo make install
