@@ -5,6 +5,8 @@
     nnoremap U u
     nnoremap <C-z> u
     inoremap <C-z> <esc>ui
+    vnoremap <C-c> y
+    vnoremap <C-x> d
     nnoremap S :%s/
 " hjkl;
     " h é mapeado para f next (ver plugins)
