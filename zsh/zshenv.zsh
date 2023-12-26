@@ -69,7 +69,7 @@ export DWMBLOCKS2_UPTIME=17
 ## PROGRAMAS
 export CLIPSIM_SIGNAL_NUMBER=$DWMBLOCKS2_CLIPBOARD
 export CLIPSIM_SIGNAL_PROGRAM="dwmblocks2"
-export CLIPSIM_IMAGE_PREVIEW="stiv"
+export CLIPSIM_IMAGE_PREVIEW="stiv_draw"
 export REDSHIFT_CACHE="$XDG_CACHE_HOME/redshift"
 export WANDB_DISABLED="true"
 export SUDO_ASKPASS="/usr/bin/dmenupass.sh"
