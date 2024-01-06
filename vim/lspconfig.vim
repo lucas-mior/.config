@@ -11,7 +11,7 @@ var lspServers = [
     name: 'pylsp',
     filetype: 'python',
     path: '/usr/bin/pylsp',
-    args: []
+    args: ['--check-parent-process', '-v']
 },
 {
     name: 'vimls',

@@ -87,4 +87,4 @@
     printf "\033]0;${PWD/\/home\/lucas/~}/\007" > /dev/tty ## seta o title do terminal
 	source /home/lucas/.config/zsh/.arquivos.zsh
 	source /home/lucas/.config/zsh/.pastas.zsh
-    stiv_clear
+    # stiv_clear
