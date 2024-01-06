@@ -19,7 +19,7 @@ vim9script
     au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
 
 # meus highlights
-    au BufWinEnter *.c,*.h       :silent! source .tags.vim
+    # au BufWinEnter *.c,*.h       :silent! source .tags.vim
     au BufRead *.mo              set ft=modelica
     au BufRead /var/tmp/fstab*   set ft=fstab
     au BufRead *.sp,*.MOD,       set ft=spice
@@ -32,7 +32,6 @@ vim9script
     au BufRead */COMMIT_EDITMSG  set ft=gitcommit
     au BufRead,BufNewFile *.tab  set ft=tab
     au BufRead ~/.config/*       set autochdir
-    au BufRead *.py              setlocal foldmethod=indent
     au BufRead *.bib             set autochdir
 
 # cd to file dir on startup
