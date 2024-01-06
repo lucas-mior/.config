@@ -5,7 +5,7 @@ LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;250;000:ln=01;38;2;128;12
 
 { /* bold      color            extensions */
      0   : rgb(250, 250, 250) : txt
-     0   : rgb(200, 250, 230) : tab
+     0   : rgb(200, 250, 230) : tab aup aup3
      1   : rgb(230, 230, 000) : tex md sent 1
      1   : rgb(205, 040, 040) : pdf djvu epub ps
      1   : rgb(070, 010, 250) : odt docx

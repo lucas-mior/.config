@@ -13,6 +13,7 @@ Plug 'yegappan/lsp'
 Plug 'ap/vim-css-color'
 Plug 'romainl/vim-cool'
 Plug 'dahu/vim-fanfingtastic'
+Plug 'vim-python/python-syntax'
 
 call plug#end()
 
@@ -36,6 +37,8 @@ let g:gitgutter_set_sign_backgrounds = 1
 let g:gitgutter_map_keys = 0
 let g:gitgutter_terminal_reports_focus = 0
 silent! highlight! link SignColumn LineNr?
+
+let g:python_highlight_all = 1
 
 function! Gototo()
     try

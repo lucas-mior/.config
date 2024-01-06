@@ -50,7 +50,7 @@
     set backspace=indent,eol,start
     set tabstop=4 shiftwidth=4 expandtab
     set textwidth=80
-    set cc=+1
+    set colorcolumn=+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20
     set linebreak autoindent
     set autoread
     set formatoptions-=c,r,o,/,b,n,i,j
