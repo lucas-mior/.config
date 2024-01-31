@@ -96,7 +96,7 @@ map wc :set sortby ctime; set info ctime
 map we :set sortby ext
 
 ## executar scripts
-map s $ zsh
+map s lastpane
 map xx run
 map xz draw_labels_yolo
 

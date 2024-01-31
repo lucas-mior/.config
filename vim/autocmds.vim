@@ -19,7 +19,6 @@ vim9script
     au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
 
 # meus highlights
-    # au BufWinEnter *.c,*.h       :silent! source .tags.vim
     au BufRead *.mo              set ft=modelica
     au BufRead /var/tmp/fstab*   set ft=fstab
     au BufRead *.sp,*.MOD,       set ft=spice

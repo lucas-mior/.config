@@ -15,8 +15,8 @@ super + d
     {dmenu_run}
 super + {z,                     shift+z,                     e}
     {urxvtc -e clip1.sh --copy, urxvtc -e clip1.sh --remove, clip.sh qr}
-super + {shift + r,  shift + p}
-    {st -e trans -I, passmenu --type}
+super + {shift + r,  shift + p, o; b}
+    {st -e trans -I, passmenu --type, st -e bluetoothctl}
 super + {b,    Return}
     {$BROWSER, st -e tmux new-session -A -s zsh zsh}
 super + r
@@ -47,6 +47,8 @@ super + equal
     st -e pulsemixer
 super + a
     audio_toggle.bash dwmblocks2
+super + control + a
+    audioport.sh dwmblocks2
 {XF86AudioMute, super + shift + m}
     vol_out.sh toggle dwmblocks2
 {XF86AudioLowerVolume, shift + Down}
