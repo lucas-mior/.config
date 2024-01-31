@@ -10,7 +10,7 @@ LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;250;000:ln=01;38;2;128;12
      1   : rgb(205, 040, 040) : pdf djvu epub ps
      1   : rgb(070, 010, 250) : odt docx
      0   : rgb(070, 010, 250) : doc
-     1   : rgb(000, 160, 000) : ods xlsx
+     1   : rgb(000, 160, 000) : ods xlsx xlsm
      0   : rgb(000, 160, 000) : xls
      0   : rgb(000, 160, 000) : csv tsv
      1   : rgb(250, 085, 000) : odp pptx
