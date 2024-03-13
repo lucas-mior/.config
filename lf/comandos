@@ -35,7 +35,6 @@ cmd on-redraw &{{
         lf -remote "send $id set ratios 3:5"
         lf -remote "send $id set preview true"
     fi
-    tmux resize-pane -y 85%
 }}
 
 ## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
@@ -298,6 +297,7 @@ cmd lastpane %{{
     lf -remote "send $id reload"
     if [ -n "$ZLE_FIFO" ]; then
         tmux last-pane
+        tmux resize-pane -y 85%
     fi
 }}
 

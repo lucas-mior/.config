@@ -19,7 +19,7 @@ vim9script
     au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
 
 # meus highlights
-    au BufRead *.mo              set ft=modelica
+    au BufRead *.mo,*.mod        set ft=modelica
     au BufRead /var/tmp/fstab*   set ft=fstab
     au BufRead *.sp,*.MOD,       set ft=spice
     au BufRead *.plt             set ft=gnuplot

@@ -10,7 +10,7 @@ set dircounts
 
 set number
 set relativenumber
-set icons
+set noicons
 set ratios '3:5'
 set tabstop 4
 set scrolloff 5

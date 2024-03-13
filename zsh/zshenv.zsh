@@ -116,13 +116,14 @@ export FOL="\033[01;38;2;000;136;255m"
 export PIN="\033[01;38;2;198;000;198m"
 
 ## PATH
-PATH=$(du $XDG_BIN_DIR     | cut -f 2 | tr '\n' ':' | sed 's/:*$//'):$PATH
-PATH=$(du $XDG_SCRIPTS_DIR | cut -f 2 | tr '\n' ':' | sed 's/:*$//'):$PATH
+PATH=$(du $XDG_BIN_DIR     | grep -v ".git" | cut -f 2 | tr '\n' ':' | sed 's/:*$//'):$PATH
+PATH=$(du $XDG_SCRIPTS_DIR | grep -v ".git" | cut -f 2 | tr '\n' ':' | sed 's/:*$//'):$PATH
 PATH=$PATH:/opt/freefilesync/Bin/
 PATH=$PATH:/usr/share/fslint/fslint/
 PATH=$PATH:/usr/share/labcontrole/
 PATH=$PATH:/opt/scilab/bin/
 PATH="$PATH:/home/lucas/.local/share/wine/drive_c/Program Files/MATLAB/R2017a/bin/"
+PATH="$PATH:/home/lucas/.local/share/wine/drive_c/Program Files/OpenModelica/bin/"
 export PATH
 
 ## FZF CONFIG
@@ -148,3 +149,5 @@ export TCELL_TRUECOLOR=on
 ## LS_COLORS e LF_ICONS
 source "$XDG_CONFIG_HOME/zsh/cores.zsh"
 source "$XDG_CONFIG_HOME/zsh/lf_icons.zsh"
+
+export OMC_LDFLAGS_LINK_TYPE="static"
