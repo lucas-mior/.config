@@ -5,6 +5,7 @@ lastpane () {
     if [ -n "$ZLE_FIFO" ]; then
         lf -remote "send reload"
         tmux last-pane
+        tmux resize-pane -y 85%
     fi
     clear
     zle reset-prompt
