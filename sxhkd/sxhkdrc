@@ -18,9 +18,9 @@ super + {z,                     shift+z,                     e}
 super + {shift + r,  shift + p, o; b}
     {st -e trans -I, passmenu --type, st -e bluetoothctl}
 super + {b,    Return}
-    {$BROWSER, st -e tmux new-session -A -s zsh zsh}
+    {$BROWSER, st}
 super + r
-    st -e tmux new lfimg.zsh
+    st -e lfimg
 super + {n,                s}
     {st -A 0.6 -e ncmpcpp, blue.bash}
 

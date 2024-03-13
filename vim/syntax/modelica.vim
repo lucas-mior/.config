@@ -121,7 +121,7 @@ hi def link modelicaBoolean         Number
 
 hi def link modelicaFlag            Keyword
 
-" hi def link modelicaSingleComment   Comment
+hi def link modelicaSingleComment   Comment
 hi def link modelicaMultiComment    Comment
 hi def link modelicaString          String
 
