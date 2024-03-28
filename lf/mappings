@@ -98,6 +98,7 @@ map we :set sortby ext
 ## executar scripts
 map s lastpane
 map xx run
+map xl run less
 map xz draw_labels_yolo
 
 map <c-f> fzf_jump

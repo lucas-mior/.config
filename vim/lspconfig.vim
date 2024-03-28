@@ -10,7 +10,7 @@ var lspServers = [
 {
     name: 'pylsp',
     filetype: 'python',
-    path: '/usr/bin/pylsp',
+    path: '/home/lucas/.local/bin/pylsp',
     args: ['--check-parent-process', '-v']
 },
 {
