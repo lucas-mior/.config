@@ -35,6 +35,7 @@ cmd on-redraw &{{
         lf -remote "send $id set ratios 3:5"
         lf -remote "send $id set preview true"
     fi
+    tmux resize-pane -y 85%
 }}
 
 ## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
@@ -256,6 +257,7 @@ cmd run !{{
         ext="${f##*.}"
         case $ext in
             bash) interpreter=bash     ;;
+             mos) interpreter=omc      ;;
               ly) interpreter=lilypond ;;
              zsh) interpreter=zsh      ;;
               sh) interpreter=dash     ;;
@@ -269,7 +271,11 @@ cmd run !{{
                1) interpreter=man      ;;
                *) lf -remote "send $id echomsg \" Inclua extensão ou torne o arquivo executável\"" ;;
         esac
-        [[ -n "$interpreter" ]] && $interpreter $f 2>&1 | less -r
+        if [ -z "$1" ]; then
+          [[ -n "$interpreter" ]] && $interpreter $f
+        else
+          [[ -n "$interpreter" ]] && $interpreter $f 2>&1 | less -r
+        fi
     fi
 }}
 
