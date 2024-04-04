@@ -28,7 +28,7 @@ xset m 1 1 &
 # EndSection
 
 sleep 1
-wall_random.bash
+wallpaper.bash
 exec dwm
 
 # export DESKTOP_SESSION=plasma
