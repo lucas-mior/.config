@@ -17,12 +17,14 @@ set scrolloff 5
 set promptfmt "\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
 set mouse
 
+# set sixel
 set preview
 set previewer piscou
 set cleaner /usr/local/bin/stiv_clear
-# $1 previous file name,
+# $1 previous file name
 # $2 width $3 height
-# $4 horizontal position $5 vertical position of preview pane
+# $4 horizontal position 
+# $5 vertical position of preview pane
 # $6 current filename to be previewed
 
 set dircounts
