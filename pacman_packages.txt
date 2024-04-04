@@ -1,0 +1,33 @@
+acpid android-file-transfer arandr asciidoc b43-fwcutter base base-devel bat biber blender 
+bluez-tools bluez-utils brotli-testdata btrfs-progs caja ccache chafa cmatrix cracklib cronie ctags 
+dash db dbus-docs debuginfod dialog ding-libs dmraid dnssec-anchors docx2txt dosfstools doxygen 
+dunst ed efibootmgr elfutils exiv2 fd ffmpegthumbnailer firefox fuse2fs fzf gcc-ada gcc-d 
+gcc-fortran gcc-m2 gcc-objc gdb git-lfs github-cli glib2-docs glibc-locales go gopls gparted grub 
+gsmartcontrol gssproxy gthumb gvfs-mtp gvim htop imagemagick imlib2 inetutils inotify-tools 
+intel-ucode iotop iwd jfsutils kcachegrind kicad kicad-library kid3-common kid3-qt konsole kotlin 
+ldns lemon lib32-gcc-libs lib32-xz libaio libcurl-compat libcurl-gnutls libevent-docs libgccjit 
+libpaper libreoffice-fresh libsecret-docs libxcrypt-compat libxml2-docs links linux linux-docs 
+linux-firmware linux-firmware-bnx2x linux-firmware-liquidio linux-firmware-marvell 
+linux-firmware-mellanox linux-firmware-nfp linux-firmware-qcom linux-firmware-qlogic linux-headers 
+linux-lts linux-lts-docs linux-lts-headers logrotate lshw lto-dump lvm2 lxappearance maim man-db 
+man-pages mediainfo mesa-utils mkinitcpio-nfs-utils mlocate mpc mpd mpv nano nautilus ncmpcpp 
+neofetch net-tools networkmanager newsboat nfs-utils nfsidmap nicotine+ nilfs-utils 
+noto-fonts-emoji ntfs-3g nvidia octave odt2txt onionshare openldap openscenegraph openssl-1.1 
+os-prober p11-kit-docs pass pdfgrep perl-image-exiftool picom poppler-glib postgresql-libs ppp 
+pptpclient pulseaudio-bluetooth pulsemixer python-audit python-brotli python-build python-capng 
+python-deprecated python-gpgme python-html2text python-importlib_resources python-libseccomp 
+python-matplotlib python-pandas python-pip python-pipx python-pluggy python-pygments 
+python-pyperclip python-pyqt6 python-pyqtgraph python-scipy python-tests qgpgme-qt5 qgpgme-qt6 
+qrencode qt5-webengine qt5-xmlpatterns qt5ct qt6ct redshift reflector reiserfsprogs rustup s-nail 
+sdparm skim splint sqlite-analyzer sqlite-doc sqlite-tcl sudo sxhkd sysfsutils syslinux 
+systemd-resolvconf systemd-ukify terminus-font tesseract-data-deu tesseract-data-eng tlp tmux 
+torbrowser-launcher traceroute ttf-liberation ttf-liberation-mono-nerd wine wireless-regdb 
+wireless_tools xclip xdotool xf86-video-vesa xfsprogs xmlto xorg-bdftopcf xorg-docs xorg-font-util 
+xorg-fonts-100dpi xorg-fonts-75dpi xorg-iceauth xorg-mkfontscale xorg-server xorg-server-devel 
+xorg-server-xephyr xorg-server-xnest xorg-server-xvfb xorg-sessreg xorg-smproxy xorg-x11perf 
+xorg-xbacklight xorg-xcmsdb xorg-xcursorgen xorg-xdpyinfo xorg-xdriinfo xorg-xev xorg-xgamma 
+xorg-xhost xorg-xinit xorg-xinput xorg-xkbevd xorg-xkbutils xorg-xkill xorg-xlsatoms 
+xorg-xlsclients xorg-xpr xorg-xrefresh xorg-xsetroot xorg-xvinfo xorg-xwayland xorg-xwd 
+xorg-xwininfo xorg-xwud xsel xterm xwallpaper yad yt-dlp zathura zathura-pdf-poppler zig zsh 
+zsh-syntax-highlighting
+texlive-basic texlive-bibtexextra texlive-binextra texlive-context texlive-fontsextra texlive-fontsrecommended texlive-fontutils texlive-formatsextra texlive-games texlive-humanities texlive-langfrench texlive-langportuguese texlive-latexextra texlive-latexrecommended texlive-luatex texlive-mathscience texlive-metapost texlive-music texlive-pictures texlive-pstricks texlive-publishers texlive-xetex

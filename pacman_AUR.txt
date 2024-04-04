@@ -1,0 +1,3 @@
+amdapp-sdk brave-bin diffr fmilib freefilesync-bin librewolf-bin ocrmypdf profile-sync-daemon-brave 
+profile-sync-daemon-librewolf qt5-webkit rxvt-unicode-truecolor-wide-glyphs simple-mtpfs ueberzugpp 
+yay
