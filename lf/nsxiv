@@ -17,7 +17,7 @@ map <c-x>z $ sobrepor.sh         "$f"
 map <c-x>a $ juntar.sh           "$f"                  
 map <c-x>e $ gthumb              "$f"                  
 map <c-x>g $ gimp                "$f"                  
-map <c-x>x $ wall_random.bash    "$f"                  
+map <c-x>x $ wallpaper.bash    "$f"                  
 map <c-x>h $ comando.sh          "$f"                  
 map <c-x>1 $ echo                "1 $f" ; exit         
 map <c-x>2 $ echo                "2 $f" ; exit         

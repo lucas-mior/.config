@@ -81,9 +81,9 @@ super + {p, shift+d}
 {XF86MonBrightnessDown, XF86MonBrightnessUp }
     {bright {--less, --more} dwmblocks2}
 {_, control, super} + Print
-    print_screen.sh {tela, area, last}
+    printscreen.sh {tela, area, last}
 super + shift + s
-    {print_screen.sh area}
+    {printscreen.sh area}
 super + shift + {a, q, w}
     {clip.sh shot por, clip.sh shot deu, clip.sh write}
 super + F8
