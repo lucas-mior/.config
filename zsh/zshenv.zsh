@@ -151,3 +151,5 @@ source "$XDG_CONFIG_HOME/zsh/cores.zsh"
 source "$XDG_CONFIG_HOME/zsh/lf_icons.zsh"
 
 export OMC_LDFLAGS_LINK_TYPE="static"
+export KBD_PATH="/usr/share/kbd/keymaps/i386/qwerty/br-abnt2.map.gz"
+export KBD_CUSTOM_DIR="/usr/local/share/kbd/keymaps/i386/qwerty/"
