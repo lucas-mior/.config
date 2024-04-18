@@ -48,15 +48,6 @@ cat () {
     done
 }
 
-makeee () {
-    if [ -n "$1" ]; then
-        make "$@"
-    else
-        make && sudo make install
-    fi
-}
-alias make=makeee
-
 alias du='du -h'
 alias ncdu='ncdu --color dark'
 alias df='df -h'
