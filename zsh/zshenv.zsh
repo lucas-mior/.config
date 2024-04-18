@@ -130,18 +130,12 @@ export PATH
 FZFO+=" --bind=ctrl-k:down,ctrl-l:up,alt-k:down,alt-l:up,ctrl-h:backward-kill-word"
 FZFO+=" --tiebreak=end --scroll-off=5 --bind change:first"
 FZFO+=" --bind=f8:down,f9:up --border=none --no-scrollbar"
-FZFO+=" --preview-window=:noborder:wrap --color=fg:248,fg+:007,bg+:000,preview-fg:007,hl:009,hl+:009"
-FZFO+=" --color=gutter:-1,info:006,border:246,prompt:110,pointer:199,marker:011,spinner:190,header:007"
+FZFO+=" --preview-window=:noborder:wrap"
+FZFO+=" --color=fg:248,fg+:007,bg+:000,preview-fg:007,hl:009,hl+:009"
+FZFO+=" --color=gutter:-1,info:006,border:246,prompt:110,pointer:199"
+FZFO+=" --color=marker:011,spinner:190,header:007"
 export FZF_DEFAULT_OPTS=$FZFO
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-
-## SKIM CONFIG
-SKIMO+=" --bind=ctrl-k:down,ctrl-l:up,alt-k:down,alt-l:up"
-SKIMO+=" --tiebreak=end --bind change:first"
-SKIMO+=" --bind=f8:down,f9:up --ansi"
-SKIMO+=" --color=fg:248,matched:009,matched_bg:000,current:007,current_bg:000,current_match:001,current_match_bg:000"
-SKIMO+=",query:007,info:006,border:000,prompt:003,pointer:003,marker:011,spinner:190,header:007"
-export SKIM_DEFAULT_OPTIONS=$SKIMO
 
 ## LF CONFIG
 export COLORTERM=truecolor
