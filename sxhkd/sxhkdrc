@@ -6,7 +6,7 @@ super + control + shift + e
 super + {F11, F12}
     {touchpad.sh, xkill}
 super + {F5, F6}
-    setkeymap.sh {br, br_lucas_mior}
+    setkeymap.sh {br, br_lucas}
 super + {f}
     {exec warpd --hint}
 
