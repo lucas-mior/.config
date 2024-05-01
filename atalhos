@@ -77,7 +77,6 @@ km    /home/lucas/.config/mpv/
 
 ## UFSC
 ms    /home/lucas/docs/moto_schutz/
-bi    /home/lucas/docs/biocal/
 ic    /home/lucas/docs/IC/
 uu    /home/lucas/docs/UFSC/
 172   /home/lucas/docs/UFSC/2017.2/
@@ -92,18 +91,22 @@ uu    /home/lucas/docs/UFSC/
 221   /home/lucas/docs/UFSC/2022.1/
 222   /home/lucas/docs/UFSC/2022.2/
 231   /home/lucas/docs/UFSC/2023.1/
-ua    /home/lucas/docs/UFSC/2023.1/EEL7418_Antenas/
-ui    /home/lucas/docs/UFSC/2023.1/EEL7415_IOT/
-ub    /home/lucas/docs/UFSC/2023.1/EEL7885_Biomedica/
 ut    /home/lucas/docs/UFSC/0TCC/
+
+## Mestrado
+bi    /home/lucas/docs/biocal/
+bm    /home/lucas/docs/biocal/00_biocal_models/
 mt    /home/lucas/docs/UFSC_mestrado/
-md    /home/lucas/docs/UFSC_mestrado/controle_preditivo/trabalho/
+ma    /home/lucas/docs/UFSC_mestrado/000_artigo/
+mi    /home/lucas/docs/UFSC_mestrado/1identificação/
+md    /home/lucas/docs/UFSC_mestrado/2modelagem/
+
+## zerdax
 zx    /home/lucas/docs/zerdax2/zerdax2/
 za    /home/lucas/docs/zerdax2/datasets/
 zb    /home/lucas/docs/zerdax2/blender/
 
 ## ARQUIVOS
-nx    /etc/nginx/nginx.conf
 aa    /home/lucas/.config/atalhos
 as    /home/lucas/.local/scripts/texto/atalhos.awk
 
