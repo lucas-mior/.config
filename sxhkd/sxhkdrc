@@ -14,7 +14,7 @@ super + {f}
 super + d
     {dmenu_run}
 super + {z,                     shift+z,                     e}
-    {urxvtc -e clip1.sh --copy, urxvtc -e clip1.sh --remove, clip.sh qr}
+    {st -e clip1.sh --copy, st -e clip1.sh --remove, clip.sh qr}
 super + {shift + r,  shift + p, o; b}
     {st -e trans -I, passmenu --type, st -e bluetoothctl}
 super + {b,    Return}

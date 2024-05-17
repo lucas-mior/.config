@@ -1,4 +1,3 @@
-amdapp-sdk brave-bin brn2-git czkawka-gui-bin dashbinsh diffr farbfeld fmilib freefilesync 
-librewolf-bin ocrmypdf profile-sync-daemon-brave profile-sync-daemon-librewolf qgpgme-qt5 
-qt5-webkit rxvt-unicode-truecolor-wide-glyphs turbo-base64 ueberzugpp ueberzugpp-debug ventoy-bin 
+brave-bin brn2-git czkawka-gui-bin dashbinsh diffr farbfeld freefilesync lingot ocrmypdf 
+profile-sync-daemon-brave rxvt-unicode-truecolor-wide-glyphs turbo-base64 ueberzugpp ventoy-bin 
 yay-debug
