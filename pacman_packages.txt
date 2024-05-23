@@ -1,12 +1,13 @@
 acpid android-file-transfer arandr asciidoc audacity b43-fwcutter base base-devel bat bear biber 
-bluez-tools bluez-utils brotli-testdata btrfs-progs caja ccache chafa cmatrix cracklib cronie ctags 
-dash db dbus-docs debuginfod dialog ding-libs discord dmraid dnssec-anchors docx2txt dosfstools 
-doxygen dunst ed efibootmgr elfutils exfatprogs exiv2 ext4magic fd ffmpegthumbnailer firefox 
-fuse2fs fzf gcc-ada gcc-d gcc-fortran gcc-objc gdb gimp git git-filter-repo git-lfs github-cli 
-gparted grub grub-btrfs gvim htop imagemagick imlib2 inetutils inkscape inotify-tools intel-ucode 
-iotop iwd jfsutils kcachegrind kdenlive kicad kicad-library kid3-common kid3-qt konsole kotlin ldns 
-lemon libgccjit libpaper libreoffice-fresh libsecret-docs libxcrypt-compat libxml2-docs links 
-linux-docs linux-firmware linux-firmware-bnx2x linux-firmware-liquidio linux-firmware-marvell 
+bluez-deprecated-tools bluez-tools bluez-utils brotli-testdata btrbk btrfs-progs caja ccache chafa 
+cmatrix cracklib cronie ctags dash db dbus-docs debuginfod dialog ding-libs discord dmidecode 
+dmraid dnssec-anchors docx2txt dosfstools doxygen dunst ed efibootmgr elfutils exfatprogs exiv2 
+ext4magic fd ffmpegthumbnailer firefox fuse2fs fzf gcc-ada gcc-d gcc-fortran gcc-objc gdb gimp git 
+git-filter-repo git-lfs github-cli gnome-disk-utility gparted grsync grub grub-btrfs gsmartcontrol 
+gvim htop imagemagick imlib2 inetutils inkscape inotify-tools intel-ucode iotop iwd jfsutils 
+kcachegrind kdenlive kicad kicad-library kid3-common kid3-qt konsole kotlin ldns lemon libgccjit 
+libpaper libreoffice-fresh libsecret-docs libxcrypt-compat libxml2-docs links linux-docs 
+linux-firmware linux-firmware-bnx2x linux-firmware-liquidio linux-firmware-marvell 
 linux-firmware-mellanox linux-firmware-nfp linux-firmware-qcom linux-firmware-qlogic linux-headers 
 linux-lts linux-lts-docs linux-lts-headers logrotate lshw lto-dump lvm2 lxappearance maim man-db 
 man-pages mediainfo mesa-utils mkinitcpio-nfs-utils mlocate mpc mpd mpv mtools nano ncmpcpp 
@@ -17,8 +18,8 @@ pptpclient pulseaudio-bluetooth pulsemixer python-audit python-build python-capn
 python-gpgme python-html2text python-importlib_resources python-libseccomp python-matplotlib 
 python-pandas python-pip python-pipx python-pluggy python-pygments python-pyperclip python-pyqt6 
 python-pyqtgraph python-scipy python-tests qrencode qt5-webengine qt5-xmlpatterns qt5ct qt6ct 
-radare2 redshift reflector reiserfsprogs rustup s-nail sdparm splint sqlite-analyzer sqlite-doc 
-sqlite-tcl sudo sxhkd sysfsutils syslinux systemd-resolvconf systemd-ukify tcc tenacity 
+radare2 redshift reflector reiserfsprogs rustup s-nail sdparm smartmontools splint sqlite-analyzer 
+sqlite-doc sqlite-tcl sudo sxhkd sysfsutils syslinux systemd-resolvconf systemd-ukify tcc tenacity 
 terminus-font tesseract-data-deu tesseract-data-eng timeshift tlp tmux torbrowser-launcher 
 traceroute translate-shell transmission-gtk ttf-liberation ttf-liberation-mono-nerd virtualbox 
 wireless_tools xclip xdotool xorg-bdftopcf xorg-docs xorg-font-util xorg-fonts-100dpi 
