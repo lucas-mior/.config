@@ -1,0 +1,34 @@
+$include /etc/inputrc
+
+set editing-mode vi
+set keymap vi-insert
+set keyseq-timeout 30
+
+$if mode=vi
+    $if Octave
+        set show-mode-in-prompt off
+    $else
+        set show-mode-in-prompt on
+        set vi-ins-mode-string \1\e[6 q\2
+        set vi-cmd-mode-string \1\e[2 q\2
+
+        set keymap vi-command
+        Control-l: clear-screen
+        Control-a: beginning-of-line
+        j: backward-char
+        k: next-history
+        l: previous-history
+        ;: forward-char
+
+        set keymap vi-insert
+        Control-l: clear-screen
+        Control-a: beginning-of-line
+    $endif
+$endif
+
+$if mode=vi
+    # python interactive: assign = expression to _
+    $if python
+        "=":"\e[1~__builtins__._ \C-v= \e[4~ \C-v= "
+    $endif
+$endif
