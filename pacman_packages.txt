@@ -1,32 +1,42 @@
-acpid android-file-transfer arandr asciidoc audacity b43-fwcutter base base-devel bat bear biber 
-bluez-deprecated-tools bluez-tools bluez-utils brotli-testdata btrbk btrfs-progs caja ccache chafa 
-cmatrix cracklib cronie ctags dash db dbus-docs debuginfod dialog ding-libs discord dmidecode 
-dmraid dnssec-anchors docx2txt dosfstools doxygen dunst ed efibootmgr elfutils exfatprogs exiv2 
-ext4magic fd ffmpegthumbnailer firefox fuse2fs fzf gcc-ada gcc-d gcc-fortran gcc-objc gdb gimp git 
-git-filter-repo git-lfs github-cli gnome-disk-utility gparted grsync grub grub-btrfs gsmartcontrol 
+acpid android-file-transfer arandr asciidoc audacity b43-fwcutter base base-devel bat bc bear biber 
+bluedevil bluez-deprecated-tools bluez-tools bluez-utils breeze breeze-gtk breeze-plymouth 
+brotli-testdata btrbk btrfs-progs caja ccache chafa cmatrix cracklib cronie ctags dash db dbus-docs 
+debuginfod dialog ding-libs discord discover dmidecode dmraid dnssec-anchors docx2txt dosfstools 
+doxygen drkonqi dunst ed efibootmgr elfutils exfatprogs exiv2 ext4magic fd ffmpegthumbnailer 
+firefox flatpak-kcm fuse2fs fzf gcc-ada gcc-d gcc-fortran gcc-objc gdb gimp git git-filter-repo 
+git-lfs github-cli gnome-disk-utility gparted grsync grub grub-btrfs gsmartcontrol gthumb gvfs-mtp 
 gvim htop imagemagick imlib2 inetutils inkscape inotify-tools intel-ucode iotop iwd jfsutils 
-kcachegrind kdenlive kicad kicad-library kid3-common kid3-qt konsole kotlin ldns lemon libgccjit 
-libpaper libreoffice-fresh libsecret-docs libxcrypt-compat libxml2-docs links linux-docs 
-linux-firmware linux-firmware-bnx2x linux-firmware-liquidio linux-firmware-marvell 
-linux-firmware-mellanox linux-firmware-nfp linux-firmware-qcom linux-firmware-qlogic linux-headers 
-linux-lts linux-lts-docs linux-lts-headers logrotate lshw lto-dump lvm2 lxappearance maim man-db 
-man-pages mediainfo mesa-utils mkinitcpio-nfs-utils mlocate mpc mpd mpv mtools nano ncmpcpp 
-neofetch net-tools networkmanager newsboat nfs-utils nfsidmap nicotine+ nilfs-utils 
-noto-fonts-emoji ntfs-3g octave odt2txt onionshare openldap openmp openscenegraph openssl-1.1 
-os-prober p11-kit-docs pass pavucontrol pdfgrep perl-image-exiftool picom postgresql-libs ppp 
-pptpclient pulseaudio-bluetooth pulsemixer python-audit python-build python-capng python-deprecated 
-python-gpgme python-html2text python-importlib_resources python-libseccomp python-matplotlib 
-python-pandas python-pip python-pipx python-pluggy python-pygments python-pyperclip python-pyqt6 
-python-pyqtgraph python-scipy python-tests qrencode qt5-webengine qt5-xmlpatterns qt5ct qt6ct 
-radare2 redshift reflector reiserfsprogs rustup s-nail sdparm smartmontools splint sqlite-analyzer 
-sqlite-doc sqlite-tcl sudo sxhkd sysfsutils syslinux systemd-resolvconf systemd-ukify tcc tenacity 
-terminus-font tesseract-data-deu tesseract-data-eng timeshift tlp tmux torbrowser-launcher 
-traceroute translate-shell transmission-gtk ttf-liberation ttf-liberation-mono-nerd virtualbox 
-wireless_tools xclip xdotool xorg-bdftopcf xorg-docs xorg-font-util xorg-fonts-100dpi 
-xorg-fonts-75dpi xorg-iceauth xorg-mkfontscale xorg-server xorg-server-devel xorg-server-xephyr 
-xorg-server-xnest xorg-server-xvfb xorg-sessreg xorg-smproxy xorg-x11perf xorg-xbacklight 
-xorg-xcmsdb xorg-xcursorgen xorg-xdpyinfo xorg-xdriinfo xorg-xev xorg-xgamma xorg-xhost xorg-xinit 
-xorg-xinput xorg-xkbevd xorg-xkbutils xorg-xkill xorg-xlsatoms xorg-xlsclients xorg-xpr 
-xorg-xrefresh xorg-xsetroot xorg-xvinfo xorg-xwayland xorg-xwd xorg-xwininfo xorg-xwud xsel xterm 
-xwallpaper yad yt-dlp zathura zathura-pdf-poppler zig zip zsh zsh-syntax-highlighting
+kactivitymanagerd kcachegrind kde-cli-tools kde-gtk-config kdecoration kdenlive kdeplasma-addons 
+kgamma kglobalacceld kicad kicad-library kid3-common kid3-qt kinfocenter kmenuedit konsole kotlin 
+kpipewire kscreen kscreenlocker ksshaskpass ksystemstats kwallet-pam kwayland kwin kwrited 
+layer-shell-qt ldns lemon libgccjit libkscreen libksysguard libpaper libplasma libreoffice-fresh 
+libsecret-docs libxcrypt-compat libxml2-docs links linux-docs linux-firmware linux-firmware-bnx2x 
+linux-firmware-liquidio linux-firmware-marvell linux-firmware-mellanox linux-firmware-nfp 
+linux-firmware-qcom linux-firmware-qlogic linux-headers linux-lts linux-lts-docs linux-lts-headers 
+logrotate lshw lto-dump lvm2 lxappearance maim man-db man-pages mediainfo mesa-utils milou 
+mkinitcpio-nfs-utils mlocate mpc mpd mpv mtools nano nautilus ncmpcpp neofetch net-tools 
+networkmanager newsboat nfs-utils nfsidmap nicotine+ nilfs-utils noto-fonts-emoji ntfs-3g 
+ocean-sound-theme octave odt2txt onionshare openldap openmp openscenegraph openssl-1.1 os-prober 
+oxygen oxygen-sounds p11-kit-docs pass pavucontrol pdfgrep perl-image-exiftool picom 
+plasma-activities plasma-activities-stats plasma-browser-integration plasma-desktop plasma-disks 
+plasma-firewall plasma-integration plasma-nm plasma-pa plasma-sdk plasma-systemmonitor 
+plasma-thunderbolt plasma-vault plasma-welcome plasma-workspace plasma-workspace-wallpapers 
+plasma5support plymouth-kcm polkit-kde-agent postgresql-libs powerdevil ppp pptpclient 
+print-manager pulseaudio-bluetooth pulsemixer python-audit python-build python-capng 
+python-deprecated python-gpgme python-html2text python-importlib_resources python-libseccomp 
+python-matplotlib python-pandas python-pip python-pipx python-pluggy python-pygments 
+python-pyperclip python-pyqt6 python-pyqtgraph python-scipy python-tests qqc2-breeze-style qrencode 
+qt5-webengine qt5-xmlpatterns qt5ct qt6ct radare2 redshift reflector reiserfsprogs rustup s-nail 
+sddm-kcm sdparm smartmontools splint sqlite-analyzer sqlite-doc sqlite-tcl sudo sxhkd sysfsutils 
+syslinux systemd-resolvconf systemd-ukify systemsettings tcc tenacity terminus-font 
+tesseract-data-deu tesseract-data-eng timeshift tlp tmux torbrowser-launcher traceroute 
+translate-shell transmission-gtk ttf-liberation ttf-liberation-mono-nerd virtualbox wacomtablet 
+wget wireless_tools xclip xdg-desktop-portal-kde xdotool xorg-bdftopcf xorg-docs xorg-font-util 
+xorg-fonts-100dpi xorg-fonts-75dpi xorg-iceauth xorg-mkfontscale xorg-server xorg-server-devel 
+xorg-server-xephyr xorg-server-xnest xorg-server-xvfb xorg-sessreg xorg-smproxy xorg-x11perf 
+xorg-xbacklight xorg-xcmsdb xorg-xcursorgen xorg-xdpyinfo xorg-xdriinfo xorg-xev xorg-xgamma 
+xorg-xhost xorg-xinit xorg-xinput xorg-xkbevd xorg-xkbutils xorg-xkill xorg-xlsatoms 
+xorg-xlsclients xorg-xpr xorg-xrefresh xorg-xsetroot xorg-xvinfo xorg-xwayland xorg-xwd 
+xorg-xwininfo xorg-xwud xsel xterm xwallpaper yad yt-dlp zathura zathura-pdf-poppler zig zip zsh 
+zsh-syntax-highlighting
 texlive-basic texlive-bibtexextra texlive-binextra texlive-context texlive-fontsextra texlive-fontsrecommended texlive-fontutils texlive-formatsextra texlive-games texlive-humanities texlive-langfrench texlive-langportuguese texlive-latexextra texlive-latexrecommended texlive-luatex texlive-mathscience texlive-metapost texlive-music texlive-pictures texlive-pstricks texlive-publishers texlive-xetex

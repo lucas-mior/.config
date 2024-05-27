@@ -1,1 +1,2 @@
-set textwidth=120
+set textwidth=200
+set nolinebreak
