@@ -45,7 +45,7 @@ export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 export KAGGLE_CONFIG_DIR="$XDG_CONFIG_HOME/kaggle"
 export CUDA_CACHE_PATH="$XDG_CACHE_HOME/nv"
 export PYTHONSTARTUP="$XDG_CONFIG_HOME/python/pythonrc.py"
-export WINEPREFIX="$XDG_DATA_HOME/wine"
+export WINEPREFIX="$HOME/.local/wine"
 
 ## dwmblocks2 e dustify
 export DWMBLOCKS2_RECORD=1
