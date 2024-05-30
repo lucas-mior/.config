@@ -5,7 +5,7 @@ include colores
 
 # set recolor "true"
 # set recolor-keephue "true"
-# set recolor-reverse-video "true"
+set recolor-reverse-video "true"
 
 set pages-per-row 1
 set page-padding 2
