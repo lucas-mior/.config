@@ -1,5 +1,5 @@
 acpid android-file-transfer arandr asciidoc audacity b43-fwcutter base base-devel bat bc bear biber 
-bluedevil bluez-deprecated-tools bluez-tools bluez-utils breeze breeze-gtk breeze-plymouth 
+bluedevil bluez-deprecated-tools bluez-tools bluez-utils boost breeze breeze-gtk breeze-plymouth 
 brotli-testdata btrbk btrfs-progs caja ccache chafa cmatrix cracklib cronie ctags dash db dbus-docs 
 debuginfod dialog ding-libs discord discover dmidecode dmraid dnssec-anchors docx2txt dosfstools 
 doxygen drkonqi dunst ed efibootmgr elfutils exfatprogs exiv2 ext4magic fd ffmpegthumbnailer 
@@ -27,15 +27,15 @@ python-deprecated python-gpgme python-html2text python-importlib_resources pytho
 python-matplotlib python-pandas python-pip python-pipx python-pluggy python-pygments 
 python-pyperclip python-pyqt6 python-pyqtgraph python-scipy python-tests qqc2-breeze-style qrencode 
 qt5-webengine qt5-xmlpatterns qt5ct qt6ct radare2 redshift reflector reiserfsprogs rustup s-nail 
-sddm-kcm sdparm smartmontools splint sqlite-analyzer sqlite-doc sqlite-tcl sudo sxhkd sysfsutils 
-syslinux systemd-resolvconf systemd-ukify systemsettings tcc tenacity terminus-font 
-tesseract-data-deu tesseract-data-eng timeshift tlp tmux torbrowser-launcher traceroute 
-translate-shell transmission-gtk ttf-liberation ttf-liberation-mono-nerd virtualbox wacomtablet 
-wget wireless_tools xclip xdg-desktop-portal-kde xdotool xorg-bdftopcf xorg-docs xorg-font-util 
-xorg-fonts-100dpi xorg-fonts-75dpi xorg-iceauth xorg-mkfontscale xorg-server xorg-server-devel 
-xorg-server-xephyr xorg-server-xnest xorg-server-xvfb xorg-sessreg xorg-smproxy xorg-x11perf 
-xorg-xbacklight xorg-xcmsdb xorg-xcursorgen xorg-xdpyinfo xorg-xdriinfo xorg-xev xorg-xgamma 
-xorg-xhost xorg-xinit xorg-xinput xorg-xkbevd xorg-xkbutils xorg-xkill xorg-xlsatoms 
+sddm-kcm sdparm smartmontools splint sqlite-analyzer sqlite-doc sqlite-tcl sudo sxhkd syncthing 
+sysfsutils syslinux systemd-resolvconf systemd-ukify systemsettings tcc tenacity terminus-font 
+tesseract-data-deu tesseract-data-eng tesseract-data-por timeshift tlp tmux torbrowser-launcher 
+traceroute translate-shell transmission-gtk ttf-liberation ttf-liberation-mono-nerd virtualbox 
+wacomtablet wget wine wireless_tools xclip xdg-desktop-portal-kde xdotool xorg-bdftopcf xorg-docs 
+xorg-font-util xorg-fonts-100dpi xorg-fonts-75dpi xorg-iceauth xorg-mkfontscale xorg-server 
+xorg-server-devel xorg-server-xephyr xorg-server-xnest xorg-server-xvfb xorg-sessreg xorg-smproxy 
+xorg-x11perf xorg-xbacklight xorg-xcmsdb xorg-xcursorgen xorg-xdpyinfo xorg-xdriinfo xorg-xev 
+xorg-xgamma xorg-xhost xorg-xinit xorg-xinput xorg-xkbevd xorg-xkbutils xorg-xkill xorg-xlsatoms 
 xorg-xlsclients xorg-xpr xorg-xrefresh xorg-xsetroot xorg-xvinfo xorg-xwayland xorg-xwd 
 xorg-xwininfo xorg-xwud xsel xterm xwallpaper yad yt-dlp zathura zathura-pdf-poppler zig zip zsh 
 zsh-syntax-highlighting

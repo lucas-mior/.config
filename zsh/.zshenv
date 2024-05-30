@@ -123,8 +123,8 @@ PATH=$PATH:/opt/freefilesync/Bin/
 PATH=$PATH:/usr/share/fslint/fslint/
 PATH=$PATH:/usr/share/labcontrole/
 PATH=$PATH:/opt/scilab/bin/
-PATH="$PATH:/home/lucas/.local/share/wine/drive_c/Program Files/MATLAB/R2017a/bin/"
-PATH="$PATH:/home/lucas/.local/share/wine/drive_c/Program Files/OpenModelica/bin/"
+PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files/MATLAB/R2017a/bin/"
+PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files/OpenModelica/bin/"
 export PATH
 
 ## FZF CONFIG

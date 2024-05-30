@@ -12,8 +12,8 @@
     " h é mapeado para f next (ver plugins)
     noremap j h
     noremap ; l
-    noremap k j
-    noremap l k
+    noremap k gj
+    noremap l gk
 " some defaults dont make sense
     nnoremap Y y$
     nnoremap e ea
