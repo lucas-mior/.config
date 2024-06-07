@@ -5,12 +5,11 @@ set completion-group-fg     "rgba(250, 250, 250, 1.0)"
 set completion-highlight-bg "rgba(250, 000, 000, 0.9)"
 set completion-highlight-fg "rgba(000, 000, 000, 0.7)"
 
-set recolor-darkcolor rgba(250, 250, 250, 0.5)
-set recolor-lightcolor rgba(0, 0, 0, 0.5)
-set default-bg "#000000ff"
+set recolor-darkcolor "rgba(250, 250, 250, 1)"
+set recolor-lightcolor "rgba(100, 100, 20, 0.1)"
 
 set default-bg "rgba(000, 000, 000, 0.9)"
-set default-fg "rgba(250, 250, 250, 0.9)"
+set default-fg "rgba(250, 250, 250, 0.0)"
 
 set inputbar-bg "rgba(000, 000, 000, 0.9)"
 set inputbar-fg "rgba(250, 250, 250, 0.9)"

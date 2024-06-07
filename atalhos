@@ -3,7 +3,9 @@
 hh    /home/lucas/
 
 ## USBs
-me    /mnt/
+me    /media/
+ma    /media/sandisk/
+mb    /media/toshiba/
 
 ## docs
 do    /home/lucas/docs/
@@ -98,7 +100,6 @@ ut    /home/lucas/docs/UFSC/0TCC/
 bi    /home/lucas/docs/biocal/
 bm    /home/lucas/docs/biocal/biocal_models/
 mt    /home/lucas/docs/UFSC_mestrado/
-ma    /home/lucas/docs/UFSC_mestrado/000_artigo/
 mi    /home/lucas/docs/UFSC_mestrado/1identificação/
 md    /home/lucas/docs/UFSC_mestrado/2modelagem/
 

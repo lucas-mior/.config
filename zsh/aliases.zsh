@@ -50,8 +50,7 @@ cat () {
 
 alias du='du -h'
 alias mount='mount --mkdir'
-# alias lsblk='lsblk -o NAME,SIZE,PARTLABEL,LABEL,FSTYPE,MOUNTPOINTS,FSUSE%,UUID'
-alias lsblk='lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINTS,FSUSE%,UUID'
+alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS,UUID'
 alias ncdu='ncdu --color dark'
 alias df='df -h'
 alias lsb='lsblk'
@@ -72,3 +71,14 @@ alias diff0='/usr/bin/diff'
 vg () { grep -iRl "$1" ./* | xargs -o vim "+/$1" ; }
 v () { vim "$@" ; }
 vi () { vim "$@" ; }
+
+cmount () {
+    set -x
+    grep "$1" /etc/crypttab
+    grep "$1" /etc/fstab
+
+    sudo systemctl daemon-reload
+    sudo systemctl start systemd-cryptsetup@$1.service
+    sudo mount /dev/mapper/$1
+    set -x
+}

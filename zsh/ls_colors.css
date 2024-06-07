@@ -18,7 +18,7 @@ LS_COLORS+=':di=1;38;2;175;135;000:fi=0:ex=01;38;2;000;250;000:ln=01;38;2;128;12
    slides  : 0   : rgb(250, 085, 000) : ppt
    image   : 1   : rgb(000, 135, 250) : jpg jpeg gif bmp png ff svg tif tiff xcf webp hdr
    music   : 1   : rgb(000, 170, 170) : mp3 flac wma ogg wav opus aac m4a
-   video   : 1   : rgb(240, 000, 240) : mov mpg mpeg mkv webm 3gp mp4 wmv avi
+   video   : 1   : rgb(240, 000, 240) : mov mpg mpeg mkv webm 3gp mp4 wmv avi mts
    archive : 1   : rgb(250, 165, 000) : iso img tar.bz tar.bz2 tbz tbz2 tar.gz tgz zip nar rar gz 7z zstd
    torrent : 1   : rgb(200, 150, 050) : part torrent
    kicad   : 1   : rgb(020, 160, 020) : kicad_pro

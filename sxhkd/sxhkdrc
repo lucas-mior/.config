@@ -23,7 +23,7 @@ super + r
     st -e lfimg
 #   st -e lfimg
 super + {n,                s}
-    {st -A 0.6 -e ncmpcpp, blue.bash}
+    {st -A 0.6 -e ncmpcpp, blue.sh}
 
 super + v
     {st -e nmtui}
@@ -40,14 +40,14 @@ control + alt + {m,             w}
     {kcolorchooser, webcam.sh}
 super + {x,         c,              o; m,            shift + e}
     {magic.sh tudo, magic.sh meta, magic.sh manual, magic.sh emoji}
-super + equal
-    {st -e python}
+# super + equal
+#     {st -e python}
 
 ## VOLUME
 {super + shift + n}
     st -e pulsemixer
 super + a
-    audio_toggle.bash dwmblocks2
+    audiotoggle.sh dwmblocks2
 super + control + a
     audioport.sh dwmblocks2
 {XF86AudioMute, super + shift + m}

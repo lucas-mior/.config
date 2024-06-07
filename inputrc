@@ -29,6 +29,6 @@ $endif
 $if mode=vi
     # python interactive: assign = expression to _
     $if python
-        "=":"\e[1~__builtins__._ \C-v= \e[4~ \C-v= "
+        "=":"\e[1~BI._ \C-v= \e[4~ \C-v= "
     $endif
 $endif

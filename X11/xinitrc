@@ -15,6 +15,7 @@ events.bash &
 dwmblocks2 &
 
 xset m 1 1 &
+setkeymap.sh br_lucas
 
 # /etc/X11/xorg.conf.d/00-keyboard.conf
 # Section "InputClass"
@@ -31,5 +32,5 @@ sleep 1
 wallpaper.bash
 exec dwm
 
-# export DESKTOP_SESSION=plasma
-# exec startplasma-x11
+#export DESKTOP_SESSION=plasma
+#exec startplasma-x11
