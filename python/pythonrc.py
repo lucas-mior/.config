@@ -11,6 +11,8 @@ import cmath
 from math import *
 from cmath import *
 
+import numpy as np
+import pandas as pd
 
 def c():
     global _
@@ -54,6 +56,9 @@ i = 1j
 j = 1j
 Pi = PI = pi
 E = e
+
+BI = __builtins__
+
 print("i := j := sqrt(-1)")
 print("_ := last result")
 print("c() to copy last result")

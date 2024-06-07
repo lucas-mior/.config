@@ -48,7 +48,7 @@ function! Gototo()
     endtry
 endfunction
 nnoremap <C-]> :call Gototo()<CR>
-nnoremap <leader>l :LspDiagNext<CR>
+nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>o :LspHover<CR>
 
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
