@@ -50,7 +50,7 @@ cat () {
 
 alias du='du -h'
 alias mount='mount --mkdir'
-alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS,UUID'
+alias lsblk='lsblk -o NAME,SIZE,LABEL,PARTLABEL,FSTYPE,MOUNTPOINTS,UUID | lsblk.awk'
 alias ncdu='ncdu --color dark'
 alias df='df -h'
 alias lsb='lsblk'
@@ -82,3 +82,5 @@ cmount () {
     sudo mount /dev/mapper/$1
     set -x
 }
+
+alias fstab='sudoedit /etc/fstab && sudo systemctl daemon-reload'
