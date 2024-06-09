@@ -144,7 +144,7 @@ wget/
 whoozle.github.io/
 xfce4/
 xsettingsd/
-*zcompdump
+*zcompdump*
 *.log
 QElectroTech/
 VirtualBox/
@@ -178,3 +178,5 @@ pluginsettings.cfg
 rizin/
 tenacity.cfg
 vim/.netrwhist
+.gsd*
+teamviewer/
