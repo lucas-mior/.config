@@ -6,8 +6,8 @@ cmd on-cd &{{
     lf -remote "send $id reload"
 
     for fi in *; do
-        if [ $(cpu_usage.sh) -gt 50 ]; then
-            break
+        if [ $(cpusage.sh) -gt 50 ]; then
+            continue
         fi
         mime="$(file -b --mime-type "$fi")"
         case "$mime" in
