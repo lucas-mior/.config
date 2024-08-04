@@ -73,7 +73,7 @@ export CLIPSIM_SIGNAL_PROGRAM="dwmblocks2"
 export CLIPSIM_IMAGE_PREVIEW="stiv_draw"
 export REDSHIFT_CACHE="$XDG_CACHE_HOME/redshift"
 export WANDB_DISABLED="true"
-export SUDO_ASKPASS="$HOME/.local/scripts/dmenuprompts/dmenupass.sh"
+export SUDO_ASKPASS="/usr/local/bin/dmenupass.sh"
 export MPD_PORT=6600
 export EDITOR="vim"
 export OPENER="xdg-open"
@@ -87,9 +87,15 @@ export MAKEFLAGS='-j16'
 #export QT_STYLE_OVERRIDE="gtk2"
 export QT_QPA_PLATFORMTHEME="qt5ct"
 export RUST_BACKTRACE=1
+
 ## pass generate [-n] <N>
-export PASSWORD_STORE_GENERATED_LENGTH=30
-export PASSWORD_STORE_CHARACTER_SET="a-zA-Z0-9!@#$%&()_+=:;[]{}-"
+PASSWORD_STORE_CHARACTER_SET=""
+PASSWORD_STORE_CHARACTER_SET+='abcdefghjkmnpqrstuvwxyz'
+PASSWORD_STORE_CHARACTER_SET+='ABCDEFGHJKMNPQRSTUVWXYZ'
+PASSWORD_STORE_CHARACTER_SET+='123456789'
+PASSWORD_STORE_CHARACTER_SET+='!@#$%&*_=+-'
+export PASSWORD_STORE_CHARACTER_SET="$PASSWORD_STORE_CHARACTER_SET"
+export PASSWORD_STORE_GENERATED_LENGTH=$(($RANDOM%3+35))
 
 ## meus scripts
 export LIXEIRA="$HOME/.local/lixeira"
@@ -125,6 +131,7 @@ PATH=$PATH:/usr/share/labcontrole/
 PATH=$PATH:/opt/scilab/bin/
 PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files/MATLAB/R2017a/bin/"
 PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files/OpenModelica/bin/"
+PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files (x86)/Dynamis/Vulcano-2.5/Vulcano.exe"
 export PATH
 
 ## FZF CONFIG
@@ -148,3 +155,6 @@ source "$XDG_CONFIG_HOME/zsh/lf_icons.zsh"
 export OMC_LDFLAGS_LINK_TYPE="static"
 export KBD_PATH="/usr/share/kbd/keymaps/i386/qwerty/br-abnt2.map.gz"
 export KBD_CUSTOM_DIR="/usr/local/share/kbd/keymaps/i386/qwerty/"
+export AWKPATH="$HOME/.local/scripts/awk/"
+export PKGEXT=".pkg.tar"
+export SRCEXT=".src.tar"

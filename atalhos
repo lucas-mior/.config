@@ -14,6 +14,8 @@ dp    /home/lucas/docs/ampera/
 po    /home/lucas/docs/polo/
 ps    /home/lucas/docs/pstu/
 so    /home/lucas/docs/solar_ratones/
+0n    /home/lucas/docs/0notes/
+0w    /home/lucas/docs/0notes/network/
 
 ## livros
 ll    /home/lucas/livros/
@@ -68,6 +70,7 @@ se    /home/lucas/.local/src/sent/
 st    /home/lucas/.local/src/st/
 sv    /home/lucas/.local/src/stiv/
 sy    /home/lucas/.local/src/wapp/
+s-    /home/lucas/.local/src/dumb_server/
 
 ## .config
 kk    /home/lucas/.config/

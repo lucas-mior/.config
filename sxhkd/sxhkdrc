@@ -13,12 +13,14 @@ super + {f}
 ## ABRIR
 super + d
     {dmenu_run}
+super + control + m
+    {mullvad-vpn}
 super + {z,                     shift+z,                     e}
     {$TERMINAL -e clip1.sh --copy, $TERMINAL -e clip1.sh --remove, clip.sh qr}
 super + {shift + r,  shift + p, o; b}
     {$TERMINAL -e trans -I, passmenu --type, $TERMINAL -e bluetoothctl}
-super + {b}
-    {$BROWSER}
+super + {b, control + t}
+    {mullvad-exclude browser.sh, mullvad-exclude torbrowser-launcher}
 super + {control + Return}
     {$TERMINAL}
 super + r
@@ -36,11 +38,13 @@ super + control
 super + o; {l, r,                h,          n}
     {lingot,   transmission-gtk, $TERMINAL -e htop, $TERMINAL -e newsboat}
 super + o; {k, f}
-    {kicad,    sudo FreeFileSync_x86_64}
+    {kicad,    FreeFileSync_x86_64}
 control + alt + {m,             w}
     {kcolorchooser, webcam.sh}
 super + {x,         c,              o; m,            shift + e}
     {magic.sh tudo, magic.sh meta, magic.sh manual, magic.sh emoji}
+super + o; {o}
+    {monero-wallet-gui}
 # super + equal
 #     {$TERMINAL -e python}
 
@@ -57,8 +61,6 @@ super + control + a
     vol_out.sh down dwmblocks2
 {XF86AudioRaiseVolume, shift + Up}
     vol_out.sh up dwmblocks2
-super + shift + {Up, Down}
-    {browser_vol.bash 0, browser_vol.bash 1}
 
 ## MÚSICA
 super + {control, alt} + p
@@ -80,7 +82,7 @@ shift + XF86AudioMute
 super + {p, shift+d}
     {xrandr.sh, killall dwmblocks; setsid -f dwmblocks}
 {XF86MonBrightnessDown, XF86MonBrightnessUp }
-    {bright {--less, --more} dwmblocks2}
+    {sudo bright {--less, --more} dwmblocks2}
 {_, control, super} + Print
     printscreen.sh {tela, area, last}
 super + shift + s

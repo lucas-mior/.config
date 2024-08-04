@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cat /sys/class/backlight/intel_backlight/max_brightness \
+    | tee /sys/class/backlight/intel_backlight/brightness
 redshift -P -O 6000 && echo 6000 > "$REDSHIFT_CACHE"
 xrdb /home/lucas/.config/X11/Xresources
 
@@ -13,7 +15,6 @@ clipsim --daemon &
 events.bash &
 
 dwmblocks2 &
-
 xset m 1 1 &
 setkeymap.sh br_lucas
 
@@ -27,7 +28,7 @@ setkeymap.sh br_lucas
 # EndSection
 
 sleep 1
-wallpaper.bash
+wallpaper.sh
 exec dwm
 
 #export DESKTOP_SESSION=plasma
