@@ -6,7 +6,7 @@ cmd on-cd &{{
     lf -remote "send $id reload"
 
     for fi in *; do
-        if [ $(cpusage.sh) -gt 50 ]; then
+        if [ $(cpusage.sh) -ge 90 ]; then
             continue
         fi
         mime="$(file -b --mime-type "$fi")"

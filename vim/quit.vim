@@ -44,7 +44,7 @@ command! -nargs=0 MyQuit :call MyQuit()
 function! MyQuit()
     " winnr('$') returns number of windows
     if winnr('$') == 1
-        bd
+        bdelete  " delete current buffer
     else
         quit
     endif

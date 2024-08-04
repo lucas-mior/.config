@@ -17,7 +17,7 @@ Plug 'vim-python/python-syntax'
 
 call plug#end()
 
-packadd termdebug 
+" packadd termdebug 
 nnoremap <c-f> :Files<CR>
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
@@ -50,6 +50,7 @@ endfunction
 nnoremap <C-]> :call Gototo()<CR>
 nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>o :LspHover<CR>
+nnoremap <leader>p :GitGutterNextHunk<CR>
 
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
 function! ToggleMarkdownListItem()
