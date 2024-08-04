@@ -25,8 +25,18 @@ var lspServers = [
     path: '/usr/bin/gopls',
     args: ['serve'],
     syncInit: v:true
-}
-]
+},
+{
+    name: 'deno',
+      filetype: ['javascript', 'typescript'],
+      path: '/usr/bin/deno',
+      args: ['lsp'],
+      debug: v:true,
+      initializationOptions: {
+           enable: v:true,
+           lint: v:true
+      }
+}]
 
 var lspOpts = {
    aleSupport: v:false,

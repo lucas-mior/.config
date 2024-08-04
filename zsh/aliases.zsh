@@ -1,5 +1,29 @@
 #!/bin/zsh
 
+cmakeclean () {
+    set -x
+
+    make clean
+    git reset --hard
+    git clean -f
+
+    rm -rf build
+    x86_64-w64-mingw32-cmake-static -B build -DCMAKE_BUILD_TYPE=Release \
+        -DLWS_WITH_STATIC=ON -DLWS_WITH_SHARED=ON \
+        -DLWS_LINK_TESTAPPS_DYNAMIC=OFF \
+        -DLWS_STATIC_PIC=ON
+
+# # option(LWS_WITH_STATIC "Build the static version of the library" ON)
+# # option(LWS_WITH_SHARED "Build the shared version of the library" ON)
+# # option(LWS_LINK_TESTAPPS_DYNAMIC "Link the test apps to the shared version of the library. Default is to link statically" OFF)
+# # option(LWS_STATIC_PIC "Build the static version of the library with position-independent code" OFF)
+# # option(LWS_SUPPRESS_DEPRECATED_API_WARNINGS "Turn off complaints about, eg, openssl 3 deprecated api usage" ON)
+
+    cmake --build build
+    # cmake --install build
+
+    set +x
+}
 alias :q='exit'
 alias x='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
 alias X='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
@@ -50,7 +74,10 @@ cat () {
 
 alias du='du -h'
 alias mount='mount --mkdir'
-alias lsblk='lsblk -o NAME,SIZE,LABEL,PARTLABEL,FSTYPE,MOUNTPOINTS,UUID | lsblk.awk'
+alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS | lsblk.awk'
+alias grub='sudoedit /etc/default/grub && sudo grub-mkconfig -o /boot/grub/grub.cfg'
+alias -g build='./build.sh'
+alias -g build.sh='./build.sh'
 alias ncdu='ncdu --color dark'
 alias df='df -h'
 alias lsb='lsblk'
@@ -84,3 +111,30 @@ cmount () {
 }
 
 alias fstab='sudoedit /etc/fstab && sudo systemctl daemon-reload'
+
+gpg-reload () {
+     pkill scdaemon
+     pkill gpg-agent
+     gpg-connect-agent /bye >/dev/null 2>&1
+     gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+     gpgconf --reload gpg-agent
+ }
+
+clean_numbers () {
+    set -x
+    for a in $(seq 9); do
+        print "$RED $a / 9 $RES\n"
+        for b in $(seq 9); do
+            print "$b / 9 $RED ($a / 9) $RES\n"
+            for c in $(seq 9); do
+                yes | rm -f *${=a}${=b}${=c}*
+            done
+            yes | rm -f *${=a}${=b}*
+        done
+        yes | rm -f *${=a}*
+    done
+    rm -f *
+    set +x
+}
+
+alias monerod='monerod --data-dir "$XDG_DATA_HOME/bitmonero"'
