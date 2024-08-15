@@ -122,7 +122,7 @@ gpg-reload () {
 
 clean_numbers () {
     cd /tmp/brn2 || return
-    set -x
+
     for a in $(seq 9); do
         print "$RED $a / 9 $RES\n"
         for b in $(seq 9); do
@@ -137,8 +137,8 @@ clean_numbers () {
 
     for a in {{a..z},{A..Z}}; do
         print "$RED $a $RES\n"
-        for b in $(seq 9); do
-            print "$b / 9 $RED ($a) $RES\n"
+        for b in {{a..z},{A..Z}}; do
+            print "[$b] $RED ($a) $RES\n"
             yes | rm -f -- *${=a}${=b}*
         done
         yes | rm -f -- *${=a}*
