@@ -20,7 +20,7 @@ super + {z,                     shift+z,                     e}
 super + {shift + r,  shift + p, o; b}
     {$TERMINAL -e trans -I, passmenu --type, $TERMINAL -e bluetoothctl}
 super + {b, control + t}
-    {mullvad-exclude browser.sh, mullvad-exclude torbrowser-launcher}
+    {browser.sh, torbrowser-launcher}
 super + {control + Return}
     {$TERMINAL}
 super + r
@@ -44,7 +44,7 @@ control + alt + {m,             w}
 super + {x,         c,              o; m,            shift + e}
     {magic.sh tudo, magic.sh meta, magic.sh manual, magic.sh emoji}
 super + o; {o}
-    {monero-wallet-gui}
+    {monero-wallet-gui -l /tmp/monero-wallet-gui-log.txt}
 # super + equal
 #     {$TERMINAL -e python}
 
