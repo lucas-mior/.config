@@ -17,6 +17,8 @@ set scrolloff 5
 set promptfmt "\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
 set mouse
 
+set dupfilefmt '%f~%n~'
+
 # set sixel
 set preview
 set previewer piscou

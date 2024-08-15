@@ -29,7 +29,7 @@
     set laststatus=1 showtabline=1 noshowmode showcmd
     set tags+=taglib
     set number relativenumber
-    set cursorline cursorcolumn "deixa o VIM lento
+    " set cursorline cursorcolumn "deixa o VIM lento
     set scrolloff=5
     set visualbell t_vb=
     set splitbelow
