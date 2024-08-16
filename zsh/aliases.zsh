@@ -121,31 +121,15 @@ gpg-reload () {
  }
 
 clean_numbers () {
-    cd /tmp/brn2 || return
-
-    for a in $(seq 9); do
-        print "$RED $a / 9 $RES\n"
-        for b in $(seq 9); do
-            print "$b / 9 $RED ($a / 9) $RES\n"
-            for c in $(seq 9); do
-                yes | rm -f -- *${=a}${=b}${=c}*
-            done
-            yes | rm -f -- *${=a}${=b}*
-        done
-        yes | rm -f -- *${=a}*
-    done
-
-    for a in {{a..z},{A..Z}}; do
-        print "$RED $a $RES\n"
-        for b in {{a..z},{A..Z}}; do
-            print "[$b] $RED ($a) $RES\n"
-            yes | rm -f -- *${=a}${=b}*
-        done
-        yes | rm -f -- *${=a}*
-    done
-        
-    rm -f -- *
     set +x
+
+    cd /tmp/brn2 || return
+    cd /tmp
+    rm -rf /tmp/brn2
+    mkdir brn2
+    cd brn2
+
+    set -x
 }
 
 alias monerod='monerod --data-dir "$XDG_DATA_HOME/bitmonero"'
