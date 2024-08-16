@@ -124,7 +124,7 @@ clean_numbers () {
     set +x
 
     cd /tmp/brn2 || return
-    cd /tmp
+    cd /tmp      || return
     rm -rf /tmp/brn2
     mkdir brn2
     cd brn2
