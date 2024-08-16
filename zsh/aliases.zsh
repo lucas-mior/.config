@@ -72,12 +72,21 @@ cat () {
     done
 }
 
+zshbuild () {
+    if [ -f "build.sh" ]; then
+        ./build.sh
+    else
+       cd ..
+       [ -f "build.sh" ] && ./build.sh
+    fi
+}
+
 alias du='du -h'
 alias mount='mount --mkdir'
 alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS | lsblk.awk'
 alias grub='sudoedit /etc/default/grub && sudo grub-mkconfig -o /boot/grub/grub.cfg'
-alias -g build='./build.sh'
-alias -g build.sh='./build.sh'
+alias -g build='zshbuild'
+alias -g build.sh='zshbuild'
 alias ncdu='ncdu --color dark'
 alias df='df -h'
 alias lsb='lsblk'
