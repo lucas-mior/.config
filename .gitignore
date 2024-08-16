@@ -180,3 +180,7 @@ tenacity.cfg
 vim/.netrwhist
 .gsd*
 teamviewer/
+lf/.pastas
+xmrig.json
+*.arquivos.vim
+/vim/plugged
