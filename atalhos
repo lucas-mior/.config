@@ -87,7 +87,7 @@ st    /home/lucas/.local/src/st/
 sv    /home/lucas/.local/src/stiv/
 sy    /home/lucas/.local/src/wapp/
 s-    /home/lucas/.local/src/dumb_server/
-s=    /home/lucas/.local/src/dumb_mosquitto_postgres/
+sq    /home/lucas/.local/src/dumb_mosquitto_postgres/
 
 ## .config
 kk    /home/lucas/.config/
