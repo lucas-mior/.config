@@ -8,7 +8,6 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-fugitive'
-Plug 'preservim/vim-markdown'
 Plug 'yegappan/lsp'
 Plug 'ap/vim-css-color'
 Plug 'romainl/vim-cool'
@@ -27,12 +26,12 @@ let g:DiffColors = 1
 let g:gitgutter_signs = 1
 let g:gitgutter_highlight_lines = 1
 let g:gitgutter_highlight_linenrs = 0
-let g:gitgutter_sign_added = '++'
-let g:gitgutter_sign_modified = '~~'
-let g:gitgutter_sign_removed = '--'
-let g:gitgutter_sign_removed_first_line = '^^'
+let g:gitgutter_sign_added = '+'
+let g:gitgutter_sign_modified = '~'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_removed_first_line = '^'
 let g:gitgutter_sign_removed_above_and_below = '{'
-let g:gitgutter_sign_modified_removed = 'ww'
+let g:gitgutter_sign_modified_removed = 'w'
 let g:gitgutter_set_sign_backgrounds = 1
 let g:gitgutter_map_keys = 0
 let g:gitgutter_terminal_reports_focus = 0

@@ -51,6 +51,7 @@ function! MyQuit()
 endfunction
 
 function! QuitIfLastBuffer()
+    echo "quitiflastbuffer"
      let cnt = 0
      for ii in range(1, bufnr("$"))
          if buflisted(ii) && !empty(bufname(ii))
@@ -64,4 +65,4 @@ function! QuitIfLastBuffer()
  endfunction
 
 " proxima linha bugs PlugUpdate, comment when installing plugins
-autocmd BufDelete * :call QuitIfLastBuffer()
+" autocmd BufDelete * :call QuitIfLastBuffer()
