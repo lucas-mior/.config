@@ -1,4 +1,4 @@
-brave-bin brn2-git clipsim-git cpupower-gui czkawka-gui-bin dashbinsh diffr farbfeld 
-freefilesync-bin heroku-cli-bin lingot mingw-w64-cmake-static mullvad-vpn-bin ocrmypdf openmodelica 
-popcorntime-bin profile-sync-daemon-brave rxvt-unicode-truecolor-wide-glyphs sc-controller 
-teamviewer turbo-base64 ueberzugpp ventoy-bin xtitle
+brave-bin clipsim-git cpupower-gui czkawka-gui-bin dashbinsh diffr farbfeld freefilesync-bin 
+heroku-cli-bin lingot mingw-w64-cmake-static mullvad-vpn-bin ocrmypdf openmodelica popcorntime-bin 
+profile-sync-daemon-brave rxvt-unicode-truecolor-wide-glyphs sc-controller teamviewer turbo-base64 
+ueberzugpp ventoy-bin xtitle
