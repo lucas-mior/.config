@@ -57,9 +57,13 @@ function! ToggleMarkdownListItem()
 
     if line_text =~ '^\s*[-*]\s\+'
         if line_text =~ '^\s*[-*]\s\+\~\~.*\~\~'
-            let new_line = substitute(line_text, '^\(\s*[-*]\)\s\+\~\~\(.*\)\~\~', '\1 \2', '')
+            let new_line = substitute(line_text,
+                                      \ '^\(\s*[-*]\)\s\+\~\~\(.*\)\~\~',
+                                      \ '\1 \2', '')
         else
-            let new_line = substitute(line_text, '^\(\s*[-*]\)\s\+\(.*\)', '\1 ~~\2~~', '')
+            let new_line = substitute(line_text, 
+                                      \ '^\(\s*[-*]\)\s\+\(.*\)',
+                                      \ '\1 ~~\2~~', '')
         endif
 
         call setline(cursor_line, new_line)

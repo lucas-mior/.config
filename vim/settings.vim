@@ -4,6 +4,8 @@
 "" configurações para não complicar minha vida
     set titlelen=0
     set breakindent
+    set autoindent
+    set smartindent
     set breakindentopt=sbr
     set showbreak=>
     set cpoptions+=n
