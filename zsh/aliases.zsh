@@ -74,10 +74,10 @@ cat () {
 
 zshbuild () {
     if [ -f "build.sh" ]; then
-        ./build.sh
+        ./build.sh "$1"
     else
        cd ..
-       [ -f "build.sh" ] && ./build.sh
+       [ -f "build.sh" ] && ./build.sh "$1"
     fi
 }
 

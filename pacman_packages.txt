@@ -1,7 +1,7 @@
 acpid android-file-transfer arandr arch-install-scripts arianna asciidoc audacity b43-fwcutter base 
 base-devel bat bc bear biber blender bluez-deprecated-tools bluez-tools bluez-utils boost 
 brotli-testdata btrbk btrfs-progs caja calibre ccache chafa cmatrix compsize cpupower cracklib 
-cronie ctags dash db dbus-docs debuginfod deno dialog ding-libs discord dmidecode dmraid 
+cronie ctags dash db dbeaver dbus-docs debuginfod deno dialog ding-libs discord dmidecode dmraid 
 dnssec-anchors docker docx2txt dosfstools doxygen dunst ed efibootmgr elfutils exfatprogs exiv2 
 ext4magic fd ffmpegthumbnailer firefox fuse2fs fzf gcc-ada gcc-d gcc-fortran gcc-objc gdb gimp git 
 git-filter-repo git-lfs github-cli gnome-disk-utility gnu-netcat gparted grsync grub grub-btrfs 
@@ -12,12 +12,12 @@ libreoffice-fresh libsecret-docs libxcrypt-compat libxml2-docs links linux linux
 linux-firmware linux-firmware-bnx2x linux-firmware-liquidio linux-firmware-marvell 
 linux-firmware-mellanox linux-firmware-nfp linux-firmware-qcom linux-firmware-qlogic linux-headers 
 linux-lts-docs linux-lts-headers logrotate lshw lto-dump lvm2 lxappearance maim man-db man-pages 
-mariadb mediainfo mingw-w64-gcc mkinitcpio-nfs-utils mlocate monero-gui mosquitto mpc mpd mpv 
-mtools nano nautilus ncmpcpp neofetch net-tools networkmanager newsboat nfs-utils nfsidmap 
-nicotine+ nilfs-utils nmap noto-fonts-emoji npm ntfs-3g nvidia-open nvme-cli octave odt2txt 
-openldap openmp openscenegraph openssl-1.1 os-prober p11-kit-docs pass pass-otp pavucontrol pdfgrep 
-perf perl-image-exiftool picard picom pipewire-media-session postgresql-libs pptpclient pulseaudio 
-pulseaudio-bluetooth pulsemixer python-deprecated python-gpgme python-html2text 
+mediainfo mingw-w64-gcc mkinitcpio-nfs-utils mlocate monero-gui mosquitto mpc mpd mpv mtools nano 
+nautilus ncmpcpp neofetch net-tools networkmanager newsboat nfs-utils nfsidmap nicotine+ 
+nilfs-utils nmap noto-fonts-emoji npm ntfs-3g nvidia-open nvme-cli octave odt2txt openldap openmp 
+openscenegraph openssl-1.1 os-prober p11-kit-docs pass pass-otp pavucontrol pdfgrep perf 
+perl-image-exiftool picard picom pipewire-media-session postgresql postgresql-libs pptpclient 
+pulseaudio pulseaudio-bluetooth pulsemixer python-deprecated python-gpgme python-html2text 
 python-importlib_resources python-libseccomp python-matplotlib python-pandas python-pip python-pipx 
 python-pluggy python-pygments python-pyperclip python-pyqt6 python-pyqtgraph python-scipy 
 python-tests qt5-webengine qt5-xmlpatterns qt5ct qt6ct radare2 redshift reflector reiserfsprogs 
