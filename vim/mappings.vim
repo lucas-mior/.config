@@ -71,6 +71,6 @@
     noremap <leader>c :Continue<CR>
     noremap <leader>s :Step<CR>
 " my_functions
-    " <C-@> is <C-Space> (for whatever reason)
+    " <C-@> is <C-Space> (for what I am sure is a very good reason)
     nnoremap <C-@> :ToggleMarkdownListItem<CR>
     nnoremap <leader>g :tab Git<CR>
