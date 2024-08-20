@@ -17,6 +17,7 @@ call plug#end()
 
 " packadd termdebug 
 nnoremap <c-f> :Files<CR>
+nnoremap <c-g> :Lines<CR>
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
 let g:airline#extensions#tabline#enabled = 1
