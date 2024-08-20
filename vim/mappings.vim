@@ -7,6 +7,7 @@
     inoremap <C-z> <esc>ui
     vnoremap <C-c> y
     vnoremap <C-x> d
+    vnoremap S :s/
     nnoremap S :%s/
 " hjkl;
     " h é mapeado para f next (ver plugins)
@@ -72,4 +73,4 @@
 " my_functions
     " <C-@> is <C-Space> (for whatever reason)
     nnoremap <C-@> :ToggleMarkdownListItem<CR>
-    nnoremap <leader>g :Git<CR>
+    nnoremap <leader>g :tab Git<CR>
