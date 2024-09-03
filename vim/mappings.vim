@@ -70,6 +70,8 @@
     noremap <leader>e :Eval<CR>
     noremap <leader>c :Continue<CR>
     noremap <leader>s :Step<CR>
+    noremap <space>   :Step<CR>
+    noremap <enter>   :Step<CR>
 " my_functions
     " <C-@> is <C-Space> (for what I am sure is a very good reason)
     nnoremap <C-@> :ToggleMarkdownListItem<CR>

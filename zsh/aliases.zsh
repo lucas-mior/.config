@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+random() {
+    seq ${1:-10} | shuf -n 1
+}
 cmakeclean () {
     set -x
 

@@ -8,7 +8,7 @@ vim9script
     au BufWritePost ~/.config/ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
     au BufWritePost ~/.config/lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
     au BufRead */Makefile,*.mk,
-               \*/src/dmenu/*,*/src/dwm/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
+               \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
                \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
     au BufRead */Makefile setlocal textwidth=100
 # compilações

@@ -2,7 +2,7 @@
     URxvt.geometry:        100x30+0+0
     URxvt.depth:           32
     URxvt.background:      [80]#000000
-    URxvt.font:            xft:mono:pixelsize=16,xft:Noto Color Emoji:pixelsize=16,xft:Hack Nerd Font Mono:pixelsize=16:antialias=true:autohint=true
+    URxvt.font:            xft:LiberationMono:size=14,xft:Noto Color Emoji:pixelsize=14,xft:Hack Nerd Font Mono:pixelsize=16:antialias=true:autohint=true
     URxvt.cursorColor:     yellow
     URxvt.iso14755:        false
     URxvt.iso14755_52:     false

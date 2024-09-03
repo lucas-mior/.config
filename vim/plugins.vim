@@ -48,6 +48,7 @@ function! Gototo()
 endfunction
 nnoremap <C-]> :call Gototo()<CR>
 nnoremap <leader>l :LspDiagNextWrap<CR>
+nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
 nnoremap <leader>p :GitGutterNextHunk<CR>
 

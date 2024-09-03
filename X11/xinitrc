@@ -5,17 +5,15 @@ cat /sys/class/backlight/intel_backlight/max_brightness \
 redshift -P -O 6000 && echo 6000 > "$REDSHIFT_CACHE"
 xrdb /home/lucas/.config/X11/Xresources
 
-xrandr.sh auto
+killall dunst; dunst &
+killall picom; picom &
+killall sxhkd; sxhkd &
+killall urxvtd; urxvtd &
+killall clipsim; clipsim --daemon &
+killall events.bash; events.bash &
 
-dunst &
-picom &
-sxhkd &
-urxvtd &
-clipsim --daemon &
-events.bash &
-
-dwmblocks2 &
-xset m 1 1 &
+killall dwmblocks2; dwmblocks2 &
+killall xset; xset m 1 1 &
 setkeymap.sh br_lucas
 
 # /etc/X11/xorg.conf.d/00-keyboard.conf
