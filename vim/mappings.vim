@@ -1,4 +1,5 @@
     let mapleader = '\'
+    map <leader>m :make -j1<CR>
 " disable ex mode (what the hell is that shit?)
     map Q <Nop>
 " :help map-modes
