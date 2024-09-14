@@ -1,4 +1,5 @@
 bottles brave-bin c3c-git clipsim-git cpupower-gui czkawka-gui-bin dashbinsh diffr farbfeld 
 freefilesync-bin heroku-cli-bin lingot mingw-w64-cmake-static mullvad-vpn-bin ncmpcpp-git ocrmypdf 
 openmodelica popcorntime-bin profile-sync-daemon-brave rxvt-unicode-truecolor-wide-glyphs 
-sc-controller teamviewer ttfautohint turbo-base64 ueberzugpp ventoy-bin xtitle
+sc-controller teamviewer ttf-lucida-fonts ttfautohint turbo-base64 ueberzugpp ventoy-bin xppaut-bin 
+xtitle

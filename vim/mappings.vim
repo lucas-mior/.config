@@ -1,5 +1,7 @@
     let mapleader = '\'
-    map <leader>m :make -j1<CR>
+    set shortmess=at
+    command! Vmake w | silent make -j1 | unsilent redraw!
+    map <leader>m :Vmake<CR>
 " disable ex mode (what the hell is that shit?)
     map Q <Nop>
 " :help map-modes
@@ -70,9 +72,9 @@
     noremap <leader>b :Break<CR>
     noremap <leader>e :Eval<CR>
     noremap <leader>c :Continue<CR>
-    noremap <leader>s :Step<CR>
-    noremap <space>   :Step<CR>
-    noremap <enter>   :Step<CR>
+    " noremap <leader>s :Step<CR>
+    " noremap <space>   :Step<CR>
+    " noremap <enter>   :Step<CR>
 " my_functions
     " <C-@> is <C-Space> (for what I am sure is a very good reason)
     nnoremap <C-@> :ToggleMarkdownListItem<CR>

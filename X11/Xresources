@@ -12,7 +12,7 @@ Nsxiv.bar.font:          monospace:size=18
 *background:      #000000
 *foreground:      #ffffff
 *foreground_bold: #ffffff
-*font:            monospace:size=14
+*font:            -*-*-*-*-*--*-480-*-*-*-*-*-*
 
 !! CORES
 *color0:  #000000

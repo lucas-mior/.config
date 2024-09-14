@@ -91,6 +91,7 @@ sq    /home/lucas/.local/src/dumb_mosquitto_postgres/
 s,    /home/lucas/.local/src/postgres_c3/
 s3    /home/lucas/.local/src/a_c3/
 s4    /home/lucas/.local/src/Iosevka/
+s5    /home/lucas/.local/src/xppaut2/
 
 ## .config
 kk    /home/lucas/.config/
@@ -125,6 +126,7 @@ bm    /home/lucas/docs/biocal/biocal_models/
 mt    /home/lucas/docs/UFSC_mestrado/
 mi    /home/lucas/docs/UFSC_mestrado/1identificação/
 md    /home/lucas/docs/UFSC_mestrado/2modelagem/
+mn    /home/lucas/docs/UFSC_mestrado/4sistemas_nao_lineares/
 mc    /home/lucas/docs/UFSC_mestrado/5controle_processos_industriais/
 
 ## zerdax
