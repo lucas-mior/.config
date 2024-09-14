@@ -47,25 +47,25 @@ function! Gototo()
     endtry
 endfunction
 nnoremap <C-]> :call Gototo()<CR>
-nnoremap <leader>l :LspDiagNextWrap<CR>
-nnoremap <leader>L :LspDiagPrev<CR>
-nnoremap <leader>o :LspHover<CR>
-nnoremap <leader>p :GitGutterNextHunk<CR>
+nnoremap <leader>l :LspDiagNextWrap<CR><CR>
+nnoremap <leader>L :LspDiagPrev<CR><CR>
+nnoremap <leader>o :LspHover<CR><CR>
+nnoremap <leader>p :GitGutterNextHunk<CR><CR>
 
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
 function! ToggleMarkdownListItem()
     let cursor_line = line('.')
     let line_text = getline(cursor_line)
 
-    if line_text =~ '^\s*[-*]\s\+'
-        if line_text =~ '^\s*[-*]\s\+\~\~.*\~\~'
+    if line_text =~ '^\s*\([-*]\|[0-9]\+\.\)\s\+'
+        if line_text =~ '^\s*\([-*]\|[0-9]\+\.\)\s\+\~\~.*\~\~'
             let new_line = substitute(line_text,
-                                      \ '^\(\s*[-*]\)\s\+\~\~\(.*\)\~\~',
-                                      \ '\1 \2', '')
+                                      \ '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\~\~\(.*\)\~\~',
+                                      \ '\1 \3', '')
         else
             let new_line = substitute(line_text, 
-                                      \ '^\(\s*[-*]\)\s\+\(.*\)',
-                                      \ '\1 ~~\2~~', '')
+                                      \ '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\(.*\)',
+                                      \ '\1 ~~\3~~', '')
         endif
 
         call setline(cursor_line, new_line)

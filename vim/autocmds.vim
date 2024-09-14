@@ -1,4 +1,5 @@
 vim9script
+    # au CursorHold   * redraw
     au BufWritePost */key-handler                           !atualizar.sed % > $XDG_CONFIG_HOME/lf/nsxiv
     au BufWritePost ~/.config/tmux/tmux.conf                !tmux source-file %
     au BufWritePost ~/.config/X11/*                         !xrdb ~/.config/X11/Xresources

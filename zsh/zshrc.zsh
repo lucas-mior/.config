@@ -88,3 +88,4 @@
 	source /home/lucas/.config/zsh/.arquivos.zsh
 	source /home/lucas/.config/zsh/.pastas.zsh
     # stiv_clear
+    eval "$(starship init zsh)"
