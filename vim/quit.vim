@@ -17,6 +17,7 @@ cnoremap wq<CR> :echoerr "press ZZ to save and quit"<CR>
 cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'MyQuit' : 'q')<CR>
 nnoremap ZZ :w<CR>:MyQuit<CR>
 nnoremap <tab> :MyBNext<cr>
+nnoremap <S-tab> :MyBPrev<cr>
 nnoremap <C-^> :MyAltFile<cr>
 " This requires running `stty -ixon` on your shellrc
 nnoremap <C-s> :w<CR>
@@ -31,11 +32,19 @@ function! MyAltFile()
 endfunction
 
 command! -nargs=0 MyBNext :call MyBNext()
+command! -nargs=0 MyBPrev :call MyBPrev()
 function! MyBNext()
     if &buftype == 'help'
         tabn
     else
         bn
+    endif
+endfunction
+function! MyBPrev()
+    if &buftype == 'help'
+        tabp
+    else
+        bp
     endif
 endfunction
 

@@ -87,6 +87,8 @@ super + {p, shift+d}
     {sudo bright {--less, --more} dwmblocks2}
 Print
     printscreen.sh tela
+super + Print
+    printscreen.sh last
 super + shift + s
     printscreen.sh area
 super + shift + {a, q, w}
