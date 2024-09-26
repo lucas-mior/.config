@@ -16,6 +16,8 @@ killall dwmblocks2; dwmblocks2 &
 killall xset; xset m 1 1 &
 setkeymap.sh br_lucas
 
+xset r rate 275 30
+
 # /etc/X11/xorg.conf.d/00-keyboard.conf
 # Section "InputClass"
 #     Identifier "system-keyboard"

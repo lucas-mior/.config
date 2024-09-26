@@ -3,6 +3,7 @@
     let &t_EI .= "\<Esc>[2 q\<Esc>]12;yellow\x7"
 "" configurações para não complicar minha vida
     set titlelen=0
+    set autowrite
     set breakindent
     set autoindent
     set smartindent

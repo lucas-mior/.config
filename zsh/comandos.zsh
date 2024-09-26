@@ -7,6 +7,31 @@ restart () {
     setsid -f "$@" >/dev/null 2>&1 
 }
 
+gr () {
+    grep --color=auto "\<$1\>" src/*.[ch] src/cvode/*.[ch] $2
+}
+
+rf () {
+    grep -l "\<${1}\>" src/*.[ch] src/cuda/*.[ch] src/cvode/*.[ch] \
+        | while read file; do
+            sed -Ei "s/\<$1\(/${2}_${1}(/g" "$file";
+        done
+}
+
+rfall () {
+    grep -E -l "\<${1}\>" src/*.[ch] src/cuda/*.[ch] src/cvode/*.[ch] \
+        | while read file; do
+            sed -E -i "s/\<$1\>\(/${2}(/g" "$file";
+        done
+}
+
+rnall () {
+    grep -E -l "\<${1}\>" src/*.[ch] src/cuda/*.[ch] src/cvode/*.[ch] \
+        | while read file; do
+            sed -E -i "s/\<$1\>/${2}/g" "$file";
+        done
+}
+
 fzfscripts () { 
     pushd ~ || exit
 	linha=$(grep --line-buffered -r "" .local/scripts/ | fzf --layout=reverse --multi)
