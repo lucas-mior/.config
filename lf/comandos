@@ -205,6 +205,7 @@ cmd txt  $ texto.bash  txt     $fx
 cmd utf  $ texto.bash  utf     $fx
 cmd cat  $ texto.bash  cat     $fx
 cmd pdf  $ word.bash  pdf      $fx
+cmd pdfpage $ word.bash pdfpage $1 $2 $fx
 cmd odf  $ word.bash  odf      $fx
 cmd ods  $ word.bash  odf      $fx
 cmd odp  $ word.bash  odf      $fx

@@ -4,10 +4,6 @@ random() {
     seq ${1:-10} | shuf -n 1
 }
 
-gr () {
-    grep "\<$1\>" src/*.[ch] $2
-}
-
 cmakeclean () {
     set -x
 

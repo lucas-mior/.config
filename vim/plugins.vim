@@ -12,6 +12,7 @@ Plug 'ap/vim-css-color'
 Plug 'romainl/vim-cool'
 Plug 'dahu/vim-fanfingtastic'
 Plug 'vim-python/python-syntax'
+Plug 'preservim/tagbar'
 
 call plug#end()
 
@@ -21,6 +22,9 @@ nnoremap <c-g> :Lines<CR>
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
 let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tagbar#enabled = 1
+let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
+let g:airline#extensions#tagbar#flags = ''
 let g:DiffColors = 1
 
 let g:gitgutter_signs = 1
@@ -51,6 +55,7 @@ nnoremap <leader>l :LspDiagNextWrap<CR><CR>
 nnoremap <leader>L :LspDiagPrev<CR><CR>
 nnoremap <leader>o :LspHover<CR><CR>
 nnoremap <leader>p :GitGutterNextHunk<CR><CR>
+nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
 
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
 function! ToggleMarkdownListItem()

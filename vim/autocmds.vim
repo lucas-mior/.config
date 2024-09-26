@@ -23,6 +23,7 @@ vim9script
 
 # meus highlights
     au BufRead *.mo,*.mod        set ft=modelica
+    au BufRead *.sage            set ft=python
     au BufRead /var/tmp/fstab*   set ft=fstab
     au BufRead *.sp,*.MOD,       set ft=spice
     au BufRead *.plt             set ft=gnuplot
