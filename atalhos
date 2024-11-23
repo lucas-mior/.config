@@ -9,6 +9,7 @@ mb    /media/toshiba/
 
 ## docs
 do    /home/lucas/docs/
+da    /home/lucas/docs/artigos/
 dc    /home/lucas/docs/comprovantes/
 dn    /home/lucas/docs/compras_online/
 dv    /home/lucas/docs/viagens/
@@ -127,7 +128,7 @@ bg    /home/lucas/docs/biocal/graça/
 mt    /home/lucas/docs/UFSC_mestrado/
 mi    /home/lucas/docs/UFSC_mestrado/1identificação/
 md    /home/lucas/docs/UFSC_mestrado/2modelagem/
-mn    /home/lucas/docs/UFSC_mestrado/4sistemas_nao_lineares/
+mn    /home/lucas/docs/UFSC_mestrado/6controle_nao_linear/
 mc    /home/lucas/docs/UFSC_mestrado/5controle_processos_industriais/
 
 ## zerdax
