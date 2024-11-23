@@ -2,8 +2,9 @@
     " set shortmess=at
     command! Vmake w | silent make -j1 clang | unsilent redraw!
     map <leader>m :Vmake<CR>:LspDiag current<CR>
-    map <leader>k dd:!source ~/.config/zsh/comandos.zsh; rf <C-r>"<backspace><space><c-r>%<backspace><backspace><cr><cr>
-    map <leader>l dd:!source ~/.config/zsh/comandos.zsh; rnall <C-r>"<backspace><space><c-r>%<backspace><backspace>_
+    " map <leader>k dd:!source ~/.config/zsh/comandos.zsh; rf <C-r>"<backspace><space><c-r>%<backspace><backspace><cr><cr>
+    " map <leader>l dd:!source ~/.config/zsh/comandos.zsh; rnall <C-r>"<backspace><space><c-r>%<backspace><backspace>_
+    map <leader>l dd:!source ~/.config/zsh/comandos.zsh; rnall <C-r>"<backspace><space>
 " disable ex mode (what the hell is that shit?)
     map Q <Nop>
 " :help map-modes

@@ -47,7 +47,7 @@ alias ll='ls -AlF'
 alias la='ls -A'
 alias lh='ls -A | grep "^\."'
 
-alias cp='cp -v'
+alias cp='cp -v --reflink=auto'
 alias mv='mv -iv'
 alias rm='rm -dv'
 alias mkd='mkdir -pv'
