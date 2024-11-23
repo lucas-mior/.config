@@ -83,7 +83,7 @@ export BROWSER="brave"
 export TERMINAL="st"
 export GOPATH="$XDG_DATA_HOME/go"
 export LESS="-R -F -X -x4"
-# export MAKEFLAGS='-j16'
+export MAKEFLAGS='-j16'
 #export QT_STYLE_OVERRIDE="gtk2"
 export QT_QPA_PLATFORMTHEME="qt5ct"
 export RUST_BACKTRACE=1
@@ -132,6 +132,7 @@ PATH=$PATH:/opt/scilab/bin/
 PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files/MATLAB/R2017a/bin/"
 PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files/OpenModelica/bin/"
 PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files (x86)/Dynamis/Vulcano-2.5/Vulcano.exe"
+PATH="$PATH:/home/lucas/.local/wine/Program Files/OpenModelica1.23.0-64bit/bin/"
 export PATH
 
 ## FZF CONFIG
@@ -158,3 +159,4 @@ export KBD_CUSTOM_DIR="/usr/local/share/kbd/keymaps/i386/qwerty/"
 export AWKPATH="$HOME/.local/scripts/awk/"
 export PKGEXT=".pkg.tar"
 export SRCEXT=".src.tar"
+export MODELICAPATH="$HOME/.openmodelica/libraries/"

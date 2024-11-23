@@ -22,7 +22,7 @@ nnoremap <c-g> :Lines<CR>
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
 let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tagbar#enabled = 1
+let g:airline#extensions#tagbar#enabled = 0
 let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
 let g:airline#extensions#tagbar#flags = ''
 let g:DiffColors = 1

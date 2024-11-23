@@ -13,6 +13,7 @@ killall clipsim; clipsim --daemon &
 killall events.bash; events.bash &
 
 killall dwmblocks2; dwmblocks2 &
+killall nicotine; nicotine &
 killall xset; xset m 1 1 &
 setkeymap.sh br_lucas
 

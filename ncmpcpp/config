@@ -35,7 +35,7 @@ visualizer_spectrum_gain = 0
 ## Gain for spectrum visualizer in dB, larger/smaller values shift bars up/down.
 visualizer_spectrum_hz_min = 40
 ## For spectrum visualizer, left-most frequency of visualizer, must be less than HZ MAX.
-visualizer_spectrum_hz_max = 2640
+visualizer_spectrum_hz_max = 22000
 ## For spectrum visualizer, right-most frequency of visualizer, must be greater than HZ MIN. # E7 (2637 Hz)
 
 ## delays
@@ -150,7 +150,7 @@ browser_sort_format = {%a - }{%t}|{%f} {(%l)}
 song_columns_list_format = (22)[yellow]{a|c} (41)[]{f} (28)[red]{b} (4)[red]{ylE} (5f)[green]{lr}
 
 ## various settings
-execute_on_song_change = album_art.sh
+# execute_on_song_change = album_art.sh
 ## Note: Custom command that will be executed each time player state
 ## changes. The environment variable MPD_PLAYER_STATE is set to the current
 ## state (either unknown, play, pause, or stop) for its duration.
@@ -186,7 +186,7 @@ media_library_primary_tag = album_artist
 media_library_albums_split_by_date = yes
 default_find_mode = wrapped
 default_tag_editor_pattern = %n - %t
-header_visibility = no
+header_visibility = yes
 statusbar_visibility = yes
 titles_visibility = no
 header_text_scrolling = yes
