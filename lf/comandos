@@ -90,17 +90,20 @@ cmd colar ${{
     list=$(sed    '1d' <<< "$load")
     mode=$(sed -n '1p' <<< "$load")
     prim=$(sed -n '2p' <<< "$load")
-    [ -e "$prim" ] && prim="$prim.~1~"
     prim="${prim##*/}"
+    [ -e "$prim" ] && prim="$prim.~1~"
 
     [[ $mode == copy ]] && op="cp -rvn --reflink=auto"
     [[ $mode == move ]] && op="mv  -vn"
     for file in $list; do
+        dir="$(dirname "$file")"
+        name="${file##*/}"
+        [[ "$dir" == "$PWD" ]] && continue
+
         oldifs="$IFS"
         IFS=" "
 
-        if [ -e "$file" ]; then
-            name="${file##*/}"
+        if [ -e "$name" ]; then
             $op "$file" "$name.~1~"
         else
             $op -t ./ "$file"
