@@ -24,11 +24,11 @@ cmd on-quit &{{
 }}
 
 cmd on-redraw &{{
-    if [ $lf_width -lt 90 ]; then
+    if [ $lf_width -lt 70 ]; then
         lf -remote "send $id set preview false"
         lf -remote "send $id set ratios 1"
         $lf_cleaner
-    elif [ $lf_width -lt 110 ]; then
+    elif [ $lf_width -lt 100 ]; then
         lf -remote "send $id set ratios 1:1"
         lf -remote "send $id set preview true"
     else
@@ -39,15 +39,15 @@ cmd on-redraw &{{
 }}
 
 ## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
-cmd move $ mv -vn  -t "$1" $fx
-cmd copi $ cp -rvn -t "$1" $fx
-cmd link % ln -sv  -t "$1" $fx
+cmd move $ mv -vn                 -t "$1" $fx
+cmd copi $ cp -rvn --reflink=auto -t "$1" $fx
+cmd link % ln -sv                 -t "$1" $fx
 cmd go %{{
     qual=$(head -n 1 <<< $fx)
     qual="${qual##*/}"
     case "$1" in
-         mv) mv  -vn -t "$2" $fx ;;
-         cp) cp -rvn -t "$2" $fx ;;
+         mv) mv  -vn                -t "$2" $fx ;;
+         cp) cp -rvn --reflink=auto -t "$2" $fx ;;
          ln) for fi in $fx; do
                  [[ "$(file -b "$fi")" = "directory" ]] && link="-s" || link=""
                  ln $link -v -t "$2" "$fi"
@@ -90,21 +90,29 @@ cmd colar ${{
     list=$(sed    '1d' <<< "$load")
     mode=$(sed -n '1p' <<< "$load")
     prim=$(sed -n '2p' <<< "$load")
+    [ -e "$prim" ] && prim="$prim.~1~"
     prim="${prim##*/}"
 
-    [[ $mode == copy ]] && cp -rvn -t ./ $list
-    [[ $mode == move ]] && mv  -vn -t ./ $list
+
+    [[ $mode == copy ]] && op="cp -rvn --reflink=auto"
+    [[ $mode == move ]] && op="mv  -vn"
+    for file in $list; do
+        oldifs="$IFS"
+        IFS=" "
+
+        if [ -e "$file" ]; then
+            name="${file##*/}"
+            $op "$file" "$name.~1~"
+        else
+            $op -t ./ "$file"
+        fi
+
+        IFS="$oldifs"
+    done
 
     lf -remote 'send load'
     lf -remote 'send clear'
     lf -remote "send $id select \"$prim\""
-}}
-cmd paste_select %{{
-    prim=$(sed -n '2p' $XDG_DATA_HOME/lf/files)
-    prim="${prim##*/}"
-    lf -remote "send $id paste"
-    lf -remote "send $id select \"$prim\""
-    lf -remote "send $id clear"
 }}
 cmd paste_link !{{
     list=$(sed '1d' $XDG_DATA_HOME/lf/files)
@@ -153,7 +161,7 @@ cmd link_hard !{{
 ## TOUCH e MKDIR
 cmd touch ${{
     ext="${1##*.}"
-    cp "${XDG_TEMPLATES_DIR}/touch.${ext}" "$1" || touch "$1"
+    cp --reflink=auto "${XDG_TEMPLATES_DIR}/touch.${ext}" "$1" || touch "$1"
     sleep 0.02s
     lf -remote "send $id load"
     lf -remote "send $id select \"$(pwd)//$1\""
@@ -240,7 +248,7 @@ cmd extract ${{
 }}
 cmd zip !{{
     mkdir $1
-    cp -r $fx $1
+    cp -r --reflink=auto $fx $1
     zip -r ${1}.zip ${1}
     rm -rf $1
 }}

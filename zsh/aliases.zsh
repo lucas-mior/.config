@@ -42,7 +42,7 @@ alias lucas='git checkout lucas'
 alias master='git checkout master'
 alias gitcs='sed -n "/\[alias\]/,/\[core\]/p" ~/.config/git/config'
 
-alias ls='ls --group-directories-first --color=auto -h'
+alias ls='ls --group-directories-first --color=auto -h -p'
 alias ll='ls -AlF'
 alias la='ls -A'
 alias lh='ls -A | grep "^\."'

@@ -50,8 +50,7 @@ map <c-k> lastpane
 
 map S push :glob-select<space>
 map <c-space> push <space><up><up>
-map pp paste_select
-map pP colar
+map pp colar
 map pk paste_link
 
 map dD       rm_duplas
