@@ -93,7 +93,6 @@ cmd colar ${{
     [ -e "$prim" ] && prim="$prim.~1~"
     prim="${prim##*/}"
 
-
     [[ $mode == copy ]] && op="cp -rvn --reflink=auto"
     [[ $mode == move ]] && op="mv  -vn"
     for file in $list; do
