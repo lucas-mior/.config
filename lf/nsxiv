@@ -1,3 +1,4 @@
+map <c-x>d $ rm "$f" 
 map <c-x>r $ magick "$f"       -rotate 270 "$f"     
 map <c-x>R $ magick "$f"       -rotate  90 "$f"     
 map <c-x>/ $ basic_img.sh rotate "$f"                  

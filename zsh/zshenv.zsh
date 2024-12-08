@@ -98,7 +98,6 @@ export PASSWORD_STORE_CHARACTER_SET="$PASSWORD_STORE_CHARACTER_SET"
 export PASSWORD_STORE_GENERATED_LENGTH=$(($RANDOM%3+35))
 
 ## meus scripts
-export LIXEIRA="$HOME/.local/lixeira"
 export TRANSFILES="/tmp/transfiles"
 export MAGIC_TMP_FILE="/tmp/magic_tmp_file"
 export TRANSLOG="$HOME/.cache/trans.log"
