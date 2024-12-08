@@ -13,4 +13,4 @@ done < $XDG_CONFIG_HOME/tempdirs
 /home/lucas/.local/scripts/count_ydl.sh
 setfont ter-124n
 
-find / > /dev/null 2>&1 &
+#find / > /dev/null 2>&1 &

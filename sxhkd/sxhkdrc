@@ -43,8 +43,8 @@ super + o; {k, f}
     {kicad,    FreeFileSync_x86_64}
 control + alt + {m,             w}
     {kcolorchooser, webcam.sh}
-super + {x,         c,              o; m,            shift + e}
-    {magic.sh tudo, magic.sh meta, magic.sh manual, magic.sh emoji}
+super + {x,         c,              o; m,            shift + e, shift+t}
+    {magic.sh tudo, magic.sh meta, magic.sh manual, magic.sh emoji, magic.sh snapshots}
 super + o; {o}
     {monero-wallet-gui -l /tmp/monero-wallet-gui-log.txt}
 super + equal
