@@ -37,6 +37,11 @@ vim9script
     au BufRead ~/.config/*       set autochdir
     au BufRead *.bib             set autochdir
 
+    augroup CustomBashSyntax
+      autocmd!
+      autocmd BufRead,BufNewFile /home/lucas/.config/lf/* setlocal filetype=lf2
+    augroup END
+
 # cd to file dir on startup
     au VimEnter * lcd %:p:h
     au WinResized * wincmd =
