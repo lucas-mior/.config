@@ -121,7 +121,7 @@ cmd paste_link !{{
 
     for fi in $list; do
         [[ "$(file -b "$fi")" == "directory" ]] && link="-s" || link=""
-        ln $link -v -t ./ "$fi"
+        ln $link -v -t ./ "$fi" || cp -rvn --reflink=auto -t ./ "$fi"
     done
     name="$(basename "$fi")"
     lf -remote 'send clear'
@@ -136,9 +136,8 @@ cmd rm_duplas %{{
     sleep 0.2
     lf -remote "send $id delete"
 }}
+
 cmd rename_A &{{
-    nome="${f##*/}."
-    ext="${nome#*.}"
     lf -remote "send $id rename"
     lf -remote "send $id cmd-end"
 }}
@@ -146,11 +145,21 @@ cmd rename_I &{{
     lf -remote "send $id rename"
     lf -remote "send $id cmd-home"
 }}
-cmd rename_cw &{{
+cmd rename_a &{{
     nome="${f##*/}."
     ext="${nome#*.}"
+    n="$(wc -m <<< "$ext")"
+
     lf -remote "send $id rename"
-    lf -remote "send $id cmd-delete-home"
+    lf -remote "send $id cmd-end"
+
+    while [ $n -gt 1 ]; do
+        lf -remote "send $id cmd-left"
+        n=$((n-1))
+    done
+
+    # cw variant
+    [ -n "$1" ] && lf -remote "send $id cmd-delete-home"
 }}
 
 cmd link_hard !{{
