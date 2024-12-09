@@ -39,15 +39,22 @@ cmd on-redraw &{{
 }}
 
 ## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
-cmd move $ mv -vn                 -t "$1" $fx
-cmd copi $ cp -rvn --reflink=auto -t "$1" $fx
-cmd link % ln -sv                 -t "$1" $fx
+cmd move ${{
+    mv -vn  -t "$1" $fx
+}}
+cmd copi ${{
+    cp -rvn -t "$1" $fx --reflink=auto
+}}
+cmd link %{{
+    ln -sv  -t "$1" $fx
+}}
+
 cmd go %{{
     qual=$(head -n 1 <<< $fx)
     qual="${qual##*/}"
     case "$1" in
-         mv) mv  -vn                -t "$2" $fx ;;
-         cp) cp -rvn --reflink=auto -t "$2" $fx ;;
+         mv) mv  -vn -t "$2" $fx ;;
+         cp) cp -rvn -t "$2" $fx --reflink=auto ;;
          ln) for fi in $fx; do
                  [[ "$(file -b "$fi")" = "directory" ]] && link="-s" || link=""
                  ln $link -v -t "$2" "$fi"
