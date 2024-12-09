@@ -27,9 +27,9 @@ map <f-9> $stiv
 
 ## RENOMEAR
 map I  rename_I
-map a  rename
+map a  rename_a
 map A  rename_A
-map cw rename_cw
+map cw rename_a cw
 map br $ brn2 $fs
 
 map r mark-save
