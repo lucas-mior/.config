@@ -15,6 +15,7 @@ set ratios '3:5'
 set tabstop 4
 set scrolloff 5
 set promptfmt "\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
+set statfmt "\033[36m%p\033[0m| %c| %u| %g| %S| \033[01;32m%t|\033[0m ->\033[01;38;2;128;128;128m %l"
 set mouse
 
 set dupfilefmt '%f~%n~'
@@ -35,7 +36,7 @@ set wrapscan
 
 set hiddenfiles ".*:*.so:*.o:*.pro:*.data:tags:*.bak:*-bak:*-cache:
 :*.aux:*.log:*.log:*.loq:*.lot:*.lof:*.bbl:*.bcf:*.blg:*.run.xml:*.toc:
-:*.idx:*.bin:*.scout:*.sqlite:*.orig:*.synctex:*__pycache__:compile_commands.json:
+:*.idx:*.bin:*.scout:*.orig:*.synctex:*__pycache__:compile_commands.json:
 :Ambiente de*:Menu *:Meus Doc*:AppData:3D Obj*:Configurações Locais:Cookies:Dados de Aplicativos:
 :OneDrive:*.ini:*.DAT:*-ms:Modelos:Recent:SendTo:*.LOG*:*.blf:Meus Ví*:Minhas I*:Minhas M*:
 :$RECYCLE*:System Volume*:Contacts:Favorites:Links:Saved Games:Searches
