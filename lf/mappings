@@ -24,6 +24,7 @@ cmap <c-n>
 cmap <c-p>
 
 map <f-9> $stiv
+map F readlink
 
 ## RENOMEAR
 map I  rename_I

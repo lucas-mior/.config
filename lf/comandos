@@ -23,6 +23,13 @@ cmd on-quit &{{
     [ -n "$ZLE_FIFO" ] && printf "exit\n" >&$ZLE_FIFO
 }}
 
+cmd readlink &{{
+    name="$(readlink -f "$f")"
+    dir="$(dirname "$name")"
+    lf -remote "send $id cd \"$dir\""
+    lf -remote "send $id select \"$name\""
+}}
+
 cmd on-redraw &{{
     if [ $lf_width -lt 70 ]; then
         lf -remote "send $id set preview false"
