@@ -104,13 +104,5 @@ map xz draw_labels_yolo
 map <c-f> fzf_jump
 map <c-s> fzf_multi
 
-# map <m-1> down  # primary
-# map <m-2> down  # secondary
-# map <m-3> down  # middle
-
-# map <m-up>    down
-# map <m-down>  down
-# map <m-left>  down
-# map <m-right> down
 map T tag-toggle
 map i zle-insert-relative
