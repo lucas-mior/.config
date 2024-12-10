@@ -7,29 +7,17 @@ syntax region BashRegion3 start="^cmd \+[a-z0-9]\+ \+\$ " end="$" contains=@BASH
 syn match lfKeyword "\<\(set\|setlocal\|cmd\|c\?map\) "
 syn keyword lfOptions
     \ quit
-    \ up
-    \ half-up
-    \ page-up
-    \ scroll-up
-    \ down
-    \ half-down
-    \ page-down
-    \ scroll-down
-    \ updir
-    \ open
-    \ jump-next
-    \ jump-prev
-    \ top
-    \ bottom
-    \ high
-    \ middle
-    \ low
+    \ up half-up page-up scroll-up
+    \ down half-down page-down scroll-down
+    \ updir open
+    \ jump-next jump-prev
+    \ top bottom
+    \ high middle low
     \ toggle
     \ invert
     \ invert-below
     \ unselect
-    \ glob-select
-    \ glob-unselect
+    \ glob-select glob-unselect
     \ calcdirsize
     \ clearmaps
     \ copy
@@ -41,9 +29,7 @@ syn keyword lfOptions
     \ redraw
     \ load
     \ reload
-    \ echo
-    \ echomsg
-    \ echoerr
+    \ echo echomsg echoerr
     \ cd
     \ select
     \ delete
@@ -51,25 +37,13 @@ syn keyword lfOptions
     \ source
     \ push
     \ read
-    \ shell
-    \ shell-pipe
-    \ shell-wait
-    \ shell-async
-    \ find
-    \ find-back
-    \ find-next
-    \ find-prev
-    \ search
-    \ search-back
-    \ search-next
-    \ search-prev
+    \ shell shell-pipe shell-wait shell-async
+    \ find find-back find-next find-prev
+    \ search search-back search-next search-prev
     \ filter
     \ setfilter
-    \ mark-save
-    \ mark-load
-    \ mark-remove
-    \ tag
-    \ tag-toggle
+    \ mark-save mark-load mark-remove
+    \ tag tag-toggle
     \ cmd-escape
     \ cmd-complete
     \ cmd-menu-complete
@@ -137,8 +111,7 @@ syn keyword lfOptions
     \ numberfmt
     \ period
     \ preserve
-    \ preview
-    \ previewer
+    \ preview previewer
     \ promptfmt
     \ ratios
     \ relativenumber
@@ -149,9 +122,7 @@ syn keyword lfOptions
     \ scrolloff
     \ selectfmt
     \ selmode
-    \ shell
-    \ shellflag
-    \ shellopts
+    \ shell shellflag shellopts
     \ sixel
     \ smartcase
     \ smartdia
@@ -161,16 +132,12 @@ syn keyword lfOptions
     \ tagfmt
     \ tempmarks
     \ timefmt
-    \ truncatechar
-    \ truncatepct
+    \ truncatechar \ truncatepct
     \ waitmsg
     \ wrapscan
     \ wrapscroll
     \ pre-cd
-    \ on-cd
-    \ on-select
-    \ on-redraw
-    \ on-quit
+    \ on-cd on-select on-redraw on-quit
 
 hi link LfKeyword Keyword
 hi link LfOptions Type
