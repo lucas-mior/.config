@@ -23,6 +23,21 @@ cmd on-quit &{{
     [ -n "$ZLE_FIFO" ] && printf "exit\n" >&$ZLE_FIFO
 }}
 
+cmd on-redraw &{{
+    if [ $lf_width -lt 70 ]; then
+        lf -remote "send $id set preview false"
+        lf -remote "send $id set ratios 1"
+        $lf_cleaner
+    elif [ $lf_width -lt 100 ]; then
+        lf -remote "send $id set ratios 1:1"
+        lf -remote "send $id set preview true"
+    else
+        lf -remote "send $id set ratios 3:5"
+        lf -remote "send $id set preview true"
+    fi
+    tmux resize-pane -y 85%
+}}
+
 cmd readlink ${{
     set -x
     mime="$(file --mime-type -b "$f")"
@@ -41,21 +56,6 @@ cmd readlink ${{
         lf -remote "send $id select \"$name\""
     fi
     set +x
-}}
-
-cmd on-redraw &{{
-    if [ $lf_width -lt 70 ]; then
-        lf -remote "send $id set preview false"
-        lf -remote "send $id set ratios 1"
-        $lf_cleaner
-    elif [ $lf_width -lt 100 ]; then
-        lf -remote "send $id set ratios 1:1"
-        lf -remote "send $id set preview true"
-    else
-        lf -remote "send $id set ratios 3:5"
-        lf -remote "send $id set preview true"
-    fi
-    tmux resize-pane -y 85%
 }}
 
 ## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
@@ -335,26 +335,6 @@ cmd openwith $ setsid -f openwith.sh $f > /dev/null 2>&1 &
 
 cmd open $ abridor.sh $fx
 
-cmd zle-insert-relative %{{
-    if [ -n "$ZLE_FIFO" ]; then
-        for f in $fx; do
-            printf 'LBUFFER+="${LBUFFER:+ }${(q)$(realpath %q --relative-to=$PWD)}"\n' "$f" >&$ZLE_FIFO
-        done
-    fi
-}}
-
-cmd lastpane %{{
-    lf -remote "send $id reload"
-    if [ -n "$ZLE_FIFO" ]; then
-        tmux last-pane
-        tmux resize-pane -y 85%
-    fi
-}}
-
 cmd restartlf ${{
     lfimg
-}}
-
-cmd split ${{
-    tmux new-window lfimg.zsh $UEBERZUG_FIFO
 }}
