@@ -23,11 +23,24 @@ cmd on-quit &{{
     [ -n "$ZLE_FIFO" ] && printf "exit\n" >&$ZLE_FIFO
 }}
 
-cmd readlink &{{
-    name="$(readlink -f "$f")"
-    dir="$(dirname "$name")"
-    lf -remote "send $id cd \"$dir\""
-    lf -remote "send $id select \"$name\""
+cmd readlink ${{
+    set -x
+    mime="$(file --mime-type -b "$f")"
+    if [ "$mime" = "inode/symlink" ]; then
+        name="$(readlink -f "$f")"
+    else
+        if [ "$(stat -c "%h" "$f")" -ge 2 ]; then
+            name="$(find ~ -samefile "$f" | shuf -n 1)"
+        else
+            lf -remote "send $id echoerr \"File has no hard links.\""
+        fi
+    fi
+    if [ -n "$name" ]; then
+        dir="$(dirname "$name")"
+        lf -remote "send $id cd \"$dir\""
+        lf -remote "send $id select \"$name\""
+    fi
+    set +x
 }}
 
 cmd on-redraw &{{
