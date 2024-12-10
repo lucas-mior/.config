@@ -237,12 +237,10 @@ cmd diff  !{{
         fi
     fi
 }}
-cmd html  $ markdown $f > ${f%%.*}.html
-cmd cue   $ cuesplit.sh
+cmd html $ markdown $f > ${f%%.*}.html
+cmd cue  $ cuesplit.sh
 
 ## CONVERSÕES
-cmd rot+ $ av.bash     rodar + $fx
-cmd rot- $ av.bash     rodar - $fx
 cmd jpg  $ imagem.bash jpg     $fx
 cmd png  $ imagem.bash png     $fx
 cmd webp $ imagem.bash webp    $fx
@@ -251,7 +249,6 @@ cmd txt  $ texto.bash  txt     $fx
 cmd utf  $ texto.bash  utf     $fx
 cmd cat  $ texto.bash  cat     $fx
 cmd pdf  $ word.bash  pdf      $fx
-cmd pdfpage $ word.bash pdfpage $1 $2 $fx
 cmd odf  $ word.bash  odf      $fx
 cmd ods  $ word.bash  odf      $fx
 cmd odp  $ word.bash  odf      $fx
