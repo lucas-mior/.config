@@ -5,16 +5,16 @@ cmd on-cd &{{
     [ -n "$ZLE_FIFO" ] && printf "cd \"$PWD\"\n zle reset-prompt\n" >&$ZLE_FIFO
     lf -remote "send $id reload"
 
-    for fi in *; do
+    for file in *; do
         if [ $(cpusage.sh) -ge 90 ]; then
             continue
         fi
-        mime="$(file -b --mime-type "$fi")"
+        mime="$(file -b --mime-type "$file")"
         case "$mime" in
-            video/*) setsid -f vid.sh "$fi" cache ;;
-            audio/*) setsid -f vid.sh "$fi" cache ;;
-            */pdf)   setsid -f pdf.sh "$fi" cache ;;
-            image/*) setsid -f stiv_draw "$fi" cache ;;
+            video/*) setsid -f vid.sh "$file" cache ;;
+            audio/*) setsid -f vid.sh "$file" cache ;;
+            */pdf)   setsid -f pdf.sh "$file" cache ;;
+            image/*) setsid -f stiv_draw "$file" cache ;;
         esac
     done
 }}
@@ -75,9 +75,9 @@ cmd go %{{
     case "$1" in
          mv) mv  -vn -t "$2" $fx ;;
          cp) cp -rvn -t "$2" $fx --reflink=auto ;;
-         ln) for fi in $fx; do
-                 [[ "$(file -b "$fi")" = "directory" ]] && link="-s" || link=""
-                 ln $link -v -t "$2" "$fi"
+         ln) for file in $fx; do
+                 [[ "$(file -b "$file")" = "directory" ]] && link="-s" || link=""
+                 ln $link -v -t "$2" "$file"
              done
     esac \
     && lf -remote "send $id cd \"$2\""        \
@@ -146,11 +146,11 @@ cmd colar ${{
 cmd paste_link !{{
     list=$(sed '1d' $XDG_DATA_HOME/lf/files)
 
-    for fi in $list; do
-        [[ "$(file -b "$fi")" == "directory" ]] && link="-s" || link=""
-        ln $link -v -t ./ "$fi" || cp -rvn --reflink=auto -t ./ "$fi"
+    for file in $list; do
+        [[ "$(file -b "$file")" == "directory" ]] && link="-s" || link=""
+        ln $link -v -t ./ "$file" || cp -rvn --reflink=auto -t ./ "$file"
     done
-    name="$(basename "$fi")"
+    name="$(basename "$file")"
     lf -remote 'send clear'
     lf -remote "send select \"$name\""
 }}
