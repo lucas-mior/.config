@@ -20,6 +20,7 @@ export INPUTRC="$XDG_CONFIG_HOME/inputrc"
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh/"
 export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc"
 export GTK_THEME="Raleigh"
+export GTK_USE_PORTAL=1
 # export GDBHISTFILE="$XDG_DATA_HOME/gdb/history"
 export LESSKEYIN="$XDG_CONFIG_HOME/less/lesskey"
 export LESSHISTFILE="$XDG_CONFIG_HOME/less/lesshistory"
