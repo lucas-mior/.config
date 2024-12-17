@@ -38,6 +38,14 @@ cmd on-redraw &{{
     tmux resize-pane -y 85%
 }}
 
+cmd start_shell ${{
+    echo "\$f: $f"
+    if [[ $f != "$fx" ]]; then
+        echo "\$fx: $fx"
+    fi
+    zsh
+}}
+
 cmd readlink ${{
     set -x
     mime="$(file --mime-type -b "$f")"
