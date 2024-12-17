@@ -118,7 +118,13 @@ cmd colar ${{
     mode=$(sed -n '1p' <<< "$load")
     prim=$(sed -n '2p' <<< "$load")
     prim="${prim##*/}"
-    [[ -e "$prim" ]] && prim="$prim.~1~"
+    if [[ -e "$prim" ]]; then
+        i=1
+        while [[ -e "$prim.~$i~" ]]; do
+            i=$((i+1))
+        done
+        prim="$prim.~$i~"
+    fi
 
     [[ $mode == copy ]] && op="cp -rvn --reflink=auto"
     [[ $mode == move ]] && op="mv  -vn"
@@ -131,7 +137,11 @@ cmd colar ${{
         IFS=" "
 
         if [[ -e "$name" ]]; then
-            $op "$file" "$name.~1~"
+            i=1
+            while [[ -e "$name.~$i~" ]]; do
+                i=$((i+1))
+            done
+            $op "$file" "$name.~$i~"
         else
             $op -t ./ "$file"
         fi
