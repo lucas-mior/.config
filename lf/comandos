@@ -108,16 +108,10 @@ cmd trans ${{
 }}
 cmd retirar ${{
     lf -remote 'send unselect; clear'
-    [[ -d "$f" ]] \
-    && find "$f" -maxdepth 1 -mindepth 1 -exec mv -nv -t ./ {} + \
-    && rmdir "$f"
-    lf -remote "send $id push gg"
-}}
-cmd retirarf ${{
-    lf -remote 'send unselect; clear'
-    [[ -d $f ]] \
-    && find $f -maxdepth 1 -mindepth 1 -exec mv -nv -t ./ {} + \
-    && rmdir $f
+    if [[ -d "$f" ]]; then
+        find "$f" -maxdepth 1 -mindepth 1 -exec mv -nv -t ./ {} + \
+            && rmdir "$f"
+    fi
 }}
 
 cmd colar ${{
