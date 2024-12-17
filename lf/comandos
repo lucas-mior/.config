@@ -73,12 +73,12 @@ cmd go %{{
     qual=$(head -n 1 <<< $fx)
     qual="${qual##*/}"
     case "$1" in
-         mv) mv  -vn -t "$2" $fx ;;
-         cp) cp -rvn -t "$2" $fx --reflink=auto ;;
-         ln) for file in $fx; do
-                 [[ "$(file -b "$file")" = "directory" ]] && link="-s" || link=""
-                 ln $link -v -t "$2" "$file"
-             done
+        mv) mv  -vn -t "$2" $fx ;;
+        cp) cp -rvn -t "$2" $fx --reflink=auto ;;
+        ln) for file in $fx; do
+                [[ "$(file -b "$file")" = "directory" ]] && link="-s" || link=""
+                ln $link -v -t "$2" "$file"
+            done
     esac \
     && lf -remote "send $id cd \"$2\""        \
     && lf -remote "send $id select \"$qual\""
@@ -118,7 +118,7 @@ cmd colar ${{
     mode=$(sed -n '1p' <<< "$load")
     prim=$(sed -n '2p' <<< "$load")
     prim="${prim##*/}"
- [[ -e "$prim" ]] && prim="$prim.~1~"
+    [[ -e "$prim" ]] && prim="$prim.~1~"
 
     [[ $mode == copy ]] && op="cp -rvn --reflink=auto"
     [[ $mode == move ]] && op="mv  -vn"
@@ -186,11 +186,11 @@ cmd rename_a &{{
     done
 
     # cw variant
- [[ -n "$1" ]] && lf -remote "send $id cmd-delete-home"
+    [[ -n "$1" ]] && lf -remote "send $id cmd-delete-home"
 }}
 
 cmd link_hard !{{
- [[ ! -L "$f" ]] && exit
+    [[ ! -L "$f" ]] && exit
     simb="$(basename "$f")"
     target="$(readlink "$simb")"
     ln -vn "$target" "./${simb}.new" && rm "$simb" && mv -vn "./${simb}.new" "$simb"
@@ -271,7 +271,7 @@ cmd fzf_jump ${{
 }}
 
 cmd echomime %{{
-   lf -remote "send $id echomsg \"$ORA $(file --mime-type $f) $RES\""
+    lf -remote "send $id echomsg \"$ORA $(file --mime-type $f) $RES\""
 }}
 ## EXTRAIR E COMPRIMIR
 cmd extract ${{
