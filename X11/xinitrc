@@ -15,6 +15,7 @@ killall events.bash; events.bash &
 killall dwmblocks2; dwmblocks2 &
 killall nicotine; nicotine &
 killall xset; xset m 1 1 &
+killall keyd-application-mapper ; keyd-application-mapper -d &
 setkeymap.sh br_lucas
 
 xset r rate 275 30
@@ -30,6 +31,8 @@ xset r rate 275 30
 
 sleep 1
 wallpaper.sh
+
+xset r rate 275 30
 exec dwm
 
 #export DESKTOP_SESSION=plasma

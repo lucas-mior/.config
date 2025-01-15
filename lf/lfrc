@@ -47,7 +47,8 @@ set shell bash
 set ifs "\n"
 set filesep "\n"
 
-set period 60
+# set period 60
+set watch true
 
 set sortby name; set info size
 
