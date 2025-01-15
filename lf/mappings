@@ -69,7 +69,6 @@ map z extract
 map Z push :zip<space>
 map <enter> shell
 map <c-o> retirar
-map <c-0> retirarf
 map <c-n> restartlf
 map o openwith
 
