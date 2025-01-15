@@ -24,7 +24,7 @@ cmakeclean () {
 # # option(LWS_SUPPRESS_DEPRECATED_API_WARNINGS "Turn off complaints about, eg, openssl 3 deprecated api usage" ON)
 
     cmake --build build
-    # cmake --install build
+    cmake --install build
 
     set +x
 }
@@ -80,8 +80,7 @@ zshbuild () {
     if [ -f "build.sh" ]; then
         ./build.sh "$1"
     else
-       cd ..
-       [ -f "build.sh" ] && ./build.sh "$1"
+        make "$1"
     fi
 }
 
