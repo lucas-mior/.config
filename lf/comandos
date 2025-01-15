@@ -1,3 +1,15 @@
+# shell       $
+# Read a shell command to execute.
+
+# shell-pipe  %
+# Read a shell command to execute piping its standard IO to the bottom statline.
+
+# shell-wait  !
+# Read a shell command to execute and wait for a key press in the end.
+
+# shell-async &
+# Read a shell command to execute asynchronously without standard IO.
+
 cmd on-cd &{{
     name="${PWD/#$HOME/'~'}"
     printf "\033]0;${name}/\007" > /dev/tty
@@ -155,11 +167,15 @@ cmd colar ${{
     lf -remote 'send clear'
     lf -remote "send $id select \"$prim\""
 }}
-cmd paste_link !{{
+cmd paste_link %{{
     list=$(sed '1d' $XDG_DATA_HOME/lf/files)
 
     for file in $list; do
-        [[ "$(file -b "$file")" == "directory" ]] && link="-s" || link=""
+        if [[ "$(file -b "$file")" == "directory" ]]; then
+            link="-s"
+        else
+            link=""
+        fi
         ln $link -v -t ./ "$file" || cp -rvn --reflink=auto -t ./ "$file"
     done
     name="$(basename "$file")"
@@ -201,7 +217,7 @@ cmd rename_a &{{
     [[ -n "$1" ]] && lf -remote "send $id cmd-delete-home"
 }}
 
-cmd link_hard !{{
+cmd link_hard %{{
     [[ ! -L "$f" ]] && exit
     simb="$(basename "$f")"
     target="$(readlink "$simb")"
@@ -217,7 +233,7 @@ cmd touch ${{
     lf -remote "send $id select \"$(pwd)//$1\""
 }}
 cmd mkdir %{{
-    mkdir -p "$1"
+    mkdir -p $@
     lf -remote "send $id load"
     lf -remote "send $id select \"$(pwd)//$1\""
 }}
@@ -282,9 +298,6 @@ cmd fzf_jump ${{
     lf -remote "send $id select \"$oque\""
 }}
 
-cmd echomime %{{
-    lf -remote "send $id echomsg \"$ORA $(file --mime-type $f) $RES\""
-}}
 ## EXTRAIR E COMPRIMIR
 cmd extract ${{
     dir="${f}.extract"
@@ -298,10 +311,6 @@ cmd zip !{{
     cp -r --reflink=auto $fx $1
     zip -r ${1}.zip ${1}
     rm -rf $1
-}}
-
-cmd draw_labels_yolo ${{
-    python ../scripts/draw_labels_yolo.py "$fx"
 }}
 
 cmd run !{{
@@ -349,4 +358,8 @@ cmd open $ abridor.sh $fx
 
 cmd restartlf ${{
     lfimg
+}}
+
+cmd draw_labels_yolo ${{
+    python ../scripts/draw_labels_yolo.py "$fx"
 }}
