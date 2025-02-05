@@ -1,5 +1,8 @@
-bottles brave-bin brn2-git c3c-git clipsim-git cproto cpupower-gui czkawka-gui-bin dashbinsh diffr 
-farbfeld freefilesync-bin heroku-cli-bin lingot mingw-w64-cmake-static mullvad-vpn-bin ncmpcpp-git 
-ocrmypdf openmodelica otf-openmoji popcorntime-bin profile-sync-daemon-brave 
-rxvt-unicode-truecolor-wide-glyphs sc-controller teamviewer ttf-lucida-fonts ttfautohint 
-turbo-base64 ueberzugpp ventoy-bin xtitle
+abx anaconda android-sdk-platform-tools apetag bottles brave-bin brn2-git clipsim-git cproto 
+cpupower-gui czkawka-cli czkawka-gui-bin dashbinsh diffr ext4magic farbfeld freefilesync-bin 
+hawck-git heroku-cli-bin hkd-git jbig2enc jexiftoolgui lingot mingw-w64-cmake-static 
+mullvad-vpn-bin nodejs-node-red ocrmypdf openmodelica otf-openmoji perl-compress-raw-lzma 
+popcorntime-bin profile-sync-daemon-brave python-cmake-bin python-snap7 qt5-webkit 
+runescape-launcher rxvt-unicode-truecolor-wide-glyphs sc-controller shntool snap7 swarp teamviewer 
+ttf-lucida-fonts ttfautohint turbo-base64 ventoy-bin vmware-keymaps vmware-workstation warsaw-bin 
+xppaut-bin xtitle

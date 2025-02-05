@@ -3,14 +3,14 @@
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=-1
 GRUB_DISTRIBUTOR="Arch"
-GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3"
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=4"
 GRUB_CMDLINE_LINUX="root=/dev/mapper/croot1 rootflags=subvol=@ rw panic=120 kernel.sysrq=1"
 
 # Preload both GPT and MBR modules so that they are not missed
 GRUB_PRELOAD_MODULES="part_gpt part_msdos"
 
 # Uncomment to enable booting from LUKS encrypted devices
-GRUB_ENABLE_CRYPTODISK=y
+# GRUB_ENABLE_CRYPTODISK=y
 
 # Set to 'countdown' or 'hidden' to change timeout behavior,
 # press ESC key to display menu.

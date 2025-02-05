@@ -14,6 +14,6 @@ done < "$XDG_CONFIG_HOME/tempdirs"
 /home/lucas/.local/scripts/count_ydl.sh
 setfont ter-124n
 
-sudo setsid -f keyd
+# sudo setsid -f keyd
 
 find / > /dev/null 2>&1 &

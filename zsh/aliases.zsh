@@ -86,7 +86,7 @@ zshbuild () {
 
 alias du='du -h'
 alias mount='mount --mkdir'
-alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS | lsblk.awk'
+alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS,PARTLABEL | lsblk.awk'
 alias grub='sudoedit /etc/default/grub && sudo grub-mkconfig -o /boot/grub/grub.cfg'
 alias -g build='zshbuild'
 alias -g build.sh='zshbuild'
