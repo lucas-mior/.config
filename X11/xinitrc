@@ -15,7 +15,7 @@ killall events.bash; events.bash &
 killall dwmblocks2; dwmblocks2 &
 killall nicotine; nicotine &
 killall xset; xset m 1 1 &
-killall keyd-application-mapper ; keyd-application-mapper -d &
+# killall keyd-application-mapper ; keyd-application-mapper -d &
 setkeymap.sh br_lucas
 
 xset r rate 275 30

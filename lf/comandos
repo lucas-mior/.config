@@ -80,10 +80,10 @@ cmd readlink ${{
 
 ## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
 cmd move ${{
-    mv -vn  -t "$1" $fx
+    mv -vn  -t "$1" $fx & progress -mp $!
 }}
 cmd copi ${{
-    cp -rvn -t "$1" $fx --reflink=auto
+    cp -rvn -t "$1" $fx --reflink=auto & progress -mp $!
 }}
 cmd link %{{
     ln -sv  -t "$1" $fx
@@ -93,8 +93,8 @@ cmd go %{{
     qual=$(head -n 1 <<< $fx)
     qual="${qual##*/}"
     case "$1" in
-        mv) mv  -vn -t "$2" $fx ;;
-        cp) cp -rvn -t "$2" $fx --reflink=auto ;;
+        mv) mv  -vn -t "$2" $fx  & progress -mp $! ;;
+        cp) cp -rvn -t "$2" $fx --reflink=auto & progress -mp $! ;;
         ln) for file in $fx; do
                 [[ "$(file -b "$file")" = "directory" ]] && link="-s" || link=""
                 ln $link -v -t "$2" "$file"
@@ -155,9 +155,9 @@ cmd colar ${{
             while [[ -e "$name.~$i~" ]]; do
                 i=$((i+1))
             done
-            $op "$file" "$name.~$i~"
+            $op "$file" "$name.~$i~" & progress -mp $!
         else
-            $op -t ./ "$file"
+            $op -t ./ "$file" & progress -mp $!
         fi
 
         IFS="$oldifs"
@@ -176,7 +176,7 @@ cmd paste_link %{{
         else
             link=""
         fi
-        ln $link -v -t ./ "$file" || cp -rvn --reflink=auto -t ./ "$file"
+        ln $link -v -t ./ "$file" || cp -rvn --reflink=auto -t ./ "$file" & progress -mp $!
     done
     name="$(basename "$file")"
     lf -remote 'send clear'
@@ -221,7 +221,7 @@ cmd link_hard %{{
     [[ ! -L "$f" ]] && exit
     simb="$(basename "$f")"
     target="$(readlink "$simb")"
-    ln -vn "$target" "./${simb}.new" && rm "$simb" && mv -vn "./${simb}.new" "$simb"
+    ln -vn "$target" "./${simb}.new" && rm "$simb" && mv -vn "./${simb}.new" "$simb"  & progress -mp $!
 }}
 
 ## TOUCH e MKDIR
@@ -308,7 +308,7 @@ cmd extract ${{
 }}
 cmd zip !{{
     mkdir $1
-    cp -r --reflink=auto $fx $1
+    cp -r --reflink=auto $fx $1 & progress -mp $!
     zip -r ${1}.zip ${1}
     rm -rf $1
 }}

@@ -16,6 +16,8 @@ Plug 'preservim/tagbar'
 
 call plug#end()
 
+command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
+
 " packadd termdebug 
 nnoremap <c-f> :Files<CR>
 nnoremap <c-g> :Lines<CR>
