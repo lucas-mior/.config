@@ -85,11 +85,17 @@ zshbuild () {
 }
 
 alias du='du -h'
-alias mount='mount --mkdir'
 alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS,PARTLABEL | lsblk.awk'
+alias initrd='sudoedit /etc/mkinitcpio.conf && sudo mkinitcpio -P'
 alias grub='sudoedit /etc/default/grub && sudo grub-mkconfig -o /boot/grub/grub.cfg'
-alias -g build='zshbuild'
-alias -g build.sh='zshbuild'
+fstab ()  {
+   sudoedit /etc/fstab /etc/crypttab /etc/crypttab.initramfs \
+       && sudo systemctl daemon-reload \
+       && sudo mkinitcpio -P
+}
+
+# alias -g build='zshbuild'
+# alias -g build.sh='zshbuild'
 alias ncdu='ncdu --color dark'
 alias df='df -h'
 alias lsb='lsblk'
