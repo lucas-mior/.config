@@ -215,13 +215,6 @@ cmd rename_a &{{
     [[ -n "$1" ]] && lf -remote "send $id cmd-delete-home"
 }}
 
-cmd link_hard %{{
-    [[ ! -L "$f" ]] && exit
-    simb="$(basename "$f")"
-    target="$(readlink "$simb")"
-    ln -vn "$target" "./${simb}.new" && rm "$simb" && mv -vn "./${simb}.new" "$simb"  & progress -mp $!
-}}
-
 ## TOUCH e MKDIR
 cmd touch ${{
     ext="${1##*.}"
@@ -239,13 +232,7 @@ cmd mkdir %{{
 ## MUDANÇAS
 cmd chmod ${{
     chmod $1 $fx
-    lf -remote "send $id reload"
 }}
-cmd chown ${{
-    sudo chown lucas:lucas $fx
-    lf -remote "send $id reload"
-}}
-cmd patch $ patch -p1 < $f
 cmd mk $ make && sudo make install
 cmd diff  !{{
     num="$(wc -l <<< $fx)"
@@ -353,11 +340,3 @@ cmd du   $ ncdu -e --color dark
 cmd openwith $ setsid -f openwith.sh $f > /dev/null 2>&1 &
 
 cmd open $ abridor.sh $fx
-
-cmd restartlf ${{
-    lfimg
-}}
-
-cmd draw_labels_yolo ${{
-    python ../scripts/draw_labels_yolo.py "$fx"
-}}
