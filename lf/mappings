@@ -41,7 +41,6 @@ map dd cut
 map <c-x>m trans mv
 map <c-x>y trans cp
 map <c-x>k trans ln
-map <c-x>L link_hard
 
 map ud clear
 map us unselect
@@ -69,7 +68,7 @@ map z extract
 map Z push :zip<space>
 map <enter> shell
 map <c-o> retirar
-map <c-n> restartlf
+map <c-n> $exec lfimg
 map o openwith
 
 map ; open
@@ -78,10 +77,10 @@ map k down
 map l up
 
 map cm push :chmod<space>
-map co chown
+map co $sudo chown -R lucas:lucas $fx
 map tt push :touch<space>
 map td push :mkdir<space>
-map pa patch
+map pa $patch -p1 < $f
 map df diff
 
 map wb :set number!; set relativenumber!
@@ -98,10 +97,9 @@ map we :set sortby ext
 map s start_shell
 map xx run
 map xl run less
-map xz draw_labels_yolo
+map xz $ python ../scripts/draw_labels_yolo.py "$fx"
 
 map <c-f> fzf_jump
 map <c-s> fzf_multi
 
 map T tag-toggle
-map i zle-insert-relative

@@ -161,3 +161,4 @@ export AWKPATH="$HOME/.local/scripts/awk/"
 export PKGEXT=".pkg.tar"
 export SRCEXT=".src.tar"
 export MODELICAPATH="$HOME/.openmodelica/libraries/"
+export LFS=/mnt/lfs/
