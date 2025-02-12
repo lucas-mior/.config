@@ -35,8 +35,8 @@ super + shift + v
 super + control
     nmcli radio wifi off
 
-super + o; {l, r,                h,          n}
-    {lingot,   transmission-gtk, $TERMINAL -e htop, $TERMINAL -e newsboat}
+super + o; {l, r,                h,                i, n}
+    {lingot,   transmission-gtk, $TERMINAL -e htop, $TERMINAL -e  sudo iotop -ao -d 0.5, $TERMINAL -e newsboat}
 super + o; {c}
     {$TERMINAL -e cmatrix}
 super + o; {k, f}

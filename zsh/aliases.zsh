@@ -85,7 +85,7 @@ zshbuild () {
 }
 
 alias du='du -h'
-alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,MOUNTPOINTS,PARTLABEL | lsblk.awk'
+alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,FSVER,MOUNTPOINTS,PARTLABEL | lsblk.awk'
 alias initrd='sudoedit /etc/mkinitcpio.conf && sudo mkinitcpio -P'
 alias grub='sudoedit /etc/default/grub && sudo grub-mkconfig -o /boot/grub/grub.cfg'
 fstab ()  {
