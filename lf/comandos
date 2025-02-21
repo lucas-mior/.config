@@ -55,6 +55,11 @@ cmd start_shell ${{
     zsh
 }}
 
+cmd start_android_vim ${{
+    st -e vim app/src/main/java/**/*.kt \
+              app/src/main/res/{layout,values,values-night}/*.xml
+}}
+
 cmd readlink ${{
     set -x
     mime="$(file --mime-type -b "$f")"

@@ -30,7 +30,7 @@
         set background=dark
     endif
     set laststatus=1 showtabline=1 noshowmode showcmd
-    set tags+=taglib
+    set tags=tags;/
     set number relativenumber
     " set cursorline cursorcolumn "deixa o VIM lento
     set scrolloff=5

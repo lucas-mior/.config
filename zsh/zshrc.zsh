@@ -4,8 +4,8 @@
     PS2=$'%{\033[0;38;5;03m%}%_ %{\033[0m%}>              '
 
 ## History
-    export HISTSIZE=1000000
-    export SAVEHIST=1000000
+    export HISTSIZE=10000
+    export SAVEHIST=10000
     export HISTFILE=$XDG_DATA_HOME/zsh/history.zsh
 
 ## Basic auto/tab complete:
@@ -88,4 +88,4 @@
 	source /home/lucas/.config/zsh/.arquivos.zsh
 	source /home/lucas/.config/zsh/.pastas.zsh
     # stiv_clear
-    eval "$(starship init zsh)"
+    # eval "$(starship init zsh)"

@@ -29,6 +29,7 @@ cmakeclean () {
     set +x
 }
 alias :q='exit'
+alias sudo='sudo HOME=/home/lucas/'
 alias x='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
 alias X='startx "$XDG_CONFIG_HOME/X11/xinitrc"'
 alias xrdbxr='xrdb $HOME/.config/X11/Xresources'
@@ -43,11 +44,12 @@ alias master='git checkout master'
 alias gitcs='sed -n "/\[alias\]/,/\[core\]/p" ~/.config/git/config'
 
 alias ls='ls --group-directories-first --color=auto -h -p'
-alias ll='ls -AlF'
-alias la='ls -A'
-alias lh='ls -A | grep "^\."'
+alias -g ll='ls -AlF'
+alias -g la='ls -A'
+alias -g lh='ls -A | grep "^\."'
 
 alias cp='cp -v --reflink=auto'
+alias rsync='rsync -HL -ur -ogt -P --fuzzy --info=progress2'
 alias mv='mv -iv'
 alias rm='rm -dv'
 alias mkd='mkdir -pv'
@@ -88,6 +90,11 @@ alias du='du -h'
 alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,FSVER,MOUNTPOINTS,PARTLABEL | lsblk.awk'
 alias initrd='sudoedit /etc/mkinitcpio.conf && sudo mkinitcpio -P'
 alias grub='sudoedit /etc/default/grub && sudo grub-mkconfig -o /boot/grub/grub.cfg'
+boot () {
+    sudoedit /boot/loader/loader.conf
+    sudoedit /boot/loader/entries/*
+    bootctl list
+}
 fstab ()  {
    sudoedit /etc/fstab /etc/crypttab /etc/crypttab.initramfs \
        && sudo systemctl daemon-reload \
