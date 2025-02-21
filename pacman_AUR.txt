@@ -1,8 +1,0 @@
-abx anaconda android-sdk-platform-tools anydesk-bin apetag bottles brave-bin brn2-git clipsim-git 
-cproto cpupower-gui czkawka-cli czkawka-gui-bin diffr ext4magic farbfeld freefilesync-bin 
-heroku-cli-bin hkd-git jbig2enc jexiftoolgui libglade lingot mingw-w64-cmake-static mullvad-vpn-bin 
-nodejs-node-red ocrmypdf openmodelica otf-openmoji pacman-boot-backup-hook perl-compress-raw-lzma 
-pod2man popcorntime-bin powerkit profile-sync-daemon-brave python-cmake-bin python-control 
-python-snap7 qt5-webkit reiserfsprogs runescape-launcher rxvt-unicode-truecolor-wide-glyphs 
-sc-controller shntool snap7 swarp ttf-lucida-fonts ttfautohint turbo-base64 ventoy-bin 
-vmware-keymaps vmware-workstation warsaw-bin xppaut-bin xtitle
