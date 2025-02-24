@@ -103,3 +103,4 @@ map <c-f> fzf_jump
 map <c-s> fzf_multi
 
 map T tag-toggle
+map <c-a> start_android_vim
