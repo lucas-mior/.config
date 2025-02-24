@@ -185,3 +185,5 @@ lf/.pastas
 xmrig.json
 *.arquivos.vim
 /vim/plugged
+/.android/
+/etc/
