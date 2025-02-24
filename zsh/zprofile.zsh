@@ -16,4 +16,5 @@ setfont ter-124n
 
 # sudo setsid -f keyd
 
-find / > /dev/null 2>&1 &
+find / \( -path "/.snapshots" -o -path "/home/.snapshots" \) -prune \
+    -o print > /dev/null 2>&1 &
