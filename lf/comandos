@@ -56,8 +56,8 @@ cmd start_shell ${{
 }}
 
 cmd start_android_vim ${{
-    st -e vim app/src/main/java/**/*.kt \
-              app/src/main/res/{layout,values,values-night}/*.xml
+    src="$(find app/src/main/java/ -iname "*.kt")"
+    setsid -f st -e vim $src
 }}
 
 cmd readlink ${{
