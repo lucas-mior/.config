@@ -165,6 +165,7 @@ konsolesshconfig
 kwinoutputconfig.json
 lastlog.txt
 luks_headers/
+luks/
 menus/
 nautilus/
 onionshare/
