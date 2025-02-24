@@ -4,6 +4,12 @@ random() {
     seq ${1:-10} | shuf -n 1
 }
 
+function fosscopy() {
+    original="$HOME/.local/src/0reference/fossify/$1"
+    copy="$HOME/.local/src/0reference/fossify_copy/$1"
+    vimdiff "$original" "$copy"
+}
+
 cmakeclean () {
     set -x
 
