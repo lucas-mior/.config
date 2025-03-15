@@ -80,6 +80,7 @@
     setopt histignoredups
     setopt histignorespace
     setopt interactivecomments
+    setopt share_history
     # set -o ignoreeof # dont exit on ctrl-d
 
 ## PLUGINS
