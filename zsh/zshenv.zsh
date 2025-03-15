@@ -134,6 +134,7 @@ PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files/OpenModelica/bin/"
 PATH="$PATH:/home/lucas/.local/wine/drive_c/Program Files (x86)/Dynamis/Vulcano-2.5/Vulcano.exe"
 PATH="$PATH:/home/lucas/.local/wine/Program Files/OpenModelica1.23.0-64bit/bin/"
 PATH="$PATH:/opt/anaconda/bin/"
+PATH="$PATH:/opt/android-sdk/platform-tools/"
 export PATH
 
 ## FZF CONFIG

@@ -277,9 +277,9 @@ cmd csv  $ word.bash  csv      $fx
 ## FZF PROCURAR
 cmd fzf_jump ${{
     if [[ $lf_hidden == false ]]; then
-        oque="$(arqs.zsh lf_arquivos | xargs -0 -I % realpath "%")"
+        oque="$(arqs.bash lf_arquivos | xargs -0 -I % realpath "%")"
     else
-        oque="$(arqs.zsh lf_meta | xargs -0 -I % realpath "%")"
+        oque="$(arqs.bash lf_meta | xargs -0 -I % realpath "%")"
     fi
     [[ ! -e $oque ]] && exit
 

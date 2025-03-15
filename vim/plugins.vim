@@ -52,7 +52,7 @@ function! Gototo()
         :execute ":tag " . expand("<cword>")
     endtry
 endfunction
-" nnoremap <C-]> :call Gototo()<CR>
+nnoremap <C-]> :call Gototo()<CR>
 nnoremap <leader>l :LspDiagNextWrap<CR><CR>
 nnoremap <leader>L :LspDiagPrev<CR><CR>
 nnoremap <leader>o :LspHover<CR><CR>
