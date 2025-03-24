@@ -22,8 +22,8 @@ vim9script
                     \ gui=NONE     guibg=NONE    guifg=NONE
   hi DiffDelete       cterm=BOLD   ctermbg=017   ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
-  hi DiffText cterm=BOLD,UNDERLINE ctermbg=001   ctermfg=NONE
-                    \ gui=NONE     guibg=#ff0000 guifg=NONE
+  hi DiffText cterm=BOLD,UNDERLINE ctermbg=017   ctermfg=NONE
+                    \ gui=NONE     guibg=NONE guifg=NONE
   hi EndOfBuffer      cterm=NONE   ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
   hi ErrorMsg         cterm=NONE   ctermbg=001   ctermfg=007 

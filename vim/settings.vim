@@ -56,7 +56,7 @@
     let &colorcolumn=join(range(81,999),",")
     set linebreak autoindent
     set autoread
-    set formatoptions-=c,r,o,/,b,n,i,j
+    " set formatoptions-=c,r,o,/,b,n,i,j
     set conceallevel=2
     set termwinsize=10x0
     filetype plugin on
