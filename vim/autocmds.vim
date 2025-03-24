@@ -20,7 +20,7 @@ vim9script
     au BufWritePost */src/a_python/*.py !python %
     au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
     au BufWritePost */src/dwmblocks2/*  !restart.sh dwmblocks2
-    au BufWritePost *.kt !android_studio_shiftf9.sh
+    # au BufWritePost *.kt !android_studio_shiftf9.sh
 
 # meus highlights
     au BufRead *.mo,*.mod        set ft=modelica
@@ -43,6 +43,12 @@ vim9script
       autocmd BufRead,BufNewFile /home/lucas/.config/lf/* setlocal filetype=lf2
     augroup END
 
+    # au BufRead *.sh setlocal syntax=off
+
 # cd to file dir on startup
     au VimEnter * lcd %:p:h
     au WinResized * wincmd =
+augroup Mkdir
+  autocmd!
+  autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
+augroup END
