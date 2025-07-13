@@ -1,39 +1,39 @@
 #!/bin/sh
 
-cat /sys/class/backlight/intel_backlight/max_brightness \
-    | tee /sys/class/backlight/intel_backlight/brightness
-redshift -P -O 6000 && echo 6000 > "$REDSHIFT_CACHE"
+# cat /sys/class/backlight/intel_backlight/max_brightness \
+#     | tee /sys/class/backlight/intel_backlight/brightness
+# redshift -P -O 6000 && echo 6000 > "$REDSHIFT_CACHE"
 xrdb /home/lucas/.config/X11/Xresources
-
+# 
 killall dunst; dunst &
 killall picom; picom &
 killall sxhkd; sxhkd &
 killall urxvtd; urxvtd &
 killall clipsim; clipsim --daemon &
 killall events.bash; events.bash &
-
+# 
 killall dwmblocks2; dwmblocks2 &
-# killall nicotine; nicotine &
+# # killall nicotine; nicotine &
 killall xset; xset m 1 1 &
-# killall keyd-application-mapper ; keyd-application-mapper -d &
-setkeymap.sh br-custom
-
-#xset r rate 275 30
-
-# /etc/X11/xorg.conf.d/00-keyboard.conf
-# Section "InputClass"
-#     Identifier "system-keyboard"
-#     MatchIsKeyboard "on"
-#     Option "XkbLayout" "br-custom"
-#     Option "XkbOptions" "caps:swapescape"
-#     Option "AutoRepeat" "0 0"
-# EndSection
-
-sleep 1
-wallpaper.sh
-
+# # killall keyd-application-mapper ; keyd-application-mapper -d &
+# setkeymap.sh br-custom
+# 
+# #xset r rate 275 30
+# 
+# # /etc/X11/xorg.conf.d/00-keyboard.conf
+# # Section "InputClass"
+# #     Identifier "system-keyboard"
+# #     MatchIsKeyboard "on"
+# #     Option "XkbLayout" "br-custom"
+# #     Option "XkbOptions" "caps:swapescape"
+# #     Option "AutoRepeat" "0 0"
+# # EndSection
+# 
+# sleep 1
+xrandr.sh
+# 
 xset r rate 275 30
 exec dwm
 
-#export DESKTOP_SESSION=plasma
-#exec startplasma-x11
+# export DESKTOP_SESSION=plasma
+# exec startplasma-x11
