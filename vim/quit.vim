@@ -49,13 +49,13 @@ function! MyBPrev()
 endfunction
 
 " quit is context dependent
-command! -nargs=0 MyQuit :call MyQuit()
-function! MyQuit()
+command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
+function! MyQuit(bang)
     " winnr('$') returns number of windows
     if winnr('$') == 1
-        bdelete  " delete current buffer
+        execute 'bdelete' . a:bang
     else
-        quit
+        execute 'quit' . a:bang
     endif
 endfunction
 
