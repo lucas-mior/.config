@@ -1,4 +1,6 @@
 ## Xorg
+super + shift + 5
+    {xdotool click 1}
 super + control + shift + d
     {shutdown}
 super + control + shift + e
@@ -6,7 +8,7 @@ super + control + shift + e
 super + {F11, F12}
     {touchpad.sh, xkill}
 super + {F5, F6}
-    setkeymap.sh {br, br_lucas}
+    setkeymap.sh {br, br-custom}
 super + {f}
     {exec warpd --hint}
 
@@ -35,6 +37,8 @@ super + shift + v
 super + control
     nmcli radio wifi off
 
+super + o; {v}
+    {windows_launch.sh}
 super + o; {l, r,                h,                i, n}
     {lingot,   transmission-gtk, $TERMINAL -e htop, $TERMINAL -e  sudo iotop -ao -d 0.5, $TERMINAL -e newsboat}
 super + o; {c}
@@ -54,15 +58,15 @@ super + equal
 {super + shift + n}
     $TERMINAL -e pulsemixer
 super + a
-    audiotoggle.sh dwmblocks2
+    audiotoggle.sh
 super + control + a
-    audioport.sh dwmblocks2
+    audioport.sh
 {XF86AudioMute, super + shift + m}
-    vol_out.sh toggle dwmblocks2
+    vol_out.sh toggle
 {XF86AudioLowerVolume, shift + Down}
-    vol_out.sh down dwmblocks2
+    vol_out.sh down
 {XF86AudioRaiseVolume, shift + Up}
-    vol_out.sh up dwmblocks2
+    vol_out.sh up
 
 ## MÚSICA
 super + {control, alt} + p

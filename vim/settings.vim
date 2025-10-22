@@ -59,6 +59,8 @@
     " set formatoptions-=c,r,o,/,b,n,i,j
     set conceallevel=2
     set termwinsize=10x0
+    set autochdir
+    set makeprg=./build.sh
     filetype plugin on
 
     colorscheme default

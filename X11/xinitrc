@@ -9,12 +9,13 @@ killall dunst; dunst &
 killall picom; picom &
 killall sxhkd; sxhkd &
 killall urxvtd; urxvtd &
-killall clipsim; clipsim --daemon &
+killall clipsim; clipsim --daemon >> $XDG_CACHE_HOME/clipsim/clipsim_log.txt 2>&1 &
 killall events.bash; events.bash &
 # 
 killall dwmblocks2; dwmblocks2 &
 # # killall nicotine; nicotine &
 killall xset; xset m 1 1 &
+spice-vdagent
 # # killall keyd-application-mapper ; keyd-application-mapper -d &
 # setkeymap.sh br-custom
 # 
