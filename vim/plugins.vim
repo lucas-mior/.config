@@ -53,11 +53,12 @@ function! Gototo()
     endtry
 endfunction
 nnoremap <C-]> :call Gototo()<CR>
-nnoremap <leader>l :LspDiagNextWrap<CR><CR>
-nnoremap <leader>L :LspDiagPrev<CR><CR>
-nnoremap <leader>o :LspHover<CR><CR>
+nnoremap <leader>l :LspDiagNextWrap<CR>
+nnoremap <leader>L :LspDiagPrev<CR>
+nnoremap <leader>o :LspHover<CR>
 nnoremap <leader>p :GitGutterNextHunk<CR><CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
+nnoremap <leader>m :make<CR>
 
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
 function! ToggleMarkdownListItem()

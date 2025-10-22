@@ -14,8 +14,6 @@ cmd on-cd &{{
     name="${PWD/#$HOME/'~'}"
     printf "\033]0;${name}/\007" > /dev/tty
 
-    lf -remote "send $id reload"
-
     for file in *; do
         if [[ $(cpusage.sh) -ge 90 ]]; then
             continue
@@ -98,7 +96,11 @@ cmd go %{{
         mv) mv  -vn -t "$2" $fx  & progress -mp $! ;;
         cp) cp -rvn -t "$2" $fx --reflink=auto & progress -mp $! ;;
         ln) for file in $fx; do
-                [[ "$(file -b "$file")" = "directory" ]] && link="-s" || link=""
+                if [[ "$(file -b "$file")" = "directory" ]]; then
+                    link="-s"
+                else
+                    link=""
+                fi
                 ln $link -v -t "$2" "$file"
             done
     esac \
@@ -106,8 +108,12 @@ cmd go %{{
     && lf -remote "send $id select \"$qual\""
 }}
 cmd trans ${{
-    [[ -z "$TRANSFILES"  ]] && exit
-    [[ -f "$TRANSFILES"  ]] && echo "" > "$TRANSFILES"
+    if [[ -z "$TRANSFILES" ]]; then
+        exit
+    fi
+    if [[ -f "$TRANSFILES" ]]; then
+        echo "" > "$TRANSFILES"
+    fi
 
     echo "$fx" > "$TRANSFILES"
     prim=$(head -n 1 "$TRANSFILES")
@@ -116,7 +122,9 @@ cmd trans ${{
     mvcpln.sh $1
 
     destino="$(cat $MAGIC_TMP_FILE)"
-    [[ ! -d $destino ]] && exit
+    if [[ ! -d $destino ]]; then
+        exit
+    fi
     lf -remote "send $id cd \"$destino\""
     lf -remote "send $id select \"$prim\""
 }}
@@ -142,12 +150,19 @@ cmd colar ${{
         prim="$prim.~$i~"
     fi
 
-    [[ $mode == copy ]] && op="cp -rvn --reflink=auto"
-    [[ $mode == move ]] && op="mv  -vn"
+    if [[ $mode == copy ]]; then
+        op="cp -rvn --reflink=auto"
+    fi
+    if [[ $mode == move ]]; then
+        op="mv  -vn"
+    fi
+
     for file in $list; do
         dir="$(dirname "$file")"
         name="${file##*/}"
-        [[ "$dir" == "$PWD" ]] && [[ $mode == move ]] && continue
+        if [[ "$dir" == "$PWD" ]] && [[ $mode == move ]]; then
+            continue
+        fi
 
         oldifs="$IFS"
         IFS=" "
@@ -217,7 +232,9 @@ cmd rename_a &{{
     done
 
     # cw variant
-    [[ -n "$1" ]] && lf -remote "send $id cmd-delete-home"
+    if [[ -n "$1" ]]; then
+        lf -remote "send $id cmd-delete-home"
+    fi
 }}
 
 ## TOUCH e MKDIR
@@ -281,7 +298,9 @@ cmd fzf_jump ${{
     else
         oque="$(arqs.bash lf_meta | xargs -0 -I % realpath "%")"
     fi
-    [[ ! -e $oque ]] && exit
+    if [[ ! -e $oque ]]; then
+        exit
+    fi
 
     pasta="$(dirname "$oque")"
     lf -remote "send $id cd     \"$pasta\""
@@ -308,6 +327,10 @@ cmd run !{{
         $f
     elif [[ "$f" =~ "Makefile" ]]; then
         make && sudo make install 2>&1 | less -r
+    elif [[ "$f" =~ "docker-compose.yaml" ]]; then
+        sudo podman compose up --build --force-recreate subscriber
+    elif [[ "$f" =~ "podman-compose.yaml" ]]; then
+        sudo podman compose up --build --force-recreate subscriber
     else
         ext="${f##*.}"
         case $ext in
@@ -327,9 +350,13 @@ cmd run !{{
                *) lf -remote "send $id echomsg \" Inclua extensão ou torne o arquivo executável\"" ;;
         esac
         if [[ -z "$1" ]]; then
-          [[ -n "$interpreter" ]] && $interpreter $f
+            if [[ -n "$interpreter" ]]; then
+                $interpreter $f
+            fi
         else
-          [[ -n "$interpreter" ]] && $interpreter $f 2>&1 | less -r
+            if [[ -n "$interpreter" ]]; then
+                $interpreter $f 2>&1 | less -r
+            fi
         fi
     fi
 }}

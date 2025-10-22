@@ -13,7 +13,7 @@ vim9script
                \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
     au BufRead */Makefile setlocal textwidth=100
 # compilações
-    au BufWritePost *.sh,*.bash,*.zsh   !shellcheck -e SC2059 -x %
+    au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
     au BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
     au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
     au BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out

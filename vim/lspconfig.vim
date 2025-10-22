@@ -12,31 +12,7 @@ var lspServers = [
     filetype: 'python',
     path: '/home/lucas/.local/bin/pylsp',
     args: ['--check-parent-process', '-v']
-},
-{
-    name: 'vimls',
-    filetype: 'vim',
-    path: '/usr/local/bin/vim-language-server',
-    args: ['--stdio']
-},
-{
-    name: 'golang',
-    filetype: ['go', 'gomod'],
-    path: '/usr/bin/gopls',
-    args: ['serve'],
-    syncInit: v:true
-},
-{
-    name: 'deno',
-      filetype: ['javascript', 'typescript'],
-      path: '/usr/bin/deno',
-      args: ['lsp'],
-      debug: v:true,
-      initializationOptions: {
-           enable: v:true,
-           lint: v:true
-      }
-}]
+},]
 
 var lspOpts = {
    aleSupport: v:false,
@@ -63,7 +39,7 @@ var lspOpts = {
    outlineOnRight: v:false,
    outlineWinSize: 20,
    showDiagInBalloon: v:true,
-   showDiagInPopup: v:false,
+   showDiagInPopup: v:true,
    showDiagOnStatusLine: v:false,
    showDiagWithSign: v:true,
    showDiagWithVirtualText: v:false,
