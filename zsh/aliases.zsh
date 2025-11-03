@@ -46,6 +46,11 @@ alias ffmpeg='ffmpeg -hide_banner'
 alias -g docker='sudo podman'
 alias -g podman='sudo podman'
 alias rnc='rename_commit.sh'
+replace () {
+    for f in *.c *.h; do
+        sed -i "$1" "$f"
+    done
+}
 
 alias vig='vim .git/info/exclude'
 alias lucas='git checkout lucas'
@@ -69,6 +74,13 @@ alias py='python'
 
 ## GIT
 alias g='git'
+git () {
+    if [[ "$1" == "push" ]]; then
+        command git pushall
+    else
+        command git "$@"
+    fi
+}
 diff () {
     git diff --no-index "$1" "$2"
 }
