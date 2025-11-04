@@ -17,17 +17,6 @@ call plug#end()
 command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
 " packadd termdebug 
-nnoremap <C-f> :call FzfFindEdit()<CR>
-
-function! FzfFindEdit()
-  let cmd = 'find . | grep -Ev ".git/(objects|refs|HEAD|index)" | fzf'
-  let file = system(cmd)->trim()
-  if empty(file)
-    redraw!
-    return
-  endif
-  execute 'edit' fnameescape(file)
-endfunction
 
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0

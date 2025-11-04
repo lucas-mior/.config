@@ -52,5 +52,24 @@ var lspOpts = {
    useBufferCompletion: v:true,
 }
 
+def FzfFindEdit()
+    var cmd =
+        'find .'
+        .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
+        .. ' | grep -Ev ".cache/"'
+        .. ' | fzf'
+    var file = trim(system(cmd))
+
+    if file ==# ''
+        redraw!
+        return
+    endif
+
+    execute 'edit' fnameescape(file)
+enddef
+
 autocmd VimEnter * call LspAddServer(lspServers)
 autocmd VimEnter * call LspOptionsSet(lspOpts)
+
+command! FzfFindEditCmd call FzfFindEdit()
+nnoremap <C-f> :FzfFindEditCmd<CR>
