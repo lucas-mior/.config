@@ -2,17 +2,17 @@ call plug#begin('~/.config/vim/plugged')
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'vim-airline/vim-airline'
-Plug 'airblade/vim-gitgutter'
-Plug 'tpope/vim-commentary'
+" Plug 'vim-airline/vim-airline'
+" Plug 'airblade/vim-gitgutter'
+" Plug 'tpope/vim-commentary'
 " Plug 'tpope/vim-surround'
-Plug 'tpope/vim-fugitive'
-Plug 'yegappan/lsp'
-Plug 'ap/vim-css-color'
-Plug 'romainl/vim-cool'
+" Plug 'tpope/vim-fugitive'
+" Plug 'yegappan/lsp'
+" Plug 'ap/vim-css-color'
+" Plug 'romainl/vim-cool'
 " Plug 'dahu/vim-fanfingtastic'
-Plug 'vim-python/python-syntax'
-Plug 'preservim/tagbar'
+" Plug 'vim-python/python-syntax'
+" Plug 'preservim/tagbar'
 
 call plug#end()
 
