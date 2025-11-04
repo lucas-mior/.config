@@ -1,26 +1,33 @@
 call plug#begin('~/.config/vim/plugged')
 
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
-" Plug 'vim-airline/vim-airline'
-" Plug 'airblade/vim-gitgutter'
-" Plug 'tpope/vim-commentary'
-" Plug 'tpope/vim-surround'
-" Plug 'tpope/vim-fugitive'
-" Plug 'yegappan/lsp'
-" Plug 'ap/vim-css-color'
-" Plug 'romainl/vim-cool'
-" Plug 'dahu/vim-fanfingtastic'
-" Plug 'vim-python/python-syntax'
-" Plug 'preservim/tagbar'
+Plug 'vim-airline/vim-airline'
+Plug 'airblade/vim-gitgutter'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-fugitive'
+Plug 'yegappan/lsp'
+Plug 'ap/vim-css-color'
+Plug 'romainl/vim-cool'
+Plug 'dahu/vim-fanfingtastic'
+Plug 'vim-python/python-syntax'
+Plug 'preservim/tagbar'
 
 call plug#end()
 
 command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
 " packadd termdebug 
-nnoremap <c-f> :Files<CR>
-nnoremap <c-g> :Lines<CR>
+nnoremap <C-f> :call FzfFindEdit()<CR>
+
+function! FzfFindEdit()
+  let cmd = 'find . | grep -Ev ".git/(objects|refs|HEAD|index)" | fzf'
+  let file = system(cmd)->trim()
+  if empty(file)
+    return
+  endif
+  execute 'edit' fnameescape(file)
+endfunction
+
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
 let g:airline#extensions#tabline#enabled = 1
