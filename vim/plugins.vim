@@ -23,6 +23,7 @@ function! FzfFindEdit()
   let cmd = 'find . | grep -Ev ".git/(objects|refs|HEAD|index)" | fzf'
   let file = system(cmd)->trim()
   if empty(file)
+    redraw!
     return
   endif
   execute 'edit' fnameescape(file)
