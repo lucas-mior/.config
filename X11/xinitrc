@@ -9,7 +9,10 @@ killall dunst; dunst &
 killall picom; picom &
 killall sxhkd; sxhkd &
 killall urxvtd; urxvtd &
+
+date                              >> $XDG_CACHE_HOME/clipsim/clipsim_log.txt
 killall clipsim; clipsim --daemon >> $XDG_CACHE_HOME/clipsim/clipsim_log.txt 2>&1 &
+
 killall events.bash; events.bash &
 # 
 killall dwmblocks2; dwmblocks2 &
