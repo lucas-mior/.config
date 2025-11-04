@@ -62,20 +62,18 @@ function! MyQuit(bang)
 endfunction
 
 function! QuitIfLastBuffer()
-  if winnr('$') != 1
-    return
-  endif
+    echo "quitiflastbuffer"
+     let cnt = 0
+     for ii in range(1, bufnr("$"))
+         if buflisted(ii) && !empty(bufname(ii))
+             \ || getbufvar(ii, '&buftype') ==# 'help'
+             let cnt += 1
+         endif
+     endfor
+     if cnt == 1
+         :q
+     endif
+ endfunction
 
-  let cnt = 0
-  for ii in range(1, bufnr('$'))
-    if buflisted(ii) && getbufvar(ii, '&buftype') ==# ''
-      let cnt += 1
-    endif
-  endfor
-
-  if cnt == 1
-    quit
-  endif
-endfunction
-
-autocmd BufDelete * call QuitIfLastBuffer()
+" proxima linha bugs PlugUpdate, comment when installing plugins
+autocmd BufDelete * :call QuitIfLastBuffer()
