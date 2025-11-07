@@ -22,7 +22,7 @@ nnoremap <tab> :MyBNext<cr>
 nnoremap <S-tab> :MyBPrev<cr>
 nnoremap <C-^> :MyAltFile<cr>
 " This requires running `stty -ixon` on your shellrc
-nnoremap <C-s> :w<CR>
+nnoremap <C-s> :w!<CR>:w!<CR>
 
 command! -nargs=0 MyAltFile :call MyAltFile()
 function! MyAltFile()

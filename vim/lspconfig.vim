@@ -56,7 +56,8 @@ def FzfFindEdit()
     var cmd =
         'find .'
         .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
-        .. ' | grep -Ev ".cache/"'
+        .. ' | grep -Ev "(.cache|bin)/"'
+        .. ' | grep -Ev "^./?$"'
         .. ' | fzf'
     var file = trim(system(cmd))
 

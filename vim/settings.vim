@@ -60,6 +60,7 @@
     set conceallevel=2
     set termwinsize=10x0
     set noautochdir
+    au CursorHold * checktime
     set makeprg=./build.sh
     filetype plugin on
 
