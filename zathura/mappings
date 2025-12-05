@@ -31,6 +31,9 @@ map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
 
+# map <f4> exec "gvim --remote +%{line} %{input}"
+# map <f4> feedkeys <Button1>
+
 ## MARCAS
 map \" feedkeys :blist<Space>
 map <A-a> feedkeys :bmark<Space>a<Return>

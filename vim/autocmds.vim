@@ -11,7 +11,7 @@ vim9script
     au BufRead */Makefile,*.mk,
                \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
                \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
-    au BufRead */Makefile setlocal textwidth=100
+    au BufRead */Makefile setlocal textwidth=80
 # compilações
     au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
     au BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
@@ -43,12 +43,10 @@ vim9script
       autocmd BufRead,BufNewFile /home/lucas/.config/lf/* setlocal filetype=lf2
     augroup END
 
-    # au BufRead *.sh setlocal syntax=off
-
 # cd to file dir on startup
-    au VimEnter * lcd %:p:h
+    # au VimEnter * lcd %:p:h
     au WinResized * wincmd =
-augroup Mkdir
-  autocmd!
-  autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
-augroup END
+# augroup Mkdir
+#   autocmd!
+#   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
+# augroup END

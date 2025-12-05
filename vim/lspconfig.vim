@@ -8,6 +8,11 @@ var lspServers = [
     args: ['--background-index']
 },
 {
+    name: 'texlab',
+    filetype: ['tex'],
+    path: '/usr/bin/texlab',
+},
+{
     name: 'pylsp',
     filetype: 'python',
     path: '/home/lucas/.local/bin/pylsp',
@@ -57,8 +62,10 @@ def FzfFindEdit()
         'find .'
         .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
         .. ' | grep -Ev "(.cache|bin)/"'
+        .. ' | grep -Ev ".aux$"'
         .. ' | grep -Ev "^./?$"'
-        .. ' | fzf'
+        .. ' | fzf --bind one:accept'
+
     var file = trim(system(cmd))
 
     if file ==# ''
@@ -66,7 +73,7 @@ def FzfFindEdit()
         return
     endif
 
-    execute 'edit' fnameescape(file)
+    execute 'edit ' .. fnameescape(file)
 enddef
 
 autocmd VimEnter * call LspAddServer(lspServers)

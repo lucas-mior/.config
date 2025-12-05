@@ -40,7 +40,8 @@ set hiddenfiles ".*:*.so:*.o:*.pro:*.data:tags:*.bak:*-bak:*-cache:
 :Ambiente de*:Menu *:Meus Doc*:AppData:3D Obj*:Configurações Locais:Cookies:Dados de Aplicativos:
 :OneDrive:*.ini:*.DAT:*-ms:Modelos:Recent:SendTo:*.LOG*:*.blf:Meus Ví*:Minhas I*:Minhas M*:
 :$RECYCLE*:System Volume*:Contacts:Favorites:Links:Saved Games:Searches
-:*.kicad_prl:*.kicad_pro-bak"
+:*.kicad_prl:*.kicad_pro-bak
+:*.fdb_latexmk:*.fls:*.ilg:*.ind:*.lol:*.mw:*.bcf-SAVE-ERROR"
 
 # set shellopts '-eu'
 set shell bash

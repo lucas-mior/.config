@@ -47,7 +47,7 @@ alias -g docker='sudo podman'
 alias -g podman='sudo podman'
 alias rnc='rename_commit.sh'
 replace () {
-    for f in *.c *.h; do
+    for f in **/*.tex **/*.cls; do
         sed -i "$1" "$f"
     done
 }
