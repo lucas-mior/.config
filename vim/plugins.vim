@@ -43,16 +43,44 @@ silent! highlight! link SignColumn LineNr?
 
 let g:python_highlight_all = 1
 
-function! Gototo()
-    let l:pos = getcurpos()
+function! Gototo() abort
+    " Save current window and cursor
+    let l:cur_win = win_getid()
+    let l:pos     = getcurpos()
+
+    " Run LspGotoDefinition silently
     silent! LspGotoDefinition
 
-    " If cursor did not move, fall back to tag jump
+    " Did the cursor stay in place? Then LSP found nothing → fallback to tag jump
     if getcurpos() ==# l:pos
         execute 'tag ' . expand('<cword>')
+        return
+    endif
+
+    " Cursor moved: LspGotoDefinition succeeded.
+    " Check whether we were placed into a *different* window
+    let l:new_win = win_getid()
+
+    if l:new_win != l:cur_win
+        " Buffer that contains the target
+        let l:buf = winbufnr(l:new_win)
+
+        " Move back to the original window and show that buffer there
+        call win_gotoid(l:cur_win)
+        execute 'buffer' l:buf
+
+        " Close the window LSP opened (if it still exists)
+        if win_gotoid(l:new_win)
+            execute 'close'
+        endif
+
+        " Ensure focus remains on the original window
+        call win_gotoid(l:cur_win)
     endif
 endfunction
+
 nnoremap <C-]> :call Gototo()<CR>
+
 nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
