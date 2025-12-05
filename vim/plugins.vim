@@ -62,20 +62,9 @@ function! Gototo() abort
     let l:new_win = win_getid()
 
     if l:new_win != l:cur_win
-        " Buffer that contains the target
-        let l:buf = winbufnr(l:new_win)
-
-        " Move back to the original window and show that buffer there
-        call win_gotoid(l:cur_win)
-        execute 'buffer' l:buf
-
-        " Close the window LSP opened (if it still exists)
-        if win_gotoid(l:new_win)
-            execute 'close'
-        endif
-
-        " Ensure focus remains on the original window
-        call win_gotoid(l:cur_win)
+        let l:buf = expand('%:p')
+        close
+        execute 'edit' l:buf
     endif
 endfunction
 
