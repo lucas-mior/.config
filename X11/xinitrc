@@ -10,6 +10,7 @@ killall picom; picom &
 killall sxhkd; sxhkd &
 killall urxvtd; urxvtd &
 
+echo ""                           >> $XDG_CACHE_HOME/clipsim/clipsim_log.txt
 date                              >> $XDG_CACHE_HOME/clipsim/clipsim_log.txt
 killall clipsim; clipsim --daemon >> $XDG_CACHE_HOME/clipsim/clipsim_log.txt 2>&1 &
 

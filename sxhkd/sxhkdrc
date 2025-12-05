@@ -88,7 +88,7 @@ shift + XF86AudioMute
 super + {p, shift+d}
     {xrandr.sh, killall dwmblocks; setsid -f dwmblocks}
 {XF86MonBrightnessDown, XF86MonBrightnessUp }
-    {sudo bright {--less, --more} dwmblocks2}
+    {bright {--less, --more} dwmblocks2}
 Print
     printscreen.sh tela
 super + Print

@@ -19,5 +19,9 @@ set statusbar-home-tilde true
 set selection-clipboard clipboard
 set zoom-max 10000
 
+set dbus-service true
+set synctex true
+set synctex-editor-command "vim --servername VIMURA --remote +%{line} %{input}"
+
 # SAIR
 map q quit

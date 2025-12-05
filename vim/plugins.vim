@@ -11,6 +11,7 @@ Plug 'romainl/vim-cool'
 Plug 'dahu/vim-fanfingtastic'
 Plug 'vim-python/python-syntax'
 Plug 'preservim/tagbar'
+Plug 'lervag/vimtex'
 
 call plug#end()
 
@@ -43,11 +44,13 @@ silent! highlight! link SignColumn LineNr?
 let g:python_highlight_all = 1
 
 function! Gototo()
-    try
-        :LspGotoDefinition
-    catch
-        :execute ":tag " . expand("<cword>")
-    endtry
+    let l:pos = getcurpos()
+    silent! LspGotoDefinition
+
+    " If cursor did not move, fall back to tag jump
+    if getcurpos() ==# l:pos
+        execute 'tag ' . expand('<cword>')
+    endif
 endfunction
 nnoremap <C-]> :call Gototo()<CR>
 nnoremap <leader>l :LspDiagNextWrap<CR>
@@ -82,6 +85,26 @@ function! GetSyntaxGroup()
     let l:s = synID(line('.'), col('.'), 1)
     echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
 endfun
+
+function! Synctex()
+    let l:vimwin = system('xdotool getactivewindow')
+    let l:vimwin = substitute(l:vimwin, '\n$', '', '')
+
+    execute "silent !zathura --synctex-forward "
+                \ . line('.') . ":" . col('.') . ":" . bufname('%')
+                \ . " main.pdf >/dev/null 2>&1 &"
+    redraw!
+
+    sleep 10m
+
+    silent call system('xdotool windowactivate ' . l:vimwin)
+endfunction
+
+nnoremap <space> :call Synctex()<CR>
+" autocmd CursorHold *.tex call Synctex()
+
+" let g:vimtex_view_method = 'zathura'
+" let g:vimtex_view_forward_search_on_start = 1
 
 let g:pyls = {
       \ 'configurationSources': ['flake8']
