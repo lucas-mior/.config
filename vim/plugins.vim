@@ -44,21 +44,18 @@ silent! highlight! link SignColumn LineNr?
 let g:python_highlight_all = 1
 
 function! Gototo() abort
-    " Save current window and cursor
     let l:cur_win = win_getid()
     let l:pos     = getcurpos()
 
-    " Run LspGotoDefinition silently
     silent! LspGotoDefinition
 
-    " Did the cursor stay in place? Then LSP found nothing → fallback to tag jump
     if getcurpos() ==# l:pos
-        execute 'tag ' . expand('<cword>')
+        let l:word = expand('<cword>')
+        let l:word_escaped = escape(l:word, '\')
+        execute 'tag ' . l:word_escaped
         return
     endif
 
-    " Cursor moved: LspGotoDefinition succeeded.
-    " Check whether we were placed into a *different* window
     let l:new_win = win_getid()
 
     if l:new_win != l:cur_win
