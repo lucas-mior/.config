@@ -35,6 +35,7 @@ set visualbell t_vb=
 set splitbelow
 set splitright
 set wrap
+
 "" Find
 set path+=**
 set pumheight=12
@@ -43,6 +44,7 @@ set wildmode=longest,full
 set wildoptions=pum
 set wildignore+=*.o
 set completeopt=menu
+
 set infercase
 set tagstack
 set hlsearch incsearch ignorecase smartcase
