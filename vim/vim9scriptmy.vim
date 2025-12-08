@@ -17,9 +17,9 @@ def FzfFindEdit()
         return
     endif
 
-    sleep 50m
+    sleep 100m
     while getchar(0) != 0
-        # do nothing
+        # wait until there are no chars to read
     endwhile
 
     execute 'edit ' .. fnameescape(file)
