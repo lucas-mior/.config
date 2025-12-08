@@ -1,14 +1,11 @@
-"" cursor
+"" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
 let &t_EI .= "\<Esc>[2 q\<Esc>]12;yellow\x7"
-"" configurações para não complicar minha vida
-set titlelen=0
+
+set titlelen=0  " don't limit title length
 set autowrite
-set breakindent
-set autoindent
-set smartindent
-set breakindentopt=sbr
-set showbreak=>
+set breakindent autoindent smartindent
+set breakindentopt=sbr showbreak=>
 set cpoptions+=n
 set commentstring=#%s
 set shell=/usr/bin/zsh

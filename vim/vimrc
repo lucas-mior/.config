@@ -1,3 +1,5 @@
+set nocompatible
+
 set undodir=/home/lucas/.local/share/vim/undo
 set directory=/home/lucas/.local/share/vim/swap
 set backupdir=/home/lucas/.local/share/vim/backup
