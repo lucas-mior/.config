@@ -23,6 +23,8 @@ def FzfFindEdit()
     endwhile
 
     execute 'edit ' .. fnameescape(file)
+    redraw!
+    return
 enddef
 
 command! FzfFindEditCmd call FzfFindEdit()
@@ -50,6 +52,8 @@ def FzfFindFileRegex()
     execute 'edit ' .. fnameescape(file)
     execute printf(':%d', line)
     normal! zz
+    redraw!
+    return
 enddef
 
 command! FzfFindFileRegexCmd call FzfFindFileRegex()
