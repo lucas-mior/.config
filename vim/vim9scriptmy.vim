@@ -38,6 +38,7 @@ def FzfFindFileRegex()
 
     var out = systemlist(cmd)
     if empty(out)
+        redraw!
         return
     endif
 
