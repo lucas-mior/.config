@@ -29,7 +29,7 @@ vim9script
     au BufRead *.sp,*.MOD,       set ft=spice
     au BufRead *.plt             set ft=gnuplot
     au BufRead */X11/urxvt       set ft=xdefaults
-    au BufRead */zathura/*       set ft=zathurarc
+    au BufRead */.config/zathura/* set ft=zathurarc
     au BufRead *.sent            set ft=sent
     au BufRead *.sed             set ft=sed
     au BufRead *.pgn             set ft=pgn

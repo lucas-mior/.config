@@ -14,18 +14,18 @@ cmd on-cd &{{
     name="${PWD/#$HOME/'~'}"
     printf "\033]0;${name}/\007" > /dev/tty
 
-    for file in *; do
-        if [[ $(cpusage.sh) -ge 90 ]]; then
-            continue
-        fi
-        mime="$(file -b --mime-type "$file")"
-        case "$mime" in
-            video/*) setsid -f vid.sh "$file" cache ;;
-            audio/*) setsid -f vid.sh "$file" cache ;;
-            */pdf)   setsid -f pdf.sh "$file" cache ;;
-            image/*) setsid -f stiv_draw "$file" cache ;;
-        esac
-    done
+    # for file in *; do
+    #     if [[ $(cpusage.sh) -ge 90 ]]; then
+    #         continue
+    #     fi
+    #     mime="$(file -b --mime-type "$file")"
+    #     case "$mime" in
+    #         video/*) setsid -f vid.sh "$file" cache ;;
+    #         audio/*) setsid -f vid.sh "$file" cache ;;
+    #         */pdf)   setsid -f pdf.sh "$file" cache ;;
+    #         image/*) setsid -f stiv_draw "$file" cache ;;
+    #     esac
+    # done
 }}
 
 cmd on-quit &{{

@@ -62,7 +62,8 @@ def FzfFindEdit()
         'find .'
         .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
         .. ' | grep -Ev "(.cache|bin)/"'
-        .. ' | grep -Ev ".aux$"'
+        .. ' | grep -Ev ".(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
+        .. ' | grep -Ev ".(bcf|pdf|idx|mw)$"'
         .. ' | grep -Ev "^./?$"'
         .. ' | fzf --bind one:accept'
 
@@ -72,6 +73,11 @@ def FzfFindEdit()
         redraw!
         return
     endif
+
+    sleep 50m
+    while getchar(0) != 0
+        # do nothing
+    endwhile
 
     execute 'edit ' .. fnameescape(file)
 enddef
