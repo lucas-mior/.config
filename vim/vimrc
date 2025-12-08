@@ -18,5 +18,6 @@ source /home/lucas/.config/vim/mappings.vim
 source /home/lucas/.config/vim/autocmds.vim
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
+source /home/lucas/.config/vim/vim9scriptmy.vim
 
 set viminfo+=n/home/lucas/.local/share/vim/viminfo

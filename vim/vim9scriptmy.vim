@@ -1,0 +1,56 @@
+vim9script
+
+def FzfFindEdit()
+    var cmd =
+        'find .'
+        .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
+        .. ' | grep -Ev "(.cache|bin)/"'
+        .. ' | grep -Ev ".(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
+        .. ' | grep -Ev ".(bcf|pdf|idx|mw)$"'
+        .. ' | grep -Ev "^./?$"'
+        .. ' | fzf --bind one:accept'
+
+    var file = trim(system(cmd))
+
+    if file ==# ''
+        redraw!
+        return
+    endif
+
+    sleep 50m
+    while getchar(0) != 0
+        # do nothing
+    endwhile
+
+    execute 'edit ' .. fnameescape(file)
+enddef
+
+command! FzfFindEditCmd call FzfFindEdit()
+nnoremap <C-f> :FzfFindEditCmd<CR>
+
+def FzfFindFileRegex()
+    var cmd = 
+        'rg --line-number --no-heading .'
+        .. ' | fzf --delimiter ":" --preview'
+        .. ' "bat --color=always --style=numbers --highlight-line {2} {1}"'
+
+    var out = systemlist(cmd)
+    if empty(out)
+        return
+    endif
+
+    var parts = split(out[0], ':', true)
+    if len(parts) < 2
+        return
+    endif
+
+    var file = parts[0]
+    var line = str2nr(parts[1])
+
+    execute 'edit ' .. fnameescape(file)
+    execute printf(':%d', line)
+    normal! zz
+enddef
+
+command! FzfFindFileRegexCmd call FzfFindFileRegex()
+nnoremap <C-h> :FzfFindFileRegexCmd<CR>
