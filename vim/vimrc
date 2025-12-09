@@ -121,7 +121,11 @@ def ToggleMarkdownListItem()
     endif
 enddef
 " <C-@> is <C-Space> (for what I am sure is a very good reason)
-nnoremap <C-@> :call ToggleMarkdownListItem()<CR>
+augroup MarkdownListToggle
+    autocmd!
+    autocmd FileType markdown
+        \ nnoremap <buffer> <C-@> :call ToggleMarkdownListItem()<CR>
+augroup END
 
 def GetSyntaxGroup()
     var s = synID(line('.'), col('.'), 1)
