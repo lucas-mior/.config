@@ -63,6 +63,8 @@ nnoremap <leader>g :tab Git<CR>
 
 let g:python_highlight_all = 1
 
+set tags=tags
+
 def Gototo()
     var cur_win = win_getid()
     var pos = getcurpos()
@@ -195,6 +197,7 @@ set mouse=a
 set mousemodel=popup
 set dictionary="/usr/share/dict/words"
 set foldmethod=marker foldmarker={,} foldminlines=1 foldlevelstart=100
+
 "" Interface
 if exists('+termguicolors')
     let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -203,7 +206,6 @@ if exists('+termguicolors')
     set background=dark
 endif
 set laststatus=1 showtabline=1 noshowmode showcmd
-set tags=tags
 set number relativenumber
 set cursorline cursorcolumn "deixa o VIM lento
 set scrolloff=5
