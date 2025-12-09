@@ -1,3 +1,8 @@
+set sandbox none
+set page-padding 2
+
+include mappings
+
 # Defines the maximum number of displayed completion entries.
 # • Value type: Integer
 # • Default value: 15
@@ -55,7 +60,7 @@ set exec-command
 # Defines the font that will be used
 # • Value type: String
 # • Default value: "monospace normal 9"
-set font "monospace normal 9"
+set font "monospace normal 14"
 
 # Shows or hides GUI elements.  If it contains 'c', the command line is
 # displayed.  If it contains 's', the statusbar is displayed.  If it contains
@@ -118,12 +123,12 @@ set statusbar-fg "#FFFFFF"
 # Defines the horizontal padding of the statusbar and notificationbar
 # • Value type: Integer
 # • Default value: 8
-set statusbar-h-padding 8
+set statusbar-h-padding 9
 
 # Defines the vertical padding of the statusbar and notificationbar
 # • Value type: Integer
 # • Default value: 2
-set statusbar-v-padding 2
+set statusbar-v-padding 3
 
 # Defines the path for a icon to be used as window icon.
 # • Value type: String
@@ -353,7 +358,7 @@ set recolor-lightcolor "#000000"
 # Defines if original image colors should be kept while recoloring.
 # • Value type: Boolean
 # • Default value: false
-set recolor-reverse-video false
+set recolor-reverse-video true
 
 # Defines if the "Loading..." text should be displayed if a page is rendered.
 # • Value type: Boolean
@@ -409,7 +414,7 @@ set search-hadjust true
 # using the mid‐ dle mouse button, or the Shift-Insert key combination.
 # • Value type: String
 # • Default value: "primary"
-set selection-clipboard "primary"
+set selection-clipboard "clipboard"
 
 # Defines if a notification should be displayed after selecting text.
 # • Value type: Boolean
@@ -488,7 +493,7 @@ set synctex-edit-modifier "ctrl"
 # Defines the command executed for SyncTeX backward synchronization.
 # • Value type: String
 # • Default value:
-set synctex-editor-command
+set synctex-editor-command "vim --servername VIMURA --remote +%{line} %{input}"
 
 # Center the screen at the vertical midpoint of the page by default.
 # • Value type: Boolean
@@ -504,13 +509,13 @@ set window-icon-document false
 # Use basename of the file in the window title.
 # • Value type: Boolean
 # • Default value: false
-set window-title-basename false
+set window-title-basename true
 
 # Display a short version of the file path, which replaces $HOME with ~, in the
 # window title.
 # • Value type: Boolean
 # • Default value: false
-set window-title-home-tilde false
+set window-title-home-tilde true
 
 # Display the page number in the window title.
 # • Value type: Boolean
@@ -525,7 +530,7 @@ set zoom-center false
 # Defines the maximum percentage that the zoom level can be.
 # • Value type: Integer
 # • Default value: 1000
-set zoom-max 1000
+set zoom-max 10000
 
 # Defines the minimum percentage that the zoom level can be.
 # • Value type: Integer

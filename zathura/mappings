@@ -1,3 +1,4 @@
+map q quit
 ## NAVEGAR NO INDEX
 map [index] J navigate_index collapse-all
 map [index] j navigate_index collapse
