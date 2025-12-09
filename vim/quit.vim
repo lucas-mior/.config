@@ -51,7 +51,6 @@ nnoremap <C-s> :w!<CR>:w!<CR>
 " endfunction
 
 " quit is context dependent
-command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
 function! MyQuit(bang)
     " winnr('$') returns number of windows
     if winnr('$') == 1
@@ -60,6 +59,7 @@ function! MyQuit(bang)
         execute 'quit' . a:bang
     endif
 endfunction
+command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
 
 function! QuitIfLastBuffer()
     echo "quitiflastbuffer"
