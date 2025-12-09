@@ -90,7 +90,7 @@ cmd link %{{
 }}
 
 cmd go %{{
-    qual=$(head -n 1 <<< $fx)
+    qual=$(echo "$fx" | head -n 1)
     qual="${qual##*/}"
     case "$1" in
         mv) mv  -vn -t "$2" $fx  & progress -mp $! ;;
@@ -221,7 +221,7 @@ cmd rename_I &{{
 cmd rename_a &{{
     nome="${f##*/}."
     ext="${nome#*.}"
-    n="$(wc -m <<< "$ext")"
+    n=$(echo "$ext" | wc -m)
 
     lf -remote "send $id rename"
     lf -remote "send $id cmd-end"
@@ -257,12 +257,12 @@ cmd chmod ${{
 }}
 cmd mk $ make && sudo make install
 cmd diff  !{{
-    num="$(wc -l <<< $fx)"
+    num=$(echo "$fx" | wc -l)
     if [[ $num -gt 2 ]]; then
         vim -d $fx
     else
-        old="$(basename "$(sed -n '1p' <<< $fx)")"
-        new="$(basename "$(sed -n '2p' <<< $fx)")"
+        old=$(basename "$(echo "$fx" | sed -n '1p')")
+        new=$(basename "$(echo "$fx" | sed -n '2p')")
         lines="$(/usr/bin/diff $fx)"
         if [[ $? = 0 ]]; then
             lf -remote "send $id echomsg \"$GRE $old == $new $RES\" "
