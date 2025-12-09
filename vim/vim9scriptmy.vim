@@ -31,11 +31,13 @@ command! FzfFindEditCmd call FzfFindEdit()
 nnoremap <C-f> :FzfFindEditCmd<CR>
 
 def FzfFindFileRegex()
+    var preview_script = 'fzf_bat_preview.bash'
+
     var cmd = 
         'rg --line-number --no-heading .'
         .. ' | fzf --delimiter ":"'
-        .. ' --preview-window=up,90% --preview-border=block --preview'
-        .. ' "bat --color=always --style=numbers --highlight-line {2} {1}"'
+        .. '       --preview-window=up,90%'
+        .. '       --preview "' .. preview_script .. ' {1} {2}"'
 
     var out = systemlist(cmd)
     if empty(out)
