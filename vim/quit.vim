@@ -51,14 +51,13 @@ nnoremap <C-s> :w!<CR>:w!<CR>
 " endfunction
 
 " quit is context dependent
-function! MyQuit(bang)
-    " winnr('$') returns number of windows
+def g:MyQuit(bang: string): void
     if winnr('$') == 1
-        execute 'bdelete' . a:bang
+        execute 'bdelete' .. bang
     else
-        execute 'quit' . a:bang
+        execute 'quit' .. bang
     endif
-endfunction
+enddef
 command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
 
 function! QuitIfLastBuffer()
