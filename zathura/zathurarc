@@ -11,46 +11,46 @@ set n-completion-items 15
 # Defines the background color that is used for command line completion entries
 # • Value type: String
 # • Default value: "#232323"
-set completion-bg "#232323"
+set completion-bg "rgba(000, 000, 000, 0.9)"
 
 # Defines the foreground color that is used for command line completion entries
 # • Value type: String
 # • Default value: "#DDDDDD"
-set completion-fg "#DDDDDD"
+set completion-fg "rgba(250, 250, 250, 1.0)"
 
 # Defines the background color that is used for command line completion group
 # elements
 # • Value type: String
 # • Default value: "#000000"
-set completion-group-bg "#000000"
+set completion-group-bg "rgba(000, 000, 000, 0.9)"
 
 # Defines the foreground color that is used for command line completion group
 # elements
 # • Value type: String
 # • Default value: "#DEDEDE"
-set completion-group-fg "#DEDEDE"
+set completion-group-fg "rgba(250, 250, 250, 1.0)"
 
 # Defines the background color that is used for the current command line
 # completion element
 # • Value type: String
 # • Default value: "#9FBC00"
-set completion-highlight-bg "#9FBC00"
+set completion-highlight-bg "rgba(250, 000, 000, 0.9)"
 
 # Defines the foreground color that is used for the current command line
 # completion element
 # • Value type: String
 # • Default value: "#232323"
-set completion-highlight-fg "#232323"
+set completion-highlight-fg "rgba(000, 000, 000, 0.7)"
 
 # Defines the default background color
 # • Value type: String
 # • Default value: "#000000"
-set default-bg "#000000"
+set default-bg "rgba(000, 000, 000, 0.9)"
 
 # Defines the default foreground color
 # • Value type: String
 # • Default value: "#DDDDDD"
-set default-fg "#DDDDDD"
+set default-fg "rgba(250, 250, 250, 0.0)"
 
 # Defines a command the should be prepended to any command run with exec.
 # • Value type: String
@@ -73,52 +73,52 @@ set guioptions "s"
 # Defines the background color for the inputbar
 # • Value type: String
 # • Default value: "#131313"
-set inputbar-bg "#131313"
+set inputbar-bg "rgba(000, 000, 000, 0.9)"
 
 # Defines the foreground color for the inputbar
 # • Value type: String
 # • Default value: "#9FBC00"
-set inputbar-fg "#9FBC00"
+set inputbar-fg "rgba(250, 250, 250, 0.9)"
 
 # Defines the background color for a notification
 # • Value type: String
 # • Default value: "#FFFFFF"
-set notification-bg "#FFFFFF"
+set notification-bg "rgba(250, 000, 000, 1.00)"
 
 # Defines the foreground color for a notification
 # • Value type: String
 # • Default value: "#000000"
-set notification-fg "#000000"
+set notification-fg "rgba(000, 000, 000, 1.00)"
 
 # Defines the background color for an error notification
 # • Value type: String
 # • Default value: "#FF1212"
-set notification-error-bg "#FF1212"
+set notification-error-bg "rgba(250, 155, 000, 1.00)"
 
 # Defines the foreground color for an error notification
 # • Value type: String
 # • Default value: "#FFFFFF"
-set notification-error-fg "#FFFFFF"
+set notification-error-fg "rgba(000, 000, 000, 1.00)"
 
 # Defines the background color for a warning notification
 # • Value type: String
 # • Default value: "#FFF712"
-set notification-warning-bg "#FFF712"
+set notification-warning-bg "rgba(250, 155, 000, 1.00)"
 
 # Defines the foreground color for a warning notification
 # • Value type: String
 # • Default value: "#FFFFFF"
-set notification-warning-fg "#FFFFFF"
+set notification-warning-fg "rgba(000, 000, 000, 1.00)"
 
 # Defines the background color of the statusbar
 # • Value type: String
 # • Default value: "#000000"
-set statusbar-bg "#000000"
+set statusbar-bg "rgba(000, 000, 000, 0.7)"
 
 # Defines the foreground color of the statusbar
 # • Value type: String
 # • Default value: "#FFFFFF"
-set statusbar-fg "#FFFFFF"
+set statusbar-fg "rgba(250, 250, 250, 1.0)"
 
 # Defines the horizontal padding of the statusbar and notificationbar
 # • Value type: Integer
@@ -215,13 +215,13 @@ set first-page-column "1:2"
 # element (e.g: current search result)
 # • Value type: String
 # • Default value: "rgba(0,188,0,0.5)"
-set highlight-active-color "rgba(0,188,0,0.5)"
+set highlight-active-color "rgba(250, 000, 000, 0.5)"
 
 # Defines the color that is used for highlighting parts of the document (e.g.:
 # show search results)
 # • Value type: String
 # • Default value: "rgba(159,251,0,0.5)"
-set highlight-color "rgba(159,251,0,0.5)"
+set highlight-color "rgba(240, 170, 000, 0.5)"
 
 # Defines the color that is used for text when highlighting parts of the
 # document (e.g.: number for links).
@@ -243,22 +243,22 @@ set incremental-search true
 # Define the background color of the selected element in index mode.
 # • Value type: String
 # • Default value: "#9FBC00"
-set index-active-bg "#9FBC00"
+set index-active-bg "rgba(250, 000, 000, 0.8)"
 
 # Defines the foreground color of the selected element in index mode.
 # • Value type: String
 # • Default value: "#232323"
-set index-active-fg "#232323"
+set index-active-fg "rgba(000, 000, 000, 0.8)"
 
 # Define the background color of the index mode.
 # • Value type: String
 # • Default value: "#232323"
-set index-bg "#232323"
+set index-bg "rgba(000, 000, 000, 0.5)"
 
 # Defines the foreground color of the index mode.
 # • Value type: String
 # • Default value: "#DDDDDD"
-set index-fg "#DDDDDD"
+set index-fg "rgba(250, 250, 250, 0.8)"
 
 # Maximum number of positions to remember in the jumplist.
 # • Value type: Integer
@@ -342,7 +342,7 @@ set recolor-adjust-lightness false
 # mode
 # • Value type: String
 # • Default value: "#FFFFFF"
-set recolor-darkcolor "#FFFFFF"
+set recolor-darkcolor "rgba(250, 250, 250, 1)"
 
 # En/Disables keeping original hue when recoloring
 # • Value type: Boolean
@@ -353,7 +353,7 @@ set recolor-keephue false
 # mode
 # • Value type: String
 # • Default value: "#000000"
-set recolor-lightcolor "#000000"
+set recolor-lightcolor "rgba(10, 5, 0, 0.5)"
 
 # Defines if original image colors should be kept while recoloring.
 # • Value type: Boolean
