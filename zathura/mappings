@@ -32,8 +32,7 @@ map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
 
-# map <f4> exec "gvim --remote +%{line} %{input}"
-# map <f4> feedkeys <Button1>
+map <Space> exec "zathuraback.sh"
 
 ## MARCAS
 map \" feedkeys :blist<Space>
