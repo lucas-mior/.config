@@ -107,14 +107,14 @@ def ToggleMarkdownListItem()
                         '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\~\~\(.*\)\~\~$',
                         '\1 \3',
                         ''
-                      )
+                       )
         else
             new_line = substitute(
                         line_text,
                         '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\(.*\)$',
                         '\1 ~~\3~~',
                         ''
-                      )
+                       )
         endif
 
         call setline(cursor_line, new_line)
