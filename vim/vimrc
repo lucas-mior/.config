@@ -83,7 +83,6 @@ def Gototo()
         call setpos('.', saved_pos)
     endif
 enddef
-
 nnoremap <C-]> :call Gototo()<CR>
 
 nnoremap <leader>l :LspDiagNextWrap<CR>
