@@ -321,7 +321,7 @@ set page-right-to-left false
 # zooming and uses more system memory.
 # • Value type: Integer
 # • Default value: 4194304 (4M)
-set page-thumbnail-size 4194304 (4M)
+set page-thumbnail-size 4194304
 
 # Defines the number of pages that are rendered next to each other in a row.
 # • Value type: Integer
