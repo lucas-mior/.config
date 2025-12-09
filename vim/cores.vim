@@ -78,7 +78,7 @@ vim9script
                     \ gui=NONE     guibg=NONE    guifg=NONE
   hi PmenuThumb       cterm=NONE   ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
-  hi PopupNotificatio cterm=NONE   ctermbg=NONE  ctermfg=NONE
+  hi PopupNotification cterm=NONE   ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
   hi Question         cterm=NONE   ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
@@ -102,9 +102,9 @@ vim9script
                     \ gui=NONE     guibg=NONE    guifg=NONE
   hi StatusLineNC     cterm=NONE   ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
-  hi StatusLineTe     cterm=NONE   ctermbg=NONE  ctermfg=NONE
+  hi StatusLineTerm   cterm=NONE   ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
-  hi StatusLineTe     cterm=NONE   ctermbg=NONE  ctermfg=NONE
+  hi StatusLineTerm   cterm=NONE   ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
   hi TabLine          cterm=ITALIC ctermbg=230   ctermfg=000 
                     \ gui=NONE     guibg=#cccccc guifg=#000000
