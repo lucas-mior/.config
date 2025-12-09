@@ -60,18 +60,19 @@ def g:MyQuit(bang: string): void
 enddef
 command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
 
-function! QuitIfLastBuffer()
-     let cnt = 0
-     for ii in range(1, bufnr("$"))
-         if buflisted(ii) && !empty(bufname(ii))
-             \ || getbufvar(ii, '&buftype') ==# 'help'
-             let cnt += 1
-         endif
-     endfor
-     if cnt == 1
-         :q
-     endif
- endfunction
+def g:QuitIfLastBuffer(): void
+    var cnt = 0
+
+    for ii in range(1, bufnr('$'))
+        if (buflisted(ii) && bufname(ii) !=# '') || getbufvar(ii, '&buftype') ==# 'help'
+            cnt += 1
+        endif
+    endfor
+
+    if cnt == 1
+        quit
+    endif
+enddef
 
 " proxima linha bugs PlugUpdate, comment when installing plugins
 autocmd BufDelete * :call QuitIfLastBuffer()
