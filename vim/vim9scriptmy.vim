@@ -33,7 +33,8 @@ nnoremap <C-f> :FzfFindEditCmd<CR>
 def FzfFindFileRegex()
     var cmd = 
         'rg --line-number --no-heading .'
-        .. ' | fzf --delimiter ":" --preview'
+        .. ' | fzf --delimiter ":"'
+        .. ' --preview-window=up,90% --preview-border=block --preview'
         .. ' "bat --color=always --style=numbers --highlight-line {2} {1}"'
 
     var out = systemlist(cmd)

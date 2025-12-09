@@ -70,7 +70,7 @@ nnoremap <C-]> :call Gototo()<CR>
 nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
-nnoremap <leader>p :GitGutterNextHunk<CR><CR>
+nnoremap <leader>p :GitGutterNextHunk<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
 nnoremap <leader>m :make<CR>
 
@@ -109,13 +109,13 @@ function! Synctex()
                 \ . " main.pdf >/dev/null 2>&1 &"
     redraw!
 
-    sleep 10m
+    sleep 20m
 
     silent call system('xdotool windowactivate ' . l:vimwin)
 endfunction
 
-nnoremap <space> :call Synctex()<CR>
-" autocmd CursorHold *.tex call Synctex()
+" nnoremap <space> :call Synctex()<CR>
+autocmd CursorMoved *.tex call Synctex()
 
 " let g:vimtex_view_method = 'zathura'
 " let g:vimtex_view_forward_search_on_start = 1

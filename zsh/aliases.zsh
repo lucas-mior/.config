@@ -71,6 +71,7 @@ alias cm='chmod -v'
 alias co='chown -v'
 alias gdb='gdb -q'
 alias py='python'
+alias pdflatex='pdflatex -halt-on-error -interaction=nonstopmode'
 
 ## GIT
 alias g='git'
