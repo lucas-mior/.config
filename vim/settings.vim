@@ -9,7 +9,7 @@ set breakindentopt=sbr showbreak=>
 set cpoptions+=n
 set commentstring=#%s
 set shell=/usr/bin/zsh
-set hidden
+" set hidden
 set noswapfile
 set timeoutlen=10000 ttimeoutlen=5
 set updatetime=100

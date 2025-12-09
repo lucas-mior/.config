@@ -21,7 +21,7 @@ command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'norm
 
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
-let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#enabled = 0
 let g:airline#extensions#tagbar#enabled = 0
 let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
 let g:airline#extensions#tagbar#flags = ''
@@ -60,8 +60,11 @@ function! Gototo() abort
 
     if l:new_win != l:cur_win
         let l:buf = expand('%:p')
+        let l:saved_pos = getcurpos()
         close
-        execute 'edit' l:buf
+        execute 'edit ' . fnameescape(l:buf)
+
+        call setpos('.', l:saved_pos)
     endif
 endfunction
 
