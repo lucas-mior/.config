@@ -129,6 +129,18 @@ def GetSyntaxGroup()
 enddef
 command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
+augroup TexSyncTex
+    autocmd!
+    autocmd FileType tex call s:SetupTexSyncTex()
+augroup END
+
+function! s:SetupTexSyncTex() abort
+    autocmd CursorMoved <buffer> call SyncTexAuto()
+
+    nnoremap <buffer> <Space> :call SyncTex()<CR>
+    nnoremap <buffer> <leader>s :call ToggleSyncTexMode()<CR>
+endfunction
+
 def SyncTex()
     var vimwin = system('xdotool getactivewindow')
     vimwin = substitute(vimwin, '\n$', '', '')
@@ -157,10 +169,6 @@ def ToggleSyncTexMode()
 enddef
 
 let g:SyncTexMode = v:false
-
-autocmd CursorMoved *.tex call SyncTexAuto()
-nnoremap <Space> :call SyncTex()<CR>
-nnoremap <leader>s :call ToggleSyncTexMode()<CR>
 
 "" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
