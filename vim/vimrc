@@ -34,7 +34,7 @@ call plug#end()
 
 command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
-" packadd termdebug 
+" packadd termdebug
 
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
@@ -92,24 +92,32 @@ nnoremap <leader>o :LspHover<CR>
 nnoremap <leader>p :GitGutterNextHunk<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
 
-function! ToggleMarkdownListItem()
-    let cursor_line = line('.')
-    let line_text = getline(cursor_line)
+def ToggleMarkdownListItem()
+    var cursor_line = line('.')
+    var line_text = getline(cursor_line)
 
     if line_text =~ '^\s*\([-*]\|[0-9]\+\.\)\s\+'
+        var new_line: string
+
         if line_text =~ '^\s*\([-*]\|[0-9]\+\.\)\s\+\~\~.*\~\~$'
-            let new_line = substitute(line_text,
-                                      \ '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\~\~\(.*\)\~\~$',
-                                      \ '\1 \3', '')
+            new_line = substitute(
+                        line_text,
+                        '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\~\~\(.*\)\~\~$',
+                        '\1 \3',
+                        ''
+                      )
         else
-            let new_line = substitute(line_text, 
-                                      \ '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\(.*\)$',
-                                      \ '\1 ~~\3~~', '')
+            new_line = substitute(
+                        line_text,
+                        '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\(.*\)$',
+                        '\1 ~~\3~~',
+                        ''
+                      )
         endif
 
         call setline(cursor_line, new_line)
     endif
-endfunction
+enddef
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
 
 function! GetSyntaxGroup()
@@ -288,7 +296,7 @@ tnoremap <C-w>J <esc><C-w>H
 tnoremap <C-w>K <esc><C-w>J
 tnoremap <C-w>L <esc><C-w>K
 tnoremap <C-w>: <esc><C-w>L
-" completions 
+" completions
 inoremap <tab> <c-n>
 inoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
@@ -391,7 +399,7 @@ nnoremap <C-f> :FzfFindEditCmd<CR>
 def FzfFindFileRegex()
     var preview_script = 'fzf_bat_preview.bash'
 
-    var cmd = 
+    var cmd =
         'rg --line-number --no-heading .'
         .. ' | fzf --delimiter ":"'
         .. '       --bind one:accept'
