@@ -11,15 +11,415 @@ set runtimepath+=/usr/share/vim/vimfiles/
 filetype on
 syntax on
 let $MYVIMRC="/home/lucas/.config/vim/vimrc"
+set viminfo+=n/home/lucas/.local/share/vim/viminfo
 
-source /home/lucas/.config/vim/settings.vim
 source /home/lucas/.config/vim/quit.vim
-source /home/lucas/.config/vim/plugins.vim
+
+call plug#begin('~/.config/vim/plugged')
+
+Plug 'vim-airline/vim-airline'
+Plug 'airblade/vim-gitgutter'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-fugitive'
+Plug 'yegappan/lsp'
+Plug 'ap/vim-css-color'
+Plug 'romainl/vim-cool'
+Plug 'dahu/vim-fanfingtastic'
+Plug 'vim-python/python-syntax'
+Plug 'preservim/tagbar'
+Plug 'lervag/vimtex'
+
+call plug#end()
+
+command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
+
+" packadd termdebug 
+
+let g:vim_markdown_strikethrough = 1
+let g:netrw_banner=0
+let g:airline#extensions#tabline#enabled = 0
+let g:airline#extensions#tagbar#enabled = 0
+let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
+let g:airline#extensions#tagbar#flags = ''
+let g:DiffColors = 1
+
+let g:gitgutter_signs = 1
+let g:gitgutter_highlight_lines = 1
+let g:gitgutter_highlight_linenrs = 0
+let g:gitgutter_sign_added = '+'
+let g:gitgutter_sign_modified = '~'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_removed_first_line = '^'
+let g:gitgutter_sign_removed_above_and_below = '{'
+let g:gitgutter_sign_modified_removed = 'w'
+let g:gitgutter_set_sign_backgrounds = 1
+let g:gitgutter_map_keys = 0
+let g:gitgutter_terminal_reports_focus = 0
+silent! highlight! link SignColumn LineNr?
+
+let g:python_highlight_all = 1
+
+function! Gototo() abort
+    let l:cur_win = win_getid()
+    let l:pos     = getcurpos()
+
+    silent! LspGotoDefinition
+
+    if getcurpos() ==# l:pos
+        let l:word = expand('<cword>')
+        let l:word_escaped = escape(l:word, '\')
+        execute 'tag ' . l:word_escaped
+        return
+    endif
+
+    let l:new_win = win_getid()
+
+    if l:new_win != l:cur_win
+        let l:buf = expand('%:p')
+        let l:saved_pos = getcurpos()
+        close
+        execute 'edit ' . fnameescape(l:buf)
+
+        call setpos('.', l:saved_pos)
+    endif
+endfunction
+
+nnoremap <C-]> :call Gototo()<CR>
+
+nnoremap <leader>l :LspDiagNextWrap<CR>
+nnoremap <leader>L :LspDiagPrev<CR>
+nnoremap <leader>o :LspHover<CR>
+nnoremap <leader>p :GitGutterNextHunk<CR>
+nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
+
+command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
+function! ToggleMarkdownListItem()
+    let cursor_line = line('.')
+    let line_text = getline(cursor_line)
+
+    if line_text =~ '^\s*\([-*]\|[0-9]\+\.\)\s\+'
+        if line_text =~ '^\s*\([-*]\|[0-9]\+\.\)\s\+\~\~.*\~\~$'
+            let new_line = substitute(line_text,
+                                      \ '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\~\~\(.*\)\~\~$',
+                                      \ '\1 \3', '')
+        else
+            let new_line = substitute(line_text, 
+                                      \ '^\(\s*\([-*]\|[0-9]\+\.\)\)\s\+\(.*\)$',
+                                      \ '\1 ~~\3~~', '')
+        endif
+
+        call setline(cursor_line, new_line)
+    endif
+endfunction
+
+command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
+function! GetSyntaxGroup()
+    let l:s = synID(line('.'), col('.'), 1)
+    echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
+endfun
+
+function! Synctex()
+    let l:vimwin = system('xdotool getactivewindow')
+    let l:vimwin = substitute(l:vimwin, '\n$', '', '')
+
+    execute "silent !zathura --synctex-forward "
+                \ . line('.') . ":" . col('.') . ":" . bufname('%')
+                \ . " main.pdf >/dev/null 2>&1 &"
+    redraw!
+
+    sleep 20m
+
+    silent call system('xdotool windowactivate ' . l:vimwin)
+endfunction
+
+" nnoremap <space> :call Synctex()<CR>
+autocmd CursorMoved *.tex call Synctex()
+
+" let g:vimtex_view_method = 'zathura'
+" let g:vimtex_view_forward_search_on_start = 1
+
+let g:pyls = {
+      \ 'configurationSources': ['flake8']
+      \ }
+
+
+"" cursor: format and color (terminal has to support these escape sequences)
+let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
+let &t_EI .= "\<Esc>[2 q\<Esc>]12;yellow\x7"
+
+set titlelen=0  " don't limit title length
+set autowrite
+set breakindent autoindent smartindent
+set breakindentopt=sbr showbreak=>
+set cpoptions+=n
+set commentstring=#%s
+set shell=/usr/bin/zsh
+" set hidden
+set noswapfile
+set timeoutlen=10000 ttimeoutlen=5
+set updatetime=100
+set history=10000
+set clipboard^=unnamedplus,unnamed
+set mouse=a
+set mousemodel=popup
+set dictionary="/usr/share/dict/words"
+set foldmethod=marker foldmarker={,} foldminlines=1 foldlevelstart=100
+"" Interface
+if exists('+termguicolors')
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    set termguicolors
+    set background=dark
+endif
+set laststatus=1 showtabline=1 noshowmode showcmd
+set tags=tags
+set number relativenumber
+" set cursorline cursorcolumn "deixa o VIM lento
+set scrolloff=5
+set visualbell t_vb=
+set splitbelow
+set splitright
+set wrap
+
+"" Find
+set path+=**
+set pumheight=12
+set wildmenu
+set wildmode=longest,full
+set wildoptions=pum
+set wildignore+=*.o
+set completeopt=menu
+
+set infercase
+set tagstack
+set hlsearch incsearch ignorecase smartcase
+"" Formatar
+set backspace=indent,eol,start
+set tabstop=4 shiftwidth=4 expandtab
+set textwidth=80
+let &colorcolumn=join(range(81,999),",")
+set linebreak autoindent
+set autoread
+" set formatoptions-=c,r,o,/,b,n,i,j
+set conceallevel=2
+set termwinsize=10x0
+set noautochdir
+au CursorHold * checktime
+set makeprg=./build.sh
+filetype plugin on
+
+colorscheme default
+if &term =~ 'st\|xterm\|kitty\|alacritty\|tmux'
+    let &t_Ts = "\e[9m"   " Strikethrough
+    let &t_Te = "\e[29m"
+    let &t_Cs = "\e[4:3m" " Undercurl
+    let &t_Ce = "\e[4:0m"
+endif
+
 source /home/lucas/.config/vim/lspconfig.vim
-source /home/lucas/.config/vim/mappings.vim
-source /home/lucas/.config/vim/autocmds.vim
+
+let mapleader = '\'
+" set shortmess=at
+command! Vmake w | silent make -j1 clang | unsilent redraw!
+map <leader>m :Vmake<CR>:LspDiag current<CR>
+nnoremap <leader>m :make<CR>
+" map <leader>k dd:!source ~/.config/zsh/comandos.zsh; rf <C-r>"<backspace><space><c-r>%<backspace><backspace><cr><cr>
+" map <leader>l dd:!source ~/.config/zsh/comandos.zsh; rnall <C-r>"<backspace><space><c-r>%<backspace><backspace>_
+" map <leader>l dd:!source ~/.config/zsh/comandos.zsh; rnall <C-r>"<backspace><space>
+" disable ex mode (what the hell is that shit?)
+map Q <Nop>
+" :help map-modes
+nnoremap U u
+nnoremap <C-z> u
+inoremap <C-z> <esc>ui
+vnoremap <C-c> y
+vnoremap <C-x> d
+vnoremap S :s/
+nnoremap S :%s/
+" hjkl;
+" h é mapeado para f next (ver plugins)
+noremap j h
+noremap ; l
+noremap k gj
+noremap l gk
+" some defaults dont make sense
+nnoremap Y y$
+nnoremap e ea
+nnoremap cd 0D
+nnoremap ' `
+nnoremap ` '
+inoremap <C-h> <esc>dbxi
+" janela
+nnoremap <C-k>  <C-w>w
+nnoremap <C-l>  <C-l><C-w>w
+tnoremap <C-k>  <C-w>w
+tnoremap <C-l>  <C-l><C-w>w
+nnoremap <C-w>j <C-w>h
+nnoremap <C-w>k <C-w>j
+nnoremap <C-w>l <C-w>k
+nnoremap <C-w>; <C-w>l
+nnoremap <C-w>J <C-w>H
+nnoremap <C-w>K <C-w>J
+nnoremap <C-w>L <C-w>K
+nnoremap <C-w>: <C-w>L
+inoremap <C-w>j <esc><C-w>h
+inoremap <C-w>k <esc><C-w>j
+inoremap <C-w>l <esc><C-w>k
+inoremap <C-w>; <esc><C-w>l
+inoremap <C-w>J <esc><C-w>H
+inoremap <C-w>K <esc><C-w>J
+inoremap <C-w>L <esc><C-w>K
+inoremap <C-w>: <esc><C-w>L
+vnoremap <C-w>j <esc><C-w>h
+vnoremap <C-w>k <esc><C-w>j
+vnoremap <C-w>l <esc><C-w>k
+vnoremap <C-w>; <esc><C-w>l
+vnoremap <C-w>J <esc><C-w>H
+vnoremap <C-w>K <esc><C-w>J
+vnoremap <C-w>L <esc><C-w>K
+vnoremap <C-w>: <esc><C-w>L
+tnoremap <C-w>j <esc><C-w>h
+tnoremap <C-w>k <esc><C-w>j
+tnoremap <C-w>l <esc><C-w>k
+tnoremap <C-w>; <esc><C-w>l
+tnoremap <C-w>J <esc><C-w>H
+tnoremap <C-w>K <esc><C-w>J
+tnoremap <C-w>L <esc><C-w>K
+tnoremap <C-w>: <esc><C-w>L
+" completions 
+inoremap <tab> <c-n>
+inoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
+inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
+cnoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
+cnoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
+" Termdebug
+noremap <leader>b :Break<CR>
+noremap <leader>e :Eval<CR>
+noremap <leader>c :Continue<CR>
+" noremap <leader>s :Step<CR>
+" noremap <space>   :Step<CR>
+" noremap <enter>   :Step<CR>
+" my_functions
+" <C-@> is <C-Space> (for what I am sure is a very good reason)
+nnoremap <C-@> :ToggleMarkdownListItem<CR>
+nnoremap <leader>g :tab Git<CR>
+
+au BufWritePost */key-handler                           !atualizar.sed % > $XDG_CONFIG_HOME/lf/nsxiv
+au BufWritePost ~/.config/tmux/tmux.conf                !tmux source-file %
+au BufWritePost ~/.config/X11/*                         !xrdb ~/.config/X11/Xresources
+au BufWritePost ~/.config/sxhkd/sxhkdrc                 !pkill -SIGUSR1 sxhkd
+au BufWritePost ~/.config/dunst/dunstrc                 !killall dunst; setsid -f dunst 2>&1 > /dev/null
+au BufWritePost ~/.config/atalhos,*/atalhos.awk         !atalhos.awk   ~/.config/atalhos
+au BufWritePost ~/.config/ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
+au BufWritePost ~/.config/lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
+au BufRead */Makefile,*.mk,
+           \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
+           \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
+au BufRead */Makefile setlocal textwidth=80
+" compilações
+au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
+au BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
+au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
+au BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
+au BufWritePost */src/a_python/*.py !python %
+au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
+au BufWritePost */src/dwmblocks2/*  !restart.sh dwmblocks2
+" au BufWritePost *.kt !android_studio_shiftf9.sh
+
+" meus highlights
+au BufRead *.mo,*.mod        set ft=modelica
+au BufRead *.sage            set ft=python
+au BufRead /var/tmp/fstab*   set ft=fstab
+au BufRead *.sp,*.MOD,       set ft=spice
+au BufRead *.plt             set ft=gnuplot
+au BufRead */X11/urxvt       set ft=xdefaults
+au BufRead */.config/zathura/* set ft=zathurarc
+au BufRead *.sent            set ft=sent
+au BufRead *.sed             set ft=sed
+au BufRead *.pgn             set ft=pgn
+au BufRead */COMMIT_EDITMSG  set ft=gitcommit
+au BufRead,BufNewFile *.tab  set ft=tab
+au BufRead ~/.config/*       set autochdir
+au BufRead *.bib             set autochdir
+
+augroup CustomBashSyntax
+  autocmd!
+  autocmd BufRead,BufNewFile /home/lucas/.config/lf/* setlocal filetype=lf2
+augroup END
+
+" cd to file dir on startup
+" au VimEnter * lcd %:p:h
+
+au WinResized * wincmd =
+" augroup Mkdir
+"   autocmd!
+"   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
+" augroup END
+
+def FzfFindEdit()
+    var cmd =
+        'find .'
+        .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
+        .. ' | grep -Ev "(.cache|bin)/"'
+        .. ' | grep -Ev ".(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
+        .. ' | grep -Ev ".(bcf|pdf|idx|mw)$"'
+        .. ' | grep -Ev "^./?$"'
+        .. ' | fzf --bind one:accept'
+
+    var file = trim(system(cmd))
+
+    if file ==# ''
+        redraw!
+        return
+    endif
+
+    sleep 100m
+    while getchar(0) != 0
+        # wait until there are no chars to read
+    endwhile
+
+    execute 'edit ' .. fnameescape(file)
+    redraw!
+    return
+enddef
+
+command! FzfFindEditCmd call FzfFindEdit()
+nnoremap <C-f> :FzfFindEditCmd<CR>
+
+def FzfFindFileRegex()
+    var preview_script = 'fzf_bat_preview.bash'
+
+    var cmd = 
+        'rg --line-number --no-heading .'
+        .. ' | fzf --delimiter ":"'
+        .. '       --bind one:accept'
+        .. '       --preview-window=up,80%,border-rounded'
+        .. '       --preview "' .. preview_script .. ' {1} {2}"'
+
+    var out = systemlist(cmd)
+    if empty(out)
+        redraw!
+        return
+    endif
+
+    var parts = split(out[0], ':', true)
+    if len(parts) < 2
+        return
+    endif
+
+    var file = parts[0]
+    var line = str2nr(parts[1])
+
+    execute 'edit ' .. fnameescape(file)
+    execute printf(':%d', line)
+    normal! zz
+    redraw!
+    return
+enddef
+
+command! FzfFindFileRegexCmd call FzfFindFileRegex()
+nnoremap <C-h> :FzfFindFileRegexCmd<CR>
+
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
-source /home/lucas/.config/vim/vim9scriptmy.vim
-
-set viminfo+=n/home/lucas/.local/share/vim/viminfo
