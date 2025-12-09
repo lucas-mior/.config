@@ -119,10 +119,10 @@ def ToggleMarkdownListItem()
 enddef
 nnoremap <C-@> :call ToggleMarkdownListItem()<CR>
 
-function! GetSyntaxGroup()
-    let l:s = synID(line('.'), col('.'), 1)
-    echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
-endfun
+def GetSyntaxGroup()
+    var s = synID(line('.'), col('.'), 1)
+    echo synIDattr(s, 'name') .. ' -> ' .. synIDattr(synIDtrans(s), 'name')
+enddef
 command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 def SyncTex()
