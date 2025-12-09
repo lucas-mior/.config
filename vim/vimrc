@@ -117,8 +117,7 @@ def ToggleMarkdownListItem()
         call setline(cursor_line, new_line)
     endif
 enddef
-command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
-nnoremap <C-@> :ToggleMarkdownListItem<CR>
+nnoremap <C-@> :call ToggleMarkdownListItem()<CR>
 
 function! GetSyntaxGroup()
     let l:s = synID(line('.'), col('.'), 1)
