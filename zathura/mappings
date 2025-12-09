@@ -1,4 +1,4 @@
-m "ctrl"ap q quit
+map q quit
 ## NAVEGAR NO INDEX
 map [index] J navigate_index collapse-all
 map [index] j navigate_index collapse
@@ -34,10 +34,10 @@ map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
 
-map k     feedkeys <F4>:exec<Space>"zathuraback.sh k"<Return>
-map l     feedkeys <F5>:exec<Space>"zathuraback.sh l"<Return>
-map <C-d> feedkeys <F6>:exec<Space>"zathuraback.sh cd"<Return>
-map <C-u> feedkeys <F7>:exec<Space>"zathuraback.sh cu"<Return>
+map k     feedkeys <F4>:exec<Space>"setsid -f zathuraback.sh k"<Return>
+map l     feedkeys <F5>:exec<Space>"setsid -f zathuraback.sh l"<Return>
+map <C-d> feedkeys <F6>:exec<Space>"setsid -f zathuraback.sh cd"<Return>
+map <C-u> feedkeys <F7>:exec<Space>"setsid -f zathuraback.sh cu"<Return>
 
 ## MARCAS
 map \" feedkeys :blist<Space>
