@@ -62,7 +62,6 @@ endfunction
 command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
 
 function! QuitIfLastBuffer()
-    echo "quitiflastbuffer"
      let cnt = 0
      for ii in range(1, bufnr("$"))
          if buflisted(ii) && !empty(bufname(ii))
