@@ -75,4 +75,4 @@ function! QuitIfLastBuffer()
  endfunction
 
 " proxima linha bugs PlugUpdate, comment when installing plugins
-"autocmd BufDelete * :call QuitIfLastBuffer()
+autocmd BufDelete * :call QuitIfLastBuffer()
