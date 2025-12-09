@@ -1,27 +1,538 @@
-set sandbox none
+# Defines the maximum number of displayed completion entries.
+# • Value type: Integer
+# • Default value: 15
+set n-completion-items 15
 
-include mappings
-include colores
+# Defines the background color that is used for command line completion entries
+# • Value type: String
+# • Default value: "#232323"
+set completion-bg "#232323"
 
-# set recolor "true"
-# set recolor-keephue "true"
-set recolor-reverse-video "true"
+# Defines the foreground color that is used for command line completion entries
+# • Value type: String
+# • Default value: "#DDDDDD"
+set completion-fg "#DDDDDD"
 
-set pages-per-row 1
-set page-padding 2
-set n-completion-items 10
-set statusbar-v-padding 3
-set statusbar-h-padding 9
-set font "monospace normal 14"
-set search-hadjust false
-set window-title-basename true
-set statusbar-home-tilde true
-set selection-clipboard clipboard
-set zoom-max 10000
+# Defines the background color that is used for command line completion group
+# elements
+# • Value type: String
+# • Default value: "#000000"
+set completion-group-bg "#000000"
 
+# Defines the foreground color that is used for command line completion group
+# elements
+# • Value type: String
+# • Default value: "#DEDEDE"
+set completion-group-fg "#DEDEDE"
+
+# Defines the background color that is used for the current command line
+# completion element
+# • Value type: String
+# • Default value: "#9FBC00"
+set completion-highlight-bg "#9FBC00"
+
+# Defines the foreground color that is used for the current command line
+# completion element
+# • Value type: String
+# • Default value: "#232323"
+set completion-highlight-fg "#232323"
+
+# Defines the default background color
+# • Value type: String
+# • Default value: "#000000"
+set default-bg "#000000"
+
+# Defines the default foreground color
+# • Value type: String
+# • Default value: "#DDDDDD"
+set default-fg "#DDDDDD"
+
+# Defines a command the should be prepended to any command run with exec.
+# • Value type: String
+# • Default value:
+set exec-command
+
+# Defines the font that will be used
+# • Value type: String
+# • Default value: "monospace normal 9"
+set font "monospace normal 9"
+
+# Shows or hides GUI elements.  If it contains 'c', the command line is
+# displayed.  If it contains 's', the statusbar is displayed.  If it contains
+# 'h', the horizontal scrollbar is displayed.  If it contains 'v', the vertical
+# scrollbar is displayed.
+# • Value type: String
+# • Default value: "s"
+set guioptions "s"
+
+# Defines the background color for the inputbar
+# • Value type: String
+# • Default value: "#131313"
+set inputbar-bg "#131313"
+
+# Defines the foreground color for the inputbar
+# • Value type: String
+# • Default value: "#9FBC00"
+set inputbar-fg "#9FBC00"
+
+# Defines the background color for a notification
+# • Value type: String
+# • Default value: "#FFFFFF"
+set notification-bg "#FFFFFF"
+
+# Defines the foreground color for a notification
+# • Value type: String
+# • Default value: "#000000"
+set notification-fg "#000000"
+
+# Defines the background color for an error notification
+# • Value type: String
+# • Default value: "#FF1212"
+set notification-error-bg "#FF1212"
+
+# Defines the foreground color for an error notification
+# • Value type: String
+# • Default value: "#FFFFFF"
+set notification-error-fg "#FFFFFF"
+
+# Defines the background color for a warning notification
+# • Value type: String
+# • Default value: "#FFF712"
+set notification-warning-bg "#FFF712"
+
+# Defines the foreground color for a warning notification
+# • Value type: String
+# • Default value: "#FFFFFF"
+set notification-warning-fg "#FFFFFF"
+
+# Defines the background color of the statusbar
+# • Value type: String
+# • Default value: "#000000"
+set statusbar-bg "#000000"
+
+# Defines the foreground color of the statusbar
+# • Value type: String
+# • Default value: "#FFFFFF"
+set statusbar-fg "#FFFFFF"
+
+# Defines the horizontal padding of the statusbar and notificationbar
+# • Value type: Integer
+# • Default value: 8
+set statusbar-h-padding 8
+
+# Defines the vertical padding of the statusbar and notificationbar
+# • Value type: Integer
+# • Default value: 2
+set statusbar-v-padding 2
+
+# Defines the path for a icon to be used as window icon.
+# • Value type: String
+# • Default value:
+set window-icon
+
+# Defines the window height on startup
+# • Value type: Integer
+# • Default value: 600
+set window-height 600
+
+# Defines the window width on startup
+# • Value type: Integer
+# • Default value: 800
+set window-width 800
+
+# Defines if the search results should be cleared on abort.
+# • Value type: Boolean
+# • Default value: true
+set abort-clear-search true
+
+# Defines which auto adjustment mode should be used if a document is loaded.
+# Possible options are "best-fit" and "width".
+# • Value type: String
+# • Default value: "best-fit"
+set adjust-open "best-fit"
+
+# Defines if the number of pages per row should be honored when advancing a
+# page.
+# • Value type: Boolean
+# • Default value: false
+set advance-pages-per-row false
+
+# Tells zathura whether to save document history at each page change or only
+# when closing a document.
+# • Value type: Boolean
+# • Default value: false
+set continuous-hist-save false
+
+# Defines  the  database  backend to use for bookmarks and input history.
+# Possible values are "sqlite" and "null". If "null" is used, bookmarks and
+# input history will not be stored.
+# • Value type: String
+# • Default value: "sqlite"
+set database "sqlite"
+
+# Defines whether zathuras window should be raised when receiving certain
+# commands via D-Bus.
+# • Value type: Boolean
+# • Default value: true
+set dbus-raise-window true
+
+# En/Disables the D-Bus service. If the services is disabled, SyncTeX forward
+# synchronization is not available.
+# • Value type: Boolean
+# • Default value: true
 set dbus-service true
-set synctex true
-set synctex-editor-command "vim --servername VIMURA --remote +%{line} %{input}"
 
-# SAIR
-map q quit
+# Defines whether double or single click on a link should trigger follow.
+# • Value type: Boolean
+# • Default value: true
+set double-click-follow true
+
+# Defines the file monitor backend used to check for changes in files. Possible
+# values are "glib", "signal" (if signal handling is supported),  and  "noop".
+# The "noop" file monitor does not trigger reloads.
+# • Value type: String
+# • Default value: "glib"
+set filemonitor "glib"
+
+# Defines  the  column  in which the first page will be displayed.  This setting
+# is stored separately for every value of pages-per-row according to the
+# following pattern <1 page per row>:[<2 pages per row>[: ...]]. The last value
+# in the list will be used for all other number of pages per row if not set
+# explicitly.  Per default, the first column is set to 2 for double-page layout,
+# i.e.  the value is set to 1:2. A value of 1:1:3 would put the first page in
+# dual-page  layout in the first column, and for layouts with more columns the
+# first page would be put in the 3rd column.
+# • Value type: String
+# • Default value: "1:2"
+set first-page-column "1:2"
+
+# Defines the color that is used to show the current selected highlighted
+# element (e.g: current search result)
+# • Value type: String
+# • Default value: "rgba(0,188,0,0.5)"
+set highlight-active-color "rgba(0,188,0,0.5)"
+
+# Defines the color that is used for highlighting parts of the document (e.g.:
+# show search results)
+# • Value type: String
+# • Default value: "rgba(159,251,0,0.5)"
+set highlight-color "rgba(159,251,0,0.5)"
+
+# Defines the color that is used for text when highlighting parts of the
+# document (e.g.: number for links).
+# • Value type: String
+# • Default value: "rgba(0,0,0,0.5)"
+set highlight-fg "rgba(0,0,0,0.5)"
+
+# Defines the modifier that needs to be pressed together with the left mouse
+# button to draw the highlighter. Possible values are "shift", "ctrl" and "alt".
+# • Value type: String
+# • Default value: "shift"
+set highlighter-modifier "shift"
+
+# En/Disables incremental search (search while typing).
+# • Value type: Boolean
+# • Default value: true
+set incremental-search true
+
+# Define the background color of the selected element in index mode.
+# • Value type: String
+# • Default value: "#9FBC00"
+set index-active-bg "#9FBC00"
+
+# Defines the foreground color of the selected element in index mode.
+# • Value type: String
+# • Default value: "#232323"
+set index-active-fg "#232323"
+
+# Define the background color of the index mode.
+# • Value type: String
+# • Default value: "#232323"
+set index-bg "#232323"
+
+# Defines the foreground color of the index mode.
+# • Value type: String
+# • Default value: "#DDDDDD"
+set index-fg "#DDDDDD"
+
+# Maximum number of positions to remember in the jumplist.
+# • Value type: Integer
+# • Default value: 2000
+set jumplist-size 2000
+
+# En/Disables aligning to the left internal link targets, for example from the
+# index.
+# • Value type: Boolean
+# • Default value: true
+set link-hadjust true
+
+# En/Disables the ability of changing zoom when following links.
+# • Value type: Boolean
+# • Default value: true
+set link-zoom true
+
+# Dis/Enables the highlighting of search results.
+# • Value type: Boolean
+# • Default value: false
+set nohlsearch false
+
+# Always open documents on the first page. If disabled, zathura will jump to the
+# last remembered position.
+# • Value type: Boolean
+# • Default value: false
+set open-first-page false
+
+# Defines  the  maximum  number of pages that could be kept in the page cache.
+# When the cache is full and a new page that isnt cached becomes visible, the
+# least recently viewed page in the cache will be evicted to make room for the
+# new one.  Large values for this variable are NOT recommended, because this
+# will lead  to consuming a significant portion of the system memory.
+# • Value type: Integer
+# • Default value: 15
+set page-cache-size 15
+
+# Vertical page padding defines the vertical gap in pixels between each rendered
+# page.
+# • Value type: Integer
+# • Default value: 1
+set page-v-padding 1
+
+# Horizontal page padding defines the horizontal gap in pixels between each
+# rendered page.
+# • Value type: Integer
+# • Default value: 1
+set page-h-padding 1
+
+# Defines whether pages in multi-column view should start from the right side.
+# • Value type: Boolean
+# • Default value: false
+set page-right-to-left false
+
+# Defines  the  maximum  size  in  pixels of the thumbnail that could be kept in
+# the thumbnail cache per page. The thumbnail is scaled for a quick preview
+# during zooming before the page is rendered. When the page is rendered, the
+# result is saved as the thumbnail only if the size is no more  than  this
+# value.  A  larger value increases quality but introduces longer delay in
+# zooming and uses more system memory.
+# • Value type: Integer
+# • Default value: 4194304 (4M)
+set page-thumbnail-size 4194304 (4M)
+
+# Defines the number of pages that are rendered next to each other in a row.
+# • Value type: Integer
+# • Default value: 1
+set pages-per-row 1
+
+# En/Disables recoloring
+# • Value type: Boolean
+# • Default value: false
+set recolor false
+
+# En/Disables adjusting lightness when recoloring.
+# • Value type: Boolean
+# • Default value: false
+set recolor-adjust-lightness false
+
+# Defines the color value that is used to represent dark colors in recoloring
+# mode
+# • Value type: String
+# • Default value: "#FFFFFF"
+set recolor-darkcolor "#FFFFFF"
+
+# En/Disables keeping original hue when recoloring
+# • Value type: Boolean
+# • Default value: false
+set recolor-keephue false
+
+# Defines the color value that is used to represent light colors in recoloring
+# mode
+# • Value type: String
+# • Default value: "#000000"
+set recolor-lightcolor "#000000"
+
+# Defines if original image colors should be kept while recoloring.
+# • Value type: Boolean
+# • Default value: false
+set recolor-reverse-video false
+
+# Defines if the "Loading..." text should be displayed if a page is rendered.
+# • Value type: Boolean
+# • Default value: true
+set render-loading true
+
+# Defines the background color that is used for the "Loading..." text.
+# • Value type: String
+# • Default value: "#FFFFFF"
+set render-loading-bg "#FFFFFF"
+
+# Defines the foreground color that is used for the "Loading..." text.
+# • Value type: String
+# • Default value: "#000000"
+set render-loading-fg "#000000"
+
+# Defines the proportion of the current viewing area that should be visible
+# after scrolling a full page.
+# • Value type: Float
+# • Default value: 0
+set scroll-full-overlap 0
+
+# Defines the horizontal step size of scrolling by calling the scroll command
+# once
+# • Value type: Float
+# • Default value: -1
+set scroll-hstep -1
+
+# Defines the step size of scrolling by calling the scroll command once
+# • Value type: Float
+# • Default value: 40
+set scroll-step 40
+
+# Defines if scrolling by half or full pages stops at page boundaries.
+# • Value type: Boolean
+# • Default value: false
+set scroll-page-aware false
+
+# Defines if the last/first page should be wrapped
+# • Value type: Boolean
+# • Default value: false
+set scroll-wrap false
+
+# En/Disables horizontally centered search results.
+# • Value type: Boolean
+# • Default value: true
+set search-hadjust true
+
+# Defines  the X clipboard into which mouse-selected data will be written.  When
+# it is "clipboard", selected data will be written to the CLIPBOARD clipboard,
+# and can be pasted using the Ctrl+v key combination.  When it is "primary",
+# selected data will be written to the PRIMARY clipboard, and can be pasted
+# using the mid‐ dle mouse button, or the Shift-Insert key combination.
+# • Value type: String
+# • Default value: "primary"
+set selection-clipboard "primary"
+
+# Defines if a notification should be displayed after selecting text.
+# • Value type: Boolean
+# • Default value: true
+set selection-notification true
+
+# Defines the background color when displaying additional information for
+# signatures with errors.
+# • Value type: String
+# • Default value: "rgba(92%,11%,14%,0.9)"
+set signature-error-color "rgba(92%,11%,14%,0.9)"
+
+# Defines the background color when displaying additional information for valid
+# signatures.
+# • Value type: String
+# • Default value: "rgba(18%,80%,33%,0.9)"
+set signature-success-color "rgba(18%,80%,33%,0.9)"
+
+# Defines the background color when displaying additional information for
+# signatures with warnings.
+# • Value type: String
+# • Default value: "rgba(100%,84%,0%,0.9)"
+set signature-warning-color "rgba(100%,84%,0%,0.9)"
+
+# Defines if the directories should be displayed in completion.
+# • Value type: Boolean
+# • Default value: true
+set show-directories true
+
+# Defines if hidden files and directories should be displayed in completion.
+# • Value type: Boolean
+# • Default value: false
+set show-hidden false
+
+# Defines the number of recent files that should be displayed in completion.  If
+# the value is negative, no upper bounds are applied. If the value is 0, no
+# recent files are shown.
+# • Value type: Integer
+# • Default value: 10
+set show-recent 10
+
+# Defines whether additional information on signatures embedded in documents
+# should be displayed.
+# • Value type: Boolean
+# • Default value false
+set show-signature-information
+
+# Use basename of the file in the statusbar.
+# • Value type: Boolean
+# • Default value: false
+set statusbar-basename false
+
+# Display a short version of the file path, which replaces $HOME with ~, in the
+# statusbar.
+# • Value type: Boolean
+# • Default value: false
+set statusbar-home-tilde false
+
+# Display (current page / total pages) as a percent in the statusbar.
+# • Value type: Boolean
+# • Default value: false
+set statusbar-page-percent false
+
+# En/Disables SyncTeX backward synchronization support.
+# • Value type: Boolean
+# • Default value: true
+set synctex true
+
+# Defines the modifier that needs to be pressed together with the left mouse
+# button to trigger the SyncTeX backward synchronization. Possible values are
+# "shift", "ctrl" and "alt".
+# • Value type: String
+# • Default value: "ctrl"
+set synctex-edit-modifier "ctrl"
+
+# Defines the command executed for SyncTeX backward synchronization.
+# • Value type: String
+# • Default value:
+set synctex-editor-command
+
+# Center the screen at the vertical midpoint of the page by default.
+# • Value type: Boolean
+# • Default value: false
+set vertical-center false
+
+# Defines whether the window document should be updated based on the first page
+# of a dcument.
+# • Value type: Boolean
+# • Default value: false
+set window-icon-document false
+
+# Use basename of the file in the window title.
+# • Value type: Boolean
+# • Default value: false
+set window-title-basename false
+
+# Display a short version of the file path, which replaces $HOME with ~, in the
+# window title.
+# • Value type: Boolean
+# • Default value: false
+set window-title-home-tilde false
+
+# Display the page number in the window title.
+# • Value type: Boolean
+# • Default value: false
+set window-title-page false
+
+# En/Disables horizontally centered zooming.
+# • Value type: Boolean
+# • Default value: false
+set zoom-center false
+
+# Defines the maximum percentage that the zoom level can be.
+# • Value type: Integer
+# • Default value: 1000
+set zoom-max 1000
+
+# Defines the minimum percentage that the zoom level can be.
+# • Value type: Integer
+# • Default value: 10
+set zoom-min 10
+
+# Defines the amount of percent that is zoomed in or out on each command.
+# • Value type: Integer
+# • Default value: 10
+set zoom-step 10
