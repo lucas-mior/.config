@@ -58,6 +58,9 @@ let g:gitgutter_map_keys = 0
 let g:gitgutter_terminal_reports_focus = 0
 silent! highlight! link SignColumn LineNr?
 
+" fugitive
+nnoremap <leader>g :tab Git<CR>
+
 let g:python_highlight_all = 1
 
 def Gototo()
@@ -117,6 +120,7 @@ def ToggleMarkdownListItem()
         call setline(cursor_line, new_line)
     endif
 enddef
+" <C-@> is <C-Space> (for what I am sure is a very good reason)
 nnoremap <C-@> :call ToggleMarkdownListItem()<CR>
 
 def GetSyntaxGroup()
@@ -157,14 +161,6 @@ let g:SyncTexMode = v:false
 autocmd CursorMoved *.tex call SyncTexAuto()
 nnoremap <Space> :call SyncTex()<CR>
 nnoremap <leader>s :call ToggleSyncTexMode()<CR>
-
-" let g:vimtex_view_method = 'zathura'
-" let g:vimtex_view_forward_search_on_start = 1
-
-let g:pyls = {
-      \ 'configurationSources': ['flake8']
-      \ }
-
 
 "" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
@@ -258,12 +254,14 @@ vnoremap <C-c> y
 vnoremap <C-x> d
 vnoremap S :s/
 nnoremap S :%s/
+
 " hjkl;
 " h é mapeado para f next (ver plugins)
 noremap j h
 noremap ; l
 noremap k gj
 noremap l gk
+
 " some defaults dont make sense
 nnoremap Y y$
 nnoremap e ea
@@ -271,6 +269,7 @@ nnoremap cd 0D
 nnoremap ' `
 nnoremap ` '
 inoremap <C-h> <esc>dbxi
+
 " janela
 nnoremap <C-k>  <C-w>w
 nnoremap <C-l>  <C-l><C-w>w
@@ -308,12 +307,14 @@ tnoremap <C-w>J <esc><C-w>H
 tnoremap <C-w>K <esc><C-w>J
 tnoremap <C-w>L <esc><C-w>K
 tnoremap <C-w>: <esc><C-w>L
+
 " completions
 inoremap <tab> <c-n>
 inoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 cnoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 cnoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
+
 " Termdebug
 noremap <leader>b :Break<CR>
 noremap <leader>e :Eval<CR>
@@ -321,9 +322,6 @@ noremap <leader>c :Continue<CR>
 " noremap <leader>s :Step<CR>
 " noremap <space>   :Step<CR>
 " noremap <enter>   :Step<CR>
-" my_functions
-" <C-@> is <C-Space> (for what I am sure is a very good reason)
-nnoremap <leader>g :tab Git<CR>
 
 au BufWritePost */key-handler                           !nsxiv_keyhandler_update_lf.sed % > $XDG_CONFIG_HOME/lf/nsxiv
 au BufWritePost ~/.config/tmux/tmux.conf                !tmux source-file %
