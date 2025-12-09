@@ -36,7 +36,7 @@ def FzfFindFileRegex()
     var cmd = 
         'rg --line-number --no-heading .'
         .. ' | fzf --delimiter ":"'
-        .. '       --preview-window=up,90%'
+        .. '       --preview-window=up,80%,border-rounded'
         .. '       --preview "' .. preview_script .. ' {1} {2}"'
 
     var out = systemlist(cmd)
