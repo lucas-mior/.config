@@ -2,6 +2,7 @@
     " set shortmess=at
     command! Vmake w | silent make -j1 clang | unsilent redraw!
     map <leader>m :Vmake<CR>:LspDiag current<CR>
+    nnoremap <leader>m :make<CR>
     " map <leader>k dd:!source ~/.config/zsh/comandos.zsh; rf <C-r>"<backspace><space><c-r>%<backspace><backspace><cr><cr>
     " map <leader>l dd:!source ~/.config/zsh/comandos.zsh; rnall <C-r>"<backspace><space><c-r>%<backspace><backspace>_
     " map <leader>l dd:!source ~/.config/zsh/comandos.zsh; rnall <C-r>"<backspace><space>
@@ -82,4 +83,3 @@
     " <C-@> is <C-Space> (for what I am sure is a very good reason)
     nnoremap <C-@> :ToggleMarkdownListItem<CR>
     nnoremap <leader>g :tab Git<CR>
-    nnoremap <leader>m :make<CR>

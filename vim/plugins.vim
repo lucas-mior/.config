@@ -75,7 +75,6 @@ nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
 nnoremap <leader>p :GitGutterNextHunk<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
-nnoremap <leader>m :make<CR>
 
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
 function! ToggleMarkdownListItem()
