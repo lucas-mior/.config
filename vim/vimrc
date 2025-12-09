@@ -119,6 +119,7 @@ def ToggleMarkdownListItem()
     endif
 enddef
 command! -nargs=0 ToggleMarkdownListItem :call ToggleMarkdownListItem()
+nnoremap <C-@> :ToggleMarkdownListItem<CR>
 
 function! GetSyntaxGroup()
     let l:s = synID(line('.'), col('.'), 1)
@@ -311,7 +312,6 @@ noremap <leader>c :Continue<CR>
 " noremap <enter>   :Step<CR>
 " my_functions
 " <C-@> is <C-Space> (for what I am sure is a very good reason)
-nnoremap <C-@> :ToggleMarkdownListItem<CR>
 nnoremap <leader>g :tab Git<CR>
 
 au BufWritePost */key-handler                           !nsxiv_keyhandler_update_lf.sed % > $XDG_CONFIG_HOME/lf/nsxiv
