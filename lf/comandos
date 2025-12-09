@@ -138,9 +138,9 @@ cmd retirar ${{
 
 cmd colar ${{
     load=$(cat $XDG_DATA_HOME/lf/files)
-    list=$(sed    '1d' <<< "$load")
-    mode=$(sed -n '1p' <<< "$load")
-    prim=$(sed -n '2p' <<< "$load")
+    list=$(echo "$load" | sed '1d')
+    mode=$(echo "$load" | sed -n '1p')
+    prim=$(echo "$load" | sed -n '2p')
     prim="${prim##*/}"
     if [[ -e "$prim" ]]; then
         i=1
