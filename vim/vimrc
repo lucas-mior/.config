@@ -113,11 +113,11 @@ function! ToggleMarkdownListItem()
     endif
 endfunction
 
-command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 function! GetSyntaxGroup()
     let l:s = synID(line('.'), col('.'), 1)
     echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
 endfun
+command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 function! Synctex()
     let l:vimwin = system('xdotool getactivewindow')

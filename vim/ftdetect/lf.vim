@@ -1,1 +1,1 @@
-au BufNewFile,BufRead */.config/lf/* set filetype=lf2
+au BufNewFile,BufRead */.config/lf/* set filetype=lf
