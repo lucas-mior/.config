@@ -151,7 +151,7 @@ def SyncTex()
     var vimwin = system('xdotool getactivewindow')
     vimwin = substitute(vimwin, '\n$', '', '')
 
-    var cmd = 'zathura --synctex-forward '
+    var cmd = 'zathura.sh --synctex-forward '
               .. line('.') .. ':' .. col('.') .. ':' .. bufname('%')
               .. ' main.pdf >/dev/null 2>&1 &'
 
