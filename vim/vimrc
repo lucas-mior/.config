@@ -125,7 +125,7 @@ function! GetSyntaxGroup()
 endfun
 command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
-def Synctex()
+def SyncTex()
     var vimwin = system('xdotool getactivewindow')
     vimwin = substitute(vimwin, '\n$', '', '')
 
@@ -141,8 +141,22 @@ def Synctex()
     call system('xdotool windowactivate ' .. vimwin)
 enddef
 
-" nnoremap <space> :call Synctex()<CR>
-autocmd CursorMoved *.tex call Synctex()
+def SyncTexAuto()
+    if get(g:, 'SyncTexMode', v:false)
+        call g:SyncTex()
+    endif
+enddef
+
+def ToggleSyncTexMode()
+    g:SyncTexMode = !get(g:, 'SyncTexMode', v:false)
+    echom 'SyncTex mode: ' .. (g:SyncTexMode ? 'ON' : 'OFF')
+enddef
+
+let g:SyncTexMode = v:false
+
+autocmd CursorMoved *.tex call SyncTexAuto()
+nnoremap <Space> :call SyncTex()<CR>
+nnoremap <leader>s :call ToggleSyncTexMode()<CR>
 
 " let g:vimtex_view_method = 'zathura'
 " let g:vimtex_view_forward_search_on_start = 1
