@@ -488,7 +488,7 @@ set synctex true
 # "shift", "ctrl" and "alt".
 # • Value type: String
 # • Default value: "ctrl"
-set synctex-edit-modifier "ctrl"
+set synctex-edit-modifier ctrl
 
 # Defines the command executed for SyncTeX backward synchronization.
 # • Value type: String

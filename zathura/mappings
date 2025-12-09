@@ -1,4 +1,4 @@
-map q quit
+m "ctrl"ap q quit
 ## NAVEGAR NO INDEX
 map [index] J navigate_index collapse-all
 map [index] j navigate_index collapse
@@ -11,6 +11,8 @@ map [index] : navigate_index expand-all
 map j scroll left
 map <F4> scroll down
 map <F5> scroll up
+map <F6> scroll half-down
+map <F7> scroll half-up
 map ; scroll right
 
 map r       rotate rotate-ccw
@@ -32,8 +34,10 @@ map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
 
-map k feedkeys :exec<Space>"zathuraback.sh"<Return><F4>
-map l feedkeys :exec<Space>"zathuraback.sh"<Return><F5>
+map k     feedkeys <F4>:exec<Space>"zathuraback.sh k"<Return>
+map l     feedkeys <F5>:exec<Space>"zathuraback.sh l"<Return>
+map <C-d> feedkeys <F6>:exec<Space>"zathuraback.sh cd"<Return>
+map <C-u> feedkeys <F7>:exec<Space>"zathuraback.sh cu"<Return>
 
 ## MARCAS
 map \" feedkeys :blist<Space>
