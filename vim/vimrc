@@ -365,7 +365,7 @@ au BufRead *.bib             set autochdir
 
 augroup CustomBashSyntax
   autocmd!
-  autocmd BufRead,BufNewFile /home/lucas/.config/lf/* setlocal filetype=lf2
+  autocmd BufRead,BufNewFile /home/lucas/.config/lf/* setlocal filetype=lf
 augroup END
 
 " cd to file dir on startup

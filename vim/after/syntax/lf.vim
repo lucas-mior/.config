@@ -142,4 +142,4 @@ syn keyword lfOptions
 hi link LfKeyword Keyword
 hi link LfOptions Type
 
-let b:current_syntax = "lf2"
+let b:current_syntax = "lf"
