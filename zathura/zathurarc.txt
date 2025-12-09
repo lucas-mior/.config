@@ -453,11 +453,9 @@ set show-recent
 
 # Defines whether additional information on signatures embedded in documents
 # should be displayed.
-set show-signature-information
-
-# 
+# • Value type: Boolean
 # • Default value false
-       • value type: Boolean
+set show-signature-information
 
 # Use basename of the file in the statusbar.
 # • Value type: Boolean
