@@ -5,46 +5,46 @@ set n-completion-items
 
 # Defines the background color that is used for command line completion entries
 # • Value type: String
-# • Default value: #232323
+# • Default value: "#232323"
 set completion-bg
 
 # Defines the foreground color that is used for command line completion entries
 # • Value type: String
-# • Default value: #DDDDDD
+# • Default value: "#DDDDDD"
 set completion-fg
 
 # Defines the background color that is used for command line completion group
 # elements
 # • Value type: String
-# • Default value: #000000
+# • Default value: "#000000"
 set completion-group-bg
 
 # Defines the foreground color that is used for command line completion group
 # elements
 # • Value type: String
-# • Default value: #DEDEDE
+# • Default value: "#DEDEDE"
 set completion-group-fg
 
 # Defines the background color that is used for the current command line
 # completion element
 # • Value type: String
-# • Default value: #9FBC00
+# • Default value: "#9FBC00"
 set completion-highlight-bg
 
 # Defines the foreground color that is used for the current command line
 # completion element
 # • Value type: String
-# • Default value: #232323
+# • Default value: "#232323"
 set completion-highlight-fg
 
 # Defines the default background color
 # • Value type: String
-# • Default value: #000000
+# • Default value: "#000000"
 set default-bg
 
 # Defines the default foreground color
 # • Value type: String
-# • Default value: #DDDDDD
+# • Default value: "#DDDDDD"
 set default-fg
 
 # Defines a command the should be prepended to any command run with exec.
@@ -54,7 +54,7 @@ set exec-command
 
 # Defines the font that will be used
 # • Value type: String
-# • Default value: monospace normal 9
+# • Default value: "monospace normal 9"
 set font   
 
 # Shows or hides GUI elements.  If it contains 'c', the command line is
@@ -62,57 +62,57 @@ set font
 # 'h', the horizontal scrollbar is displayed.  If it contains 'v', the vertical
 # scrollbar is displayed.
 # • Value type: String
-# • Default value: s
+# • Default value: "s"
 set guioptions
 
 # Defines the background color for the inputbar
 # • Value type: String
-# • Default value: #131313
+# • Default value: "#131313"
 set inputbar-bg
 
 # Defines the foreground color for the inputbar
 # • Value type: String
-# • Default value: #9FBC00
+# • Default value: "#9FBC00"
 set inputbar-fg
 
 # Defines the background color for a notification
 # • Value type: String
-# • Default value: #FFFFFF
+# • Default value: "#FFFFFF"
 set notification-bg
 
 # Defines the foreground color for a notification
 # • Value type: String
-# • Default value: #000000
+# • Default value: "#000000"
 set notification-fg
 
 # Defines the background color for an error notification
 # • Value type: String
-# • Default value: #FF1212
+# • Default value: "#FF1212"
 set notification-error-bg
 
 # Defines the foreground color for an error notification
 # • Value type: String
-# • Default value: #FFFFFF
+# • Default value: "#FFFFFF"
 set notification-error-fg
 
 # Defines the background color for a warning notification
 # • Value type: String
-# • Default value: #FFF712
+# • Default value: "#FFF712"
 set notification-warning-bg
 
 # Defines the foreground color for a warning notification
 # • Value type: String
-# • Default value: #FFFFFF
+# • Default value: "#FFFFFF"
 set notification-warning-fg
 
 # Defines the background color of the statusbar
 # • Value type: String
-# • Default value: #000000
+# • Default value: "#000000"
 set statusbar-bg
 
 # Defines the foreground color of the statusbar
 # • Value type: String
-# • Default value: #FFFFFF
+# • Default value: "#FFFFFF"
 set statusbar-fg
 
 # Defines the horizontal padding of the statusbar and notificationbar
@@ -148,7 +148,7 @@ set abort-clear-search
 # Defines which auto adjustment mode should be used if a document is loaded.
 # Possible options are "best-fit" and "width".
 # • Value type: String
-# • Default value: best-fit
+# • Default value: "best-fit"
 set adjust-open
 
 # Defines if the number of pages per row should be honored when advancing a
@@ -167,7 +167,7 @@ set continuous-hist-save
 # Possible values are "sqlite" and "null". If "null" is used, bookmarks and
 # input history will not be stored.
 # • Value type: String
-# • Default value: sqlite
+# • Default value: "sqlite"
 set database
 
 # Defines whether zathuras window should be raised when receiving certain
@@ -191,7 +191,7 @@ set double-click-follow
 # values are "glib", "signal" (if signal handling is supported),  and  "noop".
 # The "noop" file monitor does not trigger reloads.
 # • Value type: String
-# • Default value: glib
+# • Default value: "glib"
 set filemonitor
 
 # Defines  the  column  in which the first page will be displayed.  This setting
@@ -203,31 +203,31 @@ set filemonitor
 # dual-page  layout in the first column, and for layouts with more columns the
 # first page would be put in the 3rd column.
 # • Value type: String
-# • Default value: 1:2
+# • Default value: "1:2"
 set first-page-column
 
 # Defines the color that is used to show the current selected highlighted
 # element (e.g: current search result)
 # • Value type: String
-# • Default value: rgba(0,188,0,0.5)
+# • Default value: "rgba(0,188,0,0.5)"
 set highlight-active-color
 
 # Defines the color that is used for highlighting parts of the document (e.g.:
 # show search results)
 # • Value type: String
-# • Default value: rgba(159,251,0,0.5)
+# • Default value: "rgba(159,251,0,0.5)"
 set highlight-color
 
 # Defines the color that is used for text when highlighting parts of the
 # document (e.g.: number for links).
 # • Value type: String
-# • Default value: rgba(0,0,0,0.5)
+# • Default value: "rgba(0,0,0,0.5)"
 set highlight-fg
 
 # Defines the modifier that needs to be pressed together with the left mouse
 # button to draw the highlighter. Possible values are "shift", "ctrl" and "alt".
 # • Value type: String
-# • Default value: shift
+# • Default value: "shift"
 set highlighter-modifier
 
 # En/Disables incremental search (search while typing).
@@ -237,22 +237,22 @@ set incremental-search
 
 # Define the background color of the selected element in index mode.
 # • Value type: String
-# • Default value: #9FBC00
+# • Default value: "#9FBC00"
 set index-active-bg
 
 # Defines the foreground color of the selected element in index mode.
 # • Value type: String
-# • Default value: #232323
+# • Default value: "#232323"
 set index-active-fg
 
 # Define the background color of the index mode.
 # • Value type: String
-# • Default value: #232323
+# • Default value: "#232323"
 set index-bg
 
 # Defines the foreground color of the index mode.
 # • Value type: String
-# • Default value: #DDDDDD
+# • Default value: "#DDDDDD"
 set index-fg
 
 # Maximum number of positions to remember in the jumplist.
@@ -336,7 +336,7 @@ set recolor-adjust-lightness
 # Defines the color value that is used to represent dark colors in recoloring
 # mode
 # • Value type: String
-# • Default value: #FFFFFF
+# • Default value: "#FFFFFF"
 set recolor-darkcolor
 
 # En/Disables keeping original hue when recoloring
@@ -347,7 +347,7 @@ set recolor-keephue
 # Defines the color value that is used to represent light colors in recoloring
 # mode
 # • Value type: String
-# • Default value: #000000
+# • Default value: "#000000"
 set recolor-lightcolor
 
 # Defines if original image colors should be kept while recoloring.
@@ -362,12 +362,12 @@ set render-loading
 
 # Defines the background color that is used for the "Loading..." text.
 # • Value type: String
-# • Default value: #FFFFFF
+# • Default value: "#FFFFFF"
 set render-loading-bg
 
 # Defines the foreground color that is used for the "Loading..." text.
 # • Value type: String
-# • Default value: #000000
+# • Default value: "#000000"
 set render-loading-fg
 
 # Defines the proportion of the current viewing area that should be visible
@@ -408,7 +408,7 @@ set search-hadjust
 # selected data will be written to the PRIMARY clipboard, and can be pasted
 # using the mid‐ dle mouse button, or the Shift-Insert key combination.
 # • Value type: String
-# • Default value: primary
+# • Default value: "primary"
 set selection-clipboard
 
 # Defines if a notification should be displayed after selecting text.
@@ -419,19 +419,19 @@ set selection-notification
 # Defines the background color when displaying additional information for
 # signatures with errors.
 # • Value type: String
-# • Default value: rgba(92%,11%,14%,0.9)
+# • Default value: "rgba(92%,11%,14%,0.9)"
 set signature-error-color
 
 # Defines the background color when displaying additional information for valid
 # signatures.
 # • Value type: String
-# • Default value: rgba(18%,80%,33%,0.9)
+# • Default value: "rgba(18%,80%,33%,0.9)"
 set signature-success-color
 
 # Defines the background color when displaying additional information for
 # signatures with warnings.
 # • Value type: String
-# • Default value: rgba(100%,84%,0%,0.9)
+# • Default value: "rgba(100%,84%,0%,0.9)"
 set signature-warning-color
 
 # Defines if the directories should be displayed in completion.
@@ -482,7 +482,7 @@ set synctex
 # button to trigger the SyncTeX backward synchronization. Possible values are
 # "shift", "ctrl" and "alt".
 # • Value type: String
-# • Default value: ctrl
+# • Default value: "ctrl"
 set synctex-edit-modifier
 
 # Defines the command executed for SyncTeX backward synchronization.
