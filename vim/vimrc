@@ -305,7 +305,7 @@ noremap <leader>c :Continue<CR>
 nnoremap <C-@> :ToggleMarkdownListItem<CR>
 nnoremap <leader>g :tab Git<CR>
 
-au BufWritePost */key-handler                           !atualizar.sed % > $XDG_CONFIG_HOME/lf/nsxiv
+au BufWritePost */key-handler                           !nsxiv_keyhandler_update_lf.sed % > $XDG_CONFIG_HOME/lf/nsxiv
 au BufWritePost ~/.config/tmux/tmux.conf                !tmux source-file %
 au BufWritePost ~/.config/X11/*                         !xrdb ~/.config/X11/Xresources
 au BufWritePost ~/.config/sxhkd/sxhkdrc                 !pkill -SIGUSR1 sxhkd
