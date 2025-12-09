@@ -1,5 +1,5 @@
 vim9script
-# Editor highlight groups
+  # Editor highlight groups
   hi ColorColumn      cterm=NONE   ctermbg=000   ctermfg=NONE
                     \ gui=NONE     guibg=#111111 guifg=NONE
   hi Conceal          cterm=NONE   ctermbg=000   ctermfg=NONE
@@ -125,7 +125,7 @@ vim9script
   hi WildMenu         cterm=BOLD   ctermbg=007   ctermfg=000 
                     \ gui=NONE     guibg=#ffffff guifg=#000000
 
-# Syntax highlight groups
+  # Syntax highlight groups
   hi Comment          cterm=ITALIC ctermbg=NONE  ctermfg=246 
                     \ gui=NONE     guibg=NONE    guifg=#989898
 
@@ -196,13 +196,10 @@ vim9script
                     \ gui=NONE     guibg=NONE    guifg=#ddbb00
   hi debugPC          cterm=NONE   ctermbg=230   ctermfg=NONE
                     \ gui=NONE     guibg=#555555 guifg=NONE
-#debugBreakpoint xxx term=reverse ctermbg=9   guibg=red
-#debugBreakpointDisabled xxx term=reverse ctermbg=248   guibg=gray
 
+  # Others?
   hi Underlined    cterm=UNDERLINE ctermbg=NONE  ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
-# hi Ignore           cterm=NONE   ctermbg=NONE  ctermfg=NONE
-#                   \ gui=NONE     guibg=NONE    guifg=NONE
   hi Error            cterm=NONE   ctermbg=017   ctermfg=NONE
                     \ gui=NONE     guibg=NONE    guifg=NONE
   hi Todo             cterm=NONE   ctermbg=019   ctermfg=NONE
