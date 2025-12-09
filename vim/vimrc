@@ -119,19 +119,21 @@ function! GetSyntaxGroup()
 endfun
 command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
-function! Synctex()
-    let l:vimwin = system('xdotool getactivewindow')
-    let l:vimwin = substitute(l:vimwin, '\n$', '', '')
+def Synctex()
+    var vimwin = system('xdotool getactivewindow')
+    vimwin = substitute(vimwin, '\n$', '', '')
 
-    execute "silent !zathura --synctex-forward "
-                \ . line('.') . ":" . col('.') . ":" . bufname('%')
-                \ . " main.pdf >/dev/null 2>&1 &"
+    var cmd = 'zathura --synctex-forward '
+              .. line('.') .. ':' .. col('.') .. ':' .. bufname('%')
+              .. ' main.pdf >/dev/null 2>&1 &'
+
+    execute 'silent !' .. cmd
     redraw!
 
     sleep 20m
 
-    silent call system('xdotool windowactivate ' . l:vimwin)
-endfunction
+    call system('xdotool windowactivate ' .. vimwin)
+enddef
 
 " nnoremap <space> :call Synctex()<CR>
 autocmd CursorMoved *.tex call Synctex()
