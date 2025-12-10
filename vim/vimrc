@@ -435,8 +435,16 @@ nnoremap <C-f> :FzfFindEditCmd<CR>
 def FzfFindFileRegex()
     var preview_script = 'fzf_bat_preview.bash'
 
+    var buflist = []
+    for buf in range(1, bufnr('$'))
+      if bufloaded(buf)
+        call add(buflist, bufname(buf) .. ':1')
+      endif
+    endfor
+    call writefile(buflist, '/tmp/vimbuflist')
+
     var cmd =
-        'rg --line-number --no-heading .'
+        '{/usr/bin/cat /tmp/vimbuflist; rg --line-number --no-heading . }'
         .. ' | fzf --delimiter ":"'
         .. '       --bind one:accept'
         .. '       --preview-window=up,80%,border-rounded'
@@ -465,23 +473,6 @@ enddef
 
 command! FzfFindFileRegexCmd call FzfFindFileRegex()
 nnoremap <C-h> :FzfFindFileRegexCmd<CR>
-
-function! ListBufAndLS()
-  let l:buflist = []
-  for buf in range(1, bufnr('$'))
-    if bufloaded(buf)
-      call add(l:buflist, bufname(buf))
-    endif
-  endfor
-
-  let l:ls_output = split(system('ls'), "\n")
-
-  let l:combined = l:buflist + l:ls_output
-
-  for item in l:combined
-    echo item
-  endfor
-endfunction
 
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
