@@ -403,8 +403,14 @@ au WinResized * wincmd =
 " augroup END
 
 def FzfFindEdit()
+    var buflist = []
+    for buf in range(1, bufnr('$'))
+      call add(buflist, bufname(buf) .. ':1')
+    endfor
+    call writefile(buflist, '/tmp/vimbuflist')
+
     var cmd =
-        'find .'
+        '{/usr/bin/cat /tmp/vimbuflist; find .}'
         .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
         .. ' | grep -Ev "(.cache|bin)/"'
         .. ' | grep -Ev ".(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
