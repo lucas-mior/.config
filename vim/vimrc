@@ -155,7 +155,7 @@ augroup SyncTexGroup
 augroup END
 
 function! s:SyncTexSetupAuto() abort
-    autocmd CursorMoved <buffer> call SyncTexAutoForward()
+    autocmd CursorHold <buffer> call SyncTexAutoForward()
 
     nnoremap <buffer> <Space> :call SyncTexForward()<CR>
     nnoremap <buffer> <leader>s :call SyncTexToggleAutoForward()<CR>
@@ -168,11 +168,8 @@ def g:SyncTexBackward(line: string, afile: string)
 enddef
 
 def g:SyncTexForward()
-    var cmd = 'zathura --synctex-forward '
-              .. line('.') .. ':' .. col('.') .. ':' .. bufname('%')
-              .. ' main.pdf >/dev/null 2>&1 &'
-
-    execute 'silent !' .. cmd
+    execute 'silent !'
+            .. 'zf ' .. line('.') .. ' ' .. col('.') .. ' ' .. bufname('%')
     redraw!
 enddef
 
