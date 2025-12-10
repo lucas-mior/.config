@@ -155,7 +155,7 @@ augroup SyncTexGroup
 augroup END
 
 function! s:SyncTexSetupAuto() abort
-    autocmd CursorHold <buffer> call SyncTexAutoForward()
+    autocmd CursorHold <buffer> silent! call SyncTexAutoForward()
 
     nnoremap <buffer> <Space> :call SyncTexForward()<CR>
     nnoremap <buffer> <leader>s :call SyncTexToggleAutoForward()<CR>
@@ -168,15 +168,14 @@ def g:SyncTexBackward(line: string, afile: string)
 enddef
 
 def g:SyncTexForward()
-    execute 'silent !'
-            .. 'zf ' .. line('.') .. ' ' .. col('.') .. ' ' .. bufname('%')
-    redraw!
+    var cmd = printf('zf %d %d %s', line('.'), col('.'), bufname('%'))
+    call system(cmd)
 enddef
 
 def SyncTexAutoForward()
     var enabled = g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
     if enabled
-        call g:SyncTexForward()
+        silent! call g:SyncTexForward()
     endif
 enddef
 
