@@ -176,6 +176,7 @@ let g:vimtex_view_enabled = 0
 let g:vimtex_view_Auto = 0
 
 def SyncTexAutoForward()
+    var enabled = g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
     if get(g:, 'synctex_auto_forward_enable', v:false)
         call g:SyncTexForward()
     endif
@@ -183,10 +184,12 @@ enddef
 
 def SyncTexToggleAutoForward()
     g:synctex_auto_forward_enable = !get(g:, 'synctex_auto_forward_enable', v:false)
-    echom 'SyncTex mode: ' .. (g:synctex_auto_forward_enable ? 'ON' : 'OFF')
+    var enabled = g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
+    echom 'SyncTex mode: ' .. (enabled ? 'ON' : 'OFF')
 enddef
 
 let g:synctex_auto_forward_enable = v:false
+let g:synctex_auto_forward_disable = v:false
 
 "" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
