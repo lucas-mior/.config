@@ -158,19 +158,12 @@ function! s:SyncTexSetupAuto() abort
 endfunction
 
 def SyncTex()
-    # var vimwin = system('xdotool getactivewindow')
-    # vimwin = substitute(vimwin, '\n$', '', '')
-
     var cmd = 'zathura --synctex-forward '
               .. line('.') .. ':' .. col('.') .. ':' .. bufname('%')
               .. ' main.pdf >/dev/null 2>&1 &'
 
     execute 'silent !' .. cmd
     redraw!
-
-    # sleep 20m
-
-    # call system('xdotool windowactivate ' .. vimwin)
 enddef
 
 let g:vimtex_view_enabled = 0
