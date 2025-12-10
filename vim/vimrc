@@ -94,14 +94,14 @@ nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
 
-function! GitGutterNextHunkCycle()
-    let line = line('.')
-    silent! GitGutterNextHunk
-    if line('.') == line
-      1
-      GitGutterNextHunk
+def GitGutterNextHunkCycle()
+    var line_num = line('.')
+    execute 'GitGutterNextHunk'
+    if line('.') == line_num
+        call cursor(1, 1)
+        execute 'GitGutterNextHunk'
     endif
-endfunction
+enddef
 
 nnoremap <leader>p :call GitGutterNextHunkCycle()<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
