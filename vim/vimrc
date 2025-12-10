@@ -175,7 +175,7 @@ enddef
 def SyncTexAutoForward()
     var enabled = g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
     if enabled
-        silent! call g:SyncTexForward()
+        call g:SyncTexForward()
     endif
 enddef
 
