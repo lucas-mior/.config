@@ -214,7 +214,7 @@ let &t_fd = "\<Esc>[?1004l"
 execute "set <FocusGained>=\<Esc>[I"
 execute "set <FocusLost>=\<Esc>[O"
 
-autocmd FocusGained *.tex call timer_start(1000, 'SyncTexOnFocusTimer')
+autocmd FocusGained *.tex call SyncTexOnFocusGain()
 autocmd FocusLost   *.tex call SyncTexOnFocusLost()
 
 "" cursor: format and color (terminal has to support these escape sequences)
