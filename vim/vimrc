@@ -168,8 +168,8 @@ def g:SyncTexBackward(line: string, afile: string)
 enddef
 
 def g:SyncTexForward()
-    var cmd = printf('zf %d %d %s', line('.'), col('.'), bufname('%'))
-    call system(cmd)
+    var cmd = ['zf', string(line('.')), string(col('.')), bufname('%')]
+    job_start(cmd)
 enddef
 
 def SyncTexAutoForward()
