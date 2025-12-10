@@ -1,6 +1,5 @@
 set conceallevel=0
 set tabstop=2 shiftwidth=2 expandtab
-set iskeyword-=_
 set iskeyword+=\\
 set nohlsearch noincsearch noignorecase nosmartcase
 nmap w /\\\\|\\\@<!\<\k\\|\(\>\\|\s\)\@<=\S<CR>:noh<CR>
