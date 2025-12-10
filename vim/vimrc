@@ -466,5 +466,22 @@ enddef
 command! FzfFindFileRegexCmd call FzfFindFileRegex()
 nnoremap <C-h> :FzfFindFileRegexCmd<CR>
 
+function! ListBufAndLS()
+  let l:buflist = []
+  for buf in range(1, bufnr('$'))
+    if bufloaded(buf)
+      call add(l:buflist, bufname(buf))
+    endif
+  endfor
+
+  let l:ls_output = split(system('ls'), "\n")
+
+  let l:combined = l:buflist + l:ls_output
+
+  for item in l:combined
+    echo item
+  endfor
+endfunction
+
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
