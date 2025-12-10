@@ -179,7 +179,7 @@ set database "sqlite"
 # commands via D-Bus.
 # • Value type: Boolean
 # • Default value: true
-set dbus-raise-window true
+set dbus-raise-window false
 
 # En/Disables the D-Bus service. If the services is disabled, SyncTeX forward
 # synchronization is not available.
@@ -493,7 +493,7 @@ set synctex-edit-modifier ctrl
 # Defines the command executed for SyncTeX backward synchronization.
 # • Value type: String
 # • Default value:
-set synctex-editor-command "vim --servername VIMURA --remote +%{line} %{input}"
+set synctex-editor-command "vim --servername VIMURA --remote-send ':silent! edit +%{line} %{input} | silent! redraw!<CR>'"
 
 # Center the screen at the vertical midpoint of the page by default.
 # • Value type: Boolean
