@@ -493,7 +493,7 @@ set synctex-edit-modifier ctrl
 # Defines the command executed for SyncTeX backward synchronization.
 # • Value type: String
 # • Default value:
-set synctex-editor-command "vim --servername VIMURA --remote-send ':silent! edit +%{line} %{input} | silent! redraw!<CR>'"
+set synctex-editor-command "zb2 %{line} %{input}"
 
 # Center the screen at the vertical midpoint of the page by default.
 # • Value type: Boolean
