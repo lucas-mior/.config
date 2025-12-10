@@ -403,7 +403,7 @@ def FzfFindEdit()
     call writefile(buflist, '/tmp/vimbuflist')
 
     var cmd =
-        '{/usr/bin/cat /tmp/vimbuflist; find .}'
+        '{/usr/bin/cat /tmp/vimbuflist; find . -type f}'
         .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
         .. ' | grep -Ev "(.cache|bin)/"'
         .. ' | grep -Ev ".(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
