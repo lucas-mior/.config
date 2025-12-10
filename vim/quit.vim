@@ -12,8 +12,8 @@
 " old habits die hard
 cnoremap wq<CR> :echoerr "press ZZ to save and quit"<CR>
 " cnoremap w<CR> :echoerr "press CTRL-S to save"<CR>
-command! -bang -nargs=? Edit :edit! | echo "Use another open method"
-cnoreabbrev e Edit
+" command! -bang -nargs=? Edit :edit! | echo "Use another open method"
+" cnoreabbrev e Edit
 
 " sane mappings
 cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'MyQuit' : 'q')<CR>
