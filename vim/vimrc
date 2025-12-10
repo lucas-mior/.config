@@ -164,7 +164,7 @@ endfunction
 def g:SyncTexBackward(line: string, afile: string)
     g:synctex_auto_forward_disable = v:true
     silent! execute 'edit +' .. line .. ' ' .. afile
-    redraw!
+    # redraw!
 enddef
 
 def g:SyncTexForward()
