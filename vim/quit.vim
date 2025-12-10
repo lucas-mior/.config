@@ -74,5 +74,5 @@ def g:QuitIfLastBuffer(): void
     endif
 enddef
 
-" proxima linha bugs PlugUpdate, comment when installing plugins
+" next line bugs PlugUpdate, comment when installing plugins
 autocmd BufDelete * :call QuitIfLastBuffer()
