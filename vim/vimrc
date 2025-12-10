@@ -147,14 +147,14 @@ command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 augroup TexSyncTex
     autocmd!
-    autocmd FileType tex call s:SetupTexSyncTex()
+    autocmd FileType tex call s:SyncTexSetupAuto()
 augroup END
 
-function! s:SetupTexSyncTex() abort
+function! s:SyncTexSetupAuto() abort
     autocmd CursorMoved <buffer> call SyncTexAuto()
 
     nnoremap <buffer> <Space> :call SyncTex()<CR>
-    nnoremap <buffer> <leader>s :call ToggleSyncTexMode()<CR>
+    nnoremap <buffer> <leader>s :call SyncTexToggleAuto()<CR>
 endfunction
 
 def SyncTex()
@@ -177,17 +177,17 @@ let g:vimtex_view_enabled = 0
 let g:vimtex_view_automatic = 0
 
 def SyncTexAuto()
-    if get(g:, 'SyncTexMode', v:false)
+    if get(g:, 'SyncTexAutomatic', v:false)
         call g:SyncTex()
     endif
 enddef
 
-def ToggleSyncTexMode()
-    g:SyncTexMode = !get(g:, 'SyncTexMode', v:false)
-    echom 'SyncTex mode: ' .. (g:SyncTexMode ? 'ON' : 'OFF')
+def SyncTexToggleAuto()
+    g:SyncTexAutomatic = !get(g:, 'SyncTexAutomatic', v:false)
+    echom 'SyncTex mode: ' .. (g:SyncTexAutomatic ? 'ON' : 'OFF')
 enddef
 
-let g:SyncTexMode = v:false
+let g:SyncTexAutomatic = v:false
 
 "" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
