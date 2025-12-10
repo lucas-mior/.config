@@ -95,12 +95,12 @@ nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
 
 function! GitGutterNextHunkCycle()
-  let line = line('.')
-  silent! GitGutterNextHunk
-  if line('.') == line
-    1
-    GitGutterNextHunk
-  endif
+    let line = line('.')
+    silent! GitGutterNextHunk
+    if line('.') == line
+      1
+      GitGutterNextHunk
+    endif
 endfunction
 
 nnoremap <leader>p :call GitGutterNextHunkCycle()<CR>
