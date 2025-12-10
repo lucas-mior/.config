@@ -52,10 +52,11 @@ nnoremap <C-s> :w!<CR>:w!<CR>
 
 " quit is context dependent
 def g:MyQuit(bang: string): void
-    if winnr('$') == 1
-        execute 'bdelete' .. bang
-    else
+    var num = len(getbufinfo({'buflisted': 1}))
+    if num == 1
         execute 'quit' .. bang
+    else
+        execute 'bdelete' .. bang
     endif
 enddef
 command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
