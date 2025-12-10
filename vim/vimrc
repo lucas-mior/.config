@@ -145,16 +145,16 @@ def GetSyntaxGroup()
 enddef
 command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
-augroup TexSyncTex
+augroup SyncTexGroup
     autocmd!
     autocmd FileType tex call s:SyncTexSetupAuto()
 augroup END
 
 function! s:SyncTexSetupAuto() abort
-    autocmd CursorMoved <buffer> call SyncTexAuto()
+    autocmd CursorMoved <buffer> call SyncTexAutoForward()
 
-    nnoremap <buffer> <Space> :call SyncTex()<CR>
-    nnoremap <buffer> <leader>s :call SyncTexToggleAuto()<CR>
+    nnoremap <buffer> <Space> :call SyncTexForward()<CR>
+    nnoremap <buffer> <leader>s :call SyncTexToggleAutoForward()<CR>
 endfunction
 
 def g:SyncTexBackward(line: string, afile: string)
@@ -162,7 +162,7 @@ def g:SyncTexBackward(line: string, afile: string)
     redraw!
 enddef
 
-def SyncTex()
+def g:SyncTexForward()
     var cmd = 'zathura --synctex-forward '
               .. line('.') .. ':' .. col('.') .. ':' .. bufname('%')
               .. ' main.pdf >/dev/null 2>&1 &'
@@ -172,20 +172,20 @@ def SyncTex()
 enddef
 
 let g:vimtex_view_enabled = 0
-let g:vimtex_view_automatic = 0
+let g:vimtex_view_Auto = 0
 
-def SyncTexAuto()
-    if get(g:, 'SyncTexAutomatic', v:false)
-        call g:SyncTex()
+def SyncTexAutoForward()
+    if get(g:, 'SyncTexAuto', v:false)
+        call g:SyncTexForward()
     endif
 enddef
 
-def SyncTexToggleAuto()
-    g:SyncTexAutomatic = !get(g:, 'SyncTexAutomatic', v:false)
-    echom 'SyncTex mode: ' .. (g:SyncTexAutomatic ? 'ON' : 'OFF')
+def SyncTexToggleAutoForward()
+    g:SyncTexAuto = !get(g:, 'SyncTexAuto', v:false)
+    echom 'SyncTex mode: ' .. (g:SyncTexAuto ? 'ON' : 'OFF')
 enddef
 
-let g:SyncTexAutomatic = v:false
+let g:SyncTexAuto = v:false
 
 "" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
