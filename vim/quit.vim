@@ -61,15 +61,15 @@ enddef
 command! -nargs=0 -bang MyQuit :call MyQuit(<q-bang>)
 
 def g:QuitIfLastBuffer(): void
-    var cnt = 0
+    var count = 0
 
     for ii in range(1, bufnr('$'))
         if (buflisted(ii) && bufname(ii) !=# '') || getbufvar(ii, '&buftype') ==# 'help'
-            cnt += 1
+            count += 1
         endif
     endfor
 
-    if cnt == 1
+    if count == 1
         quit
     endif
 enddef
