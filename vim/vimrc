@@ -93,7 +93,17 @@ nnoremap <C-]> :call Gototo()<CR>
 nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
-nnoremap <leader>p :GitGutterNextHunk<CR>
+
+function! GitGutterNextHunkCycle()
+  let line = line('.')
+  silent! GitGutterNextHunk
+  if line('.') == line
+    1
+    GitGutterNextHunk
+  endif
+endfunction
+
+nnoremap <leader>p :call GitGutterNextHunkCycle()<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
 
 def ToggleMarkdownListItem()
@@ -162,6 +172,9 @@ def SyncTex()
 
     # call system('xdotool windowactivate ' .. vimwin)
 enddef
+
+let g:vimtex_view_enabled = 0
+let g:vimtex_view_automatic = 0
 
 def SyncTexAuto()
     if get(g:, 'SyncTexMode', v:false)

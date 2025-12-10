@@ -45,6 +45,7 @@ map <C-u> feedkeys <F7>:exec<Space>"ssid -f zb cu"<Return>
 # map <C-u> feedkeys <F7>
 map <Space> feedkeys :exec<Space>"ssid -f zb k"<Return>
 unmap <Button1>
+unmap <C-k>
 unmap d
 
 ## MARCAS

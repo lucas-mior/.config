@@ -8,16 +8,16 @@ var lspServers = [
     args: ['--background-index']
 },
 {
-    name: 'texlab',
-    filetype: ['tex'],
-    path: '/usr/bin/texlab',
-},
-{
     name: 'pylsp',
     filetype: 'python',
     path: '/home/lucas/.local/bin/pylsp',
     args: ['--check-parent-process', '-v']
 },]
+# {
+#     name: 'texlab',
+#     filetype: ['tex'],
+#     path: '/usr/bin/texlab',
+# },
 
 var lspOpts = {
    aleSupport: v:false,
