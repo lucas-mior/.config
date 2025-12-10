@@ -169,7 +169,7 @@ enddef
 
 def g:SyncTexForward()
     var cmd = ['zf', string(line('.')), string(col('.')), bufname('%')]
-    job_start(cmd)
+    var s:keep_alive = job_start(cmd)
 enddef
 
 def SyncTexAutoForward()
