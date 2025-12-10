@@ -64,7 +64,12 @@ def g:QuitIfLastBuffer(): void
     var count = 0
 
     for i in range(1, bufnr('$'))
-        if (buflisted(i) && bufname(i) !=# '') || getbufvar(i, '&buftype') ==# 'help'
+        if (buflisted(i) && bufname(i) !=# '')
+                || getbufvar(i, '&buftype') ==# 'quickfix'
+                || getbufvar(i, '&buftype') ==# 'help'
+                || getbufvar(i, '&buftype') ==# 'terminal'
+                || getbufvar(i, '&buftype') ==# 'prompt	'
+                || getbufvar(i, '&buftype') ==# 'popup   '
             count += 1
         endif
     endfor
