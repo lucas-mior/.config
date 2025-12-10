@@ -437,9 +437,7 @@ def FzfFindFileRegex()
 
     var buflist = []
     for buf in range(1, bufnr('$'))
-      if bufloaded(buf)
-        call add(buflist, bufname(buf) .. ':1')
-      endif
+      call add(buflist, bufname(buf) .. ':1')
     endfor
     call writefile(buflist, '/tmp/vimbuflist')
 
