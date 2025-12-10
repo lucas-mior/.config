@@ -157,6 +157,11 @@ function! s:SyncTexSetupAuto() abort
     nnoremap <buffer> <leader>s :call SyncTexToggleAuto()<CR>
 endfunction
 
+def g:StupidFunction(line: string, afile: string)
+    silent! execute 'edit +' .. line .. ' ' .. afile
+    redraw!
+enddef
+
 def SyncTex()
     var cmd = 'zathura --synctex-forward '
               .. line('.') .. ':' .. col('.') .. ':' .. bufname('%')
