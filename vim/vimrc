@@ -36,6 +36,10 @@ command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'norm
 
 " packadd termdebug
 
+let g:vimtex_view_enabled = 0
+let g:vimtex_view_Auto = 0
+
+
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
 let g:airline#extensions#tabline#enabled = 0
@@ -172,9 +176,6 @@ def g:SyncTexForward()
     redraw!
 enddef
 
-let g:vimtex_view_enabled = 0
-let g:vimtex_view_Auto = 0
-
 def SyncTexAutoForward()
     var enabled = g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
     if enabled
@@ -190,6 +191,27 @@ enddef
 
 let g:synctex_auto_forward_enable = v:false
 let g:synctex_auto_forward_disable = v:false
+let g:synctex_focus_timer = -1
+
+def g:OnFocusTimer(timer_id: number)
+    g:synctex_focus_timer = -1
+    g:synctex_auto_forward_disable = v:false
+enddef
+
+def g:OnFocusLost()
+    if g:synctex_focus_timer != -1
+        timer_stop(g:synctex_focus_timer)
+        g:synctex_focus_timer = -1
+    endif
+enddef
+
+let &t_fe = "\<Esc>[?1004h"
+let &t_fd = "\<Esc>[?1004l"
+execute "set <FocusGained>=\<Esc>[I"
+execute "set <FocusLost>=\<Esc>[O"
+
+autocmd FocusGained *.tex call timer_start(1000, 'OnFocusTimer')
+autocmd FocusLost   *.tex call g:OnFocusLost()
 
 "" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
