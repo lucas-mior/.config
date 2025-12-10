@@ -278,7 +278,6 @@ set conceallevel=2
 set termwinsize=10x0
 set noautochdir
 au CursorHold * checktime
-set makeprg=./build.sh
 filetype plugin on
 
 colorscheme default
@@ -296,6 +295,7 @@ let mapleader = '\'
 
 command! Vmake w | silent make -j1 clang | unsilent redraw!
 map <leader>m :Vmake<CR>:LspDiag current<CR>
+set makeprg=./build.sh
 nnoremap <leader>m :make<CR>
 
 " disable ex mode (what the hell is that shit?)
