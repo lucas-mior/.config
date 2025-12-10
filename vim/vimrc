@@ -193,12 +193,16 @@ let g:synctex_auto_forward_enable = v:false
 let g:synctex_auto_forward_disable = v:false
 let g:synctex_focus_timer = -1
 
-def g:OnFocusTimer(timer_id: number)
+def SyncTexOnFocusTimer(timer_id: number)
     g:synctex_focus_timer = -1
     g:synctex_auto_forward_disable = v:false
 enddef
 
-def g:OnFocusLost()
+def SyncTexOnFocusGain()
+    timer_start(1000, 'SyncTexOnFocusTimer')
+enddef
+
+def SyncTexOnFocusLost()
     if g:synctex_focus_timer != -1
         timer_stop(g:synctex_focus_timer)
         g:synctex_focus_timer = -1
@@ -210,8 +214,8 @@ let &t_fd = "\<Esc>[?1004l"
 execute "set <FocusGained>=\<Esc>[I"
 execute "set <FocusLost>=\<Esc>[O"
 
-autocmd FocusGained *.tex call timer_start(1000, 'OnFocusTimer')
-autocmd FocusLost   *.tex call g:OnFocusLost()
+autocmd FocusGained *.tex call timer_start(1000, 'SyncTexOnFocusTimer')
+autocmd FocusLost   *.tex call SyncTexOnFocusLost()
 
 "" cursor: format and color (terminal has to support these escape sequences)
 let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
