@@ -294,8 +294,8 @@ let mapleader = '\'
 " set shortmess=at
 
 command! Vmake w | silent make -j1 clang | unsilent redraw!
-nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
 set makeprg=./build.sh
+nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
 nnoremap <leader>m :make<CR>
 
 " disable ex mode (what the hell is that shit?)
