@@ -507,5 +507,8 @@ enddef
 command! FzfFindFileRegexCmd call FzfFindFileRegex()
 nnoremap <C-h> :FzfFindFileRegexCmd<CR>
 
+" ignore diacritcs on search
+cnoremap <CR> <C-\>e getcmdtype() =~ '[?/]' ? substitute(getcmdline(), '\a', '[[=\0=]]', 'g'): getcmdline()<CR><CR>
+
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
