@@ -64,7 +64,7 @@ silent! highlight! link SignColumn LineNr?
 
 " fugitive
 nnoremap <leader>g :tab Git<CR>
-nnoremap <C-g>     :Git commit -a -m 'WIP VIM'<CR>
+nnoremap <C-g>     :!gitwip.sh % <CR>
 
 let g:python_highlight_all = 1
 
