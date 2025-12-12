@@ -152,7 +152,7 @@ command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 augroup SyncTexGroup
     autocmd!
-    autocmd FileType tex call g:SyncTexSetupAuto()
+    autocmd FileType tex call s:SyncTexSetupAuto()
 augroup END
 
 function! s:SyncTexSetupAuto() abort
