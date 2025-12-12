@@ -64,6 +64,7 @@ silent! highlight! link SignColumn LineNr?
 
 " fugitive
 nnoremap <leader>g :tab Git<CR>
+nnoremap <C-g>     :Git commit -a -m 'WIP VIM'<CR>
 
 let g:python_highlight_all = 1
 
@@ -151,7 +152,7 @@ command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 augroup SyncTexGroup
     autocmd!
-    autocmd FileType tex call s:SyncTexSetupAuto()
+    autocmd FileType tex call g:SyncTexSetupAuto()
 augroup END
 
 function! s:SyncTexSetupAuto() abort
