@@ -44,7 +44,7 @@ map <C-u> feedkeys <F7>:exec<Space>ssid<Space>-f<Space>zb<Space>cu<Return>
 # map l     feedkeys <F5>
 # map <C-d> feedkeys <F6>
 # map <C-u> feedkeys <F7>
-map <Space> feedkeys :exec<Space>ssid<Space>-f<Space>zb k<Return>
+map <Space> feedkeys :exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
 unmap <Button1>
 unmap <C-k>
 unmap <C-l>
