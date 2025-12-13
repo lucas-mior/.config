@@ -34,6 +34,7 @@ map <F4> scroll down
 map <F5> scroll up
 map <F6> scroll half-down
 map <F7> scroll half-up
+
 # this requires `sudo ln -s /usr/bin/setsid /usr/bin/ssid`
 map gg    feedkeys <F1>:exec<Space>ssid<Space>-f<Space>zb<Space>gg<Return>
 map k     feedkeys <F4>:exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
