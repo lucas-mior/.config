@@ -58,7 +58,7 @@ def EvalSmart()
     'sizeof', 'typedef', 'struct', 'union', 'enum',
     'static', 'extern', 'auto', 'register',
     'const', 'volatile', 'restrict',
-    'void', 'char', 'short', 'int', 'long',
+    'void', 'bool', 'char', 'short', 'int', 'long',
     'float', 'double', 'signed', 'unsigned',
   ]
 
