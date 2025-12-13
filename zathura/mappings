@@ -24,7 +24,6 @@ map z       recolor
 map v       recolor
 
 # Janela
-map <C-l> reload
 map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
