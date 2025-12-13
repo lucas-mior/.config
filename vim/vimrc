@@ -384,7 +384,7 @@ cnoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 cnoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 
 au BufWritePost ~/.config/X11/*                 !xrdb ~/.config/X11/Xresources
-au BufWritePost */nsxiv/key-handler             !nsxiv_keyhandler_update_lf.sed % > $XDG_CONFIG_HOME/lf/nsxiv
+au BufWritePost */nsxiv/key-handler             !nsxiv_keyhandler_update_lf.sed % > ~/.config/lf/nsxiv
 au BufWritePost */tmux/tmux.conf                !tmux source-file %
 au BufWritePost */sxhkdrc                       !pkill -SIGUSR1 sxhkd
 au BufWritePost */dunst/dunstrc                 !killall dunst; setsid -f dunst 2>&1 > /dev/null
