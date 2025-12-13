@@ -50,72 +50,72 @@ au User TermdebugStartPost let g:term_debug_on = v:true
 au User TermdebugStopPre   let g:term_debug_on = v:false
 
 def EvalSmart()
-  if !g:term_debug_on
-      return
-  endif
-  var save_pos = getcurpos()
-
-  var lnum = line('.')
-  var text = getline(lnum)
-
-  if text =~ '^#'
-    setpos('.', save_pos)
-    return
-  endif
-
-  var c_keywords = [
-    'if', 'else', 'while', 'for', 'do', 'switch', 'case', 'default',
-    'break', 'continue', 'return', 'goto',
-    'sizeof', 'typedef', 'struct', 'union', 'enum',
-    'static', 'extern', 'auto', 'register',
-    'const', 'volatile', 'restrict',
-    'void', 'bool', 'char', 'short', 'int', 'long',
-    'float', 'double', 'signed', 'unsigned',
-  ]
-
-  var colnum = col('.')
-  var lastcol = len(text)
-
-  while colnum <= lastcol
-    if text[colnum - 1] =~ '[_0-9A-Za-z]'
-      var start = colnum
-      var end = colnum
-
-      while end <= lastcol && text[end - 1] =~ '[_0-9A-Za-z]'
-        end += 1
-      endwhile
-
-      var ident = text[start - 1 : end - 2]
-
-      if index(c_keywords, ident) >= 0
-        colnum = end
-        continue
-      endif
-
-      var tags = taglist('^' .. ident .. '$')
-      var is_typedef = false
-
-      for t in tags
-        if get(t, 'kind', '') ==# 't'
-          is_typedef = true
-          break
-        endif
-      endfor
-
-      if !is_typedef
-        cursor(lnum, start)
-        execute 'Eval'
-        break
-      endif
-
-      colnum = end
-      continue
+    if !g:term_debug_on
+        return
     endif
-
-    colnum += 1
-  endwhile
-
-  setpos('.', save_pos)
+    var save_pos = getcurpos()
+  
+    var lnum = line('.')
+    var text = getline(lnum)
+  
+    if text =~ '^#'
+        setpos('.', save_pos)
+        return
+    endif
+  
+    var c_keywords = [
+        'if', 'else', 'while', 'for', 'do', 'switch', 'case', 'default',
+        'break', 'continue', 'return', 'goto',
+        'sizeof', 'typedef', 'struct', 'union', 'enum',
+        'static', 'extern', 'auto', 'register',
+        'const', 'volatile', 'restrict',
+        'void', 'bool', 'char', 'short', 'int', 'long',
+        'float', 'double', 'signed', 'unsigned',
+    ]
+  
+    var colnum = col('.')
+    var lastcol = len(text)
+  
+    while colnum <= lastcol
+        if text[colnum - 1] =~ '[_0-9A-Za-z]'
+            var start = colnum
+            var end = colnum
+  
+            while end <= lastcol && text[end - 1] =~ '[_0-9A-Za-z]'
+                end += 1
+            endwhile
+  
+            var ident = text[start - 1 : end - 2]
+  
+            if index(c_keywords, ident) >= 0
+                colnum = end
+                continue
+            endif
+  
+            var tags = taglist('^' .. ident .. '$')
+            var is_typedef = false
+  
+            for t in tags
+                if get(t, 'kind', '') ==# 't'
+                    is_typedef = true
+                    break
+                endif
+            endfor
+  
+            if !is_typedef
+                cursor(lnum, start)
+                execute 'Eval'
+                break
+            endif
+  
+            colnum = end
+            continue
+        endif
+  
+        colnum += 1
+    endwhile
+  
+    setpos('.', save_pos)
 enddef
 
 let g:vimtex_view_enabled = 0
