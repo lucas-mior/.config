@@ -156,10 +156,10 @@ augroup END
 
 augroup SyncTexGroup
     autocmd!
-    autocmd FileType tex call s:SyncTexSetupAuto()
+    autocmd FileType tex call SyncTexSetupAuto()
 augroup END
 
-def s:SyncTexSetupAuto()
+def SyncTexSetupAuto()
     autocmd CursorHold <buffer> silent! call SyncTexAutoForward()
 
     nnoremap <buffer> <Space> :call s:SyncTexForward()<CR>
