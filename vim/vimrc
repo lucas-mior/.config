@@ -416,20 +416,20 @@ enddef
 autocmd BufWritePost * call s:RunShellcheck()
 
 " meus highlights
-au BufRead *.mo,*.mod        set ft=modelica
-au BufRead *.sage            set ft=python
-au BufRead /var/tmp/fstab*   set ft=fstab
-au BufRead *.sp,*.MOD,       set ft=spice
-au BufRead *.plt             set ft=gnuplot
-au BufRead */X11/urxvt       set ft=xdefaults
+au BufRead *.mo,*.mod          set ft=modelica
+au BufRead *.sage              set ft=python
+au BufRead /var/tmp/fstab*     set ft=fstab
+au BufRead *.sp,*.MOD,         set ft=spice
+au BufRead *.plt               set ft=gnuplot
+au BufRead */X11/urxvt         set ft=xdefaults
 au BufRead */.config/zathura/* set ft=zathurarc
-au BufRead *.sent            set ft=sent
-au BufRead *.sed             set ft=sed
-au BufRead *.pgn             set ft=pgn
-au BufRead */COMMIT_EDITMSG  set ft=gitcommit
-au BufRead,BufNewFile *.tab  set ft=tab
-au BufRead ~/.config/*       set autochdir
-au BufRead *.bib             set autochdir
+au BufRead *.sent              set ft=sent
+au BufRead *.sed               set ft=sed
+au BufRead *.pgn               set ft=pgn
+au BufRead */COMMIT_EDITMSG    set ft=gitcommit
+au BufRead,BufNewFile *.tab    set ft=tab
+au BufRead ~/.config/*         set autochdir
+au BufRead *.bib               set autochdir
 
 augroup CustomBashSyntax
   autocmd!
