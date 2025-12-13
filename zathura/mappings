@@ -34,6 +34,8 @@ map <F4> scroll down
 map <F5> scroll up
 map <F6> scroll half-down
 map <F7> scroll half-up
+map <F8> scroll full-down
+map <F9> scroll full-up
 
 # this requires `sudo ln -s /usr/bin/setsid /usr/bin/ssid`
 map gg    feedkeys <F1>:exec<Space>ssid<Space>-f<Space>zb<Space>gg<Return>
@@ -42,6 +44,8 @@ map k     feedkeys <F4>:exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
 map l     feedkeys <F5>:exec<Space>ssid<Space>-f<Space>zb<Space>l<Return>
 map <C-d> feedkeys <F6>:exec<Space>ssid<Space>-f<Space>zb<Space>ctrld<Return>
 map <C-u> feedkeys <F7>:exec<Space>ssid<Space>-f<Space>zb<Space>ctrlu<Return>
+map <C-f> feedkeys <F8>:exec<Space>ssid<Space>-f<Space>zb<Space>ctrlf<Return>
+map <C-b> feedkeys <F9>:exec<Space>ssid<Space>-f<Space>zb<Space>ctrlb<Return>
 
 map <Space> feedkeys :exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
 unmap <Button1>
