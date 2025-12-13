@@ -66,10 +66,7 @@ def EvalSmart()
   var lastcol = len(text)
 
   while colnum <= lastcol
-    var ch = text[colnum - 1]
-
-    if ch =~ '[_0-9A-Za-z]'
-      # extract identifier starting here
+    if text[colnum - 1] =~ '[_0-9A-Za-z]'
       var start = colnum
       var end = colnum
 
@@ -79,7 +76,22 @@ def EvalSmart()
 
       var ident = text[start - 1 : end - 2]
 
-      if index(c_keywords, ident) < 0
+      if index(c_keywords, ident) >= 0
+        colnum = end
+        continue
+      endif
+
+      var tags = taglist('^' .. ident .. '$')
+      var is_typedef = false
+
+      for t in tags
+        if get(t, 'kind', '') ==# 't'
+          is_typedef = true
+          break
+        endif
+      endfor
+
+      if !is_typedef
         cursor(lnum, start)
         return
       endif
