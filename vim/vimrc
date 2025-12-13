@@ -440,7 +440,7 @@ au WinResized * wincmd =
 "   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
 " augroup END
 
-def FzfFindEdit()
+def FzfFindFile()
     var buflist = []
     for buf in range(1, bufnr('$'))
         add(buflist, bufname(buf))
@@ -475,10 +475,10 @@ def FzfFindEdit()
     return
 enddef
 
-command! FzfFindEdit call FzfFindEdit()
-nnoremap <C-f> :FzfFindEdit<CR>
+command! FzfFindFile call FzfFindFile()
+nnoremap <C-f> :FzfFindFile<CR>
 
-def FzfFindFileRegex()
+def FzfFindRegex()
     var preview_script = 'fzf_bat_preview.bash'
 
     var cmd =
@@ -509,8 +509,8 @@ def FzfFindFileRegex()
     return
 enddef
 
-command! FzfFindFileRegex call FzfFindFileRegex()
-nnoremap <C-h> :FzfFindFileRegex<CR>
+command! FzfFindRegex call FzfFindRegex()
+nnoremap <C-h> :FzfFindRegex<CR>
 
 " ignore diacritcs on search a à á ã â A À Á Ã Â
 cnoremap <CR>
