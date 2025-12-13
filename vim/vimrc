@@ -97,7 +97,7 @@ def Gototo()
         var saved_pos = getcurpos()
         close
         execute 'edit ' .. fnameescape(buf)
-        call setpos('.', saved_pos)
+        setpos('.', saved_pos)
     endif
 enddef
 nnoremap <C-]> :call Gototo()<CR>
@@ -110,7 +110,7 @@ def GitGutterNextHunkCycle()
     var line_num = line('.')
     execute 'GitGutterNextHunk'
     if line('.') == line_num
-        call cursor(1, 1)
+        cursor(1, 1)
         execute 'GitGutterNextHunk'
     endif
 enddef
@@ -141,7 +141,7 @@ def ToggleMarkdownListItem()
                        )
         endif
 
-        call setline(cursor_line, new_line)
+        setline(cursor_line, new_line)
     endif
 enddef
 " <C-@> is <C-Space> (for what I am sure is a very good reason)
@@ -176,7 +176,7 @@ enddef
 
 def SyncTexAutoForward()
     if s:synctex_auto_forward_enable && !s:synctex_auto_forward_disable
-        call s:SyncTexForward()
+        s:SyncTexForward()
     endif
 enddef
 
@@ -436,9 +436,9 @@ au WinResized * wincmd =
 def FzfFindEdit()
     var buflist = []
     for buf in range(1, bufnr('$'))
-      call add(buflist, bufname(buf))
+      add(buflist, bufname(buf))
     endfor
-    call writefile(buflist, '/tmp/vimbuflist')
+    writefile(buflist, '/tmp/vimbuflist')
 
     var cmd =
         '{/usr/bin/cat /tmp/vimbuflist; find . -type f}'
