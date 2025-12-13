@@ -430,7 +430,7 @@ au BufRead */COMMIT_EDITMSG    setlocal ft=gitcommit
 au BufRead,BufNewFile *.tab    setlocal ft=tab
 au BufRead ~/.config/*         setlocal autochdir
 au BufRead *.bib               setlocal autochdir
-au BufRead */.config/lf/*      setlocal filetype=lf
+au BufRead */.config/lf/*      setlocal ft=lf
 
 " cd to file dir on startup
 " au VimEnter * lcd %:p:h
