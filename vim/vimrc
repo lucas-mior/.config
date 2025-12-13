@@ -44,7 +44,15 @@ noremap <leader>c :Continue<CR>
 noremap <space>   :Step<CR>
 noremap <enter>   :Step<CR>
 
+let g:term_debug_on = v:false
+
+au User TermdebugStartPost let g:term_debug_on = v:true
+au User TermdebugStopPre   let g:term_debug_on = v:false
+
 def EvalSmart()
+  if !g:term_debug_on
+      return
+  endif
   var save_pos = getcurpos()
 
   var lnum = line('.')
