@@ -1,3 +1,5 @@
+set verbosefile=vimlog.txt
+set verbose=8
 set nocompatible
 
 set undodir=/home/lucas/.local/share/vim/undo
@@ -72,6 +74,12 @@ nnoremap <leader>g :tab Git<CR>
 nnoremap <C-g>     :!gitwip.sh % <CR>
 
 let g:python_highlight_all = 1
+
+def GetSyntaxGroup()
+    var s = synID(line('.'), col('.'), 1)
+    echo synIDattr(s, 'name') .. ' -> ' .. synIDattr(synIDtrans(s), 'name')
+enddef
+command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 set tags=tags
 
@@ -149,12 +157,6 @@ augroup MarkdownListToggle
         \ nnoremap <buffer> <C-@> :call ToggleMarkdownListItem()<CR>
 augroup END
 
-def GetSyntaxGroup()
-    var s = synID(line('.'), col('.'), 1)
-    echo synIDattr(s, 'name') .. ' -> ' .. synIDattr(synIDtrans(s), 'name')
-enddef
-command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
-
 augroup SyncTexGroup
     autocmd!
     autocmd FileType tex call s:SyncTexSetupAuto()
@@ -179,16 +181,17 @@ def s:SyncTexForward()
 enddef
 
 def SyncTexAutoForward()
-    var enabled = g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
-    if enabled
+    if g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
         call s:SyncTexForward()
     endif
 enddef
 
 def SyncTexToggleAutoForward()
-    g:synctex_auto_forward_enable = !get(g:, 'synctex_auto_forward_enable', v:false)
-    var enabled = g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
-    echom 'SyncTex mode: ' .. (enabled ? 'ON' : 'OFF')
+    if g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
+        echo 'SyncTex mode: ON'
+    else
+        echo 'SyncTex mode: OFF'
+    endif
 enddef
 
 let g:synctex_auto_forward_enable = v:false
