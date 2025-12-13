@@ -415,7 +415,6 @@ enddef
 
 autocmd BufWritePost * call s:RunShellcheck()
 
-" meus highlights
 au BufRead,BufNewFile *.mo,*.mod          setlocal filetype=modelica
 au BufRead,BufNewFile *.sage              setlocal filetype=python
 au BufRead,BufNewFile /var/tmp/fstab*     setlocal filetype=fstab
