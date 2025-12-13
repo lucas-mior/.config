@@ -279,7 +279,6 @@ set wildignore+=*.o
 set completeopt=menu
 
 set infercase
-set tagstack
 set hlsearch incsearch ignorecase smartcase
 "" Formatar
 set backspace=indent,eol,start
