@@ -99,6 +99,7 @@ def Gototo()
         execute 'edit ' .. fnameescape(buf)
         setpos('.', saved_pos)
     endif
+    return
 enddef
 nnoremap <C-]> :call Gototo()<CR>
 
@@ -113,6 +114,7 @@ def GitGutterNextHunkCycle()
         cursor(1, 1)
         execute 'GitGutterNextHunk'
     endif
+    return
 enddef
 
 nnoremap <leader>p :call GitGutterNextHunkCycle()<CR>
@@ -143,6 +145,7 @@ def ToggleMarkdownListItem()
 
         setline(cursor_line, new_line)
     endif
+    return
 enddef
 " <C-@> is <C-Space> (for what I am sure is a very good reason)
 augroup MarkdownListToggle
@@ -161,23 +164,27 @@ def s:SyncTexSetupAuto()
 
     nnoremap <buffer> <Space> :call s:SyncTexForward()<CR>
     nnoremap <buffer> <leader>s :call SyncTexToggleAutoForward()<CR>
+    return
 enddef
 
 def g:SyncTexBackward(line: string, afile: string)
     g:synctex_auto_forward_disable = v:true
     silent! execute 'edit +' .. line .. ' ' .. afile
     # redraw!
+    return
 enddef
 
 def s:SyncTexForward()
     var cmd = ['zf', string(line('.')), string(col('.')), bufname('%')]
     job_start(cmd)
+    return
 enddef
 
 def SyncTexAutoForward()
     if s:synctex_auto_forward_enable && !s:synctex_auto_forward_disable
         s:SyncTexForward()
     endif
+    return
 enddef
 
 def SyncTexToggleAutoForward()
@@ -187,6 +194,7 @@ def SyncTexToggleAutoForward()
     else
         echo 'SyncTex mode: OFF'
     endif
+    return
 enddef
 
 let s:synctex_auto_forward_enable = v:false
@@ -196,6 +204,7 @@ let s:synctex_focus_timer = -1
 def SyncTexOnFocusTimer(timer_id: number)
     s:synctex_focus_timer = -1
     s:synctex_auto_forward_disable = v:false
+    return
 enddef
 
 def SyncTexOnFocusGain()
@@ -203,6 +212,7 @@ def SyncTexOnFocusGain()
         timer_stop(s:synctex_focus_timer)
     endif
     s:synctex_focus_timer = timer_start(1000, 'SyncTexOnFocusTimer')
+    return
 enddef
 
 def SyncTexOnFocusLost()
@@ -210,6 +220,7 @@ def SyncTexOnFocusLost()
         timer_stop(s:synctex_focus_timer)
         s:synctex_focus_timer = -1
     endif
+    return
 enddef
 
 let &t_fe = "\<Esc>[?1004h"
@@ -396,9 +407,10 @@ au BufWritePost */src/dwmblocks2/*  !restart.sh dwmblocks2
 
 " au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
 def s:RunShellcheck()
-  if &filetype ==# 'sh'
-    execute '!shellcheck -e SC2059 -x ' .. fnameescape(expand('%:p'))
-  endif
+    if &filetype ==# 'sh'
+      execute '!shellcheck -e SC2059 -x ' .. fnameescape(expand('%:p'))
+    endif
+    return
 enddef
 
 autocmd BufWritePost * call s:RunShellcheck()
