@@ -469,8 +469,8 @@ def FzfFindEdit()
     return
 enddef
 
-command! FzfFindEditCmd call FzfFindEdit()
-nnoremap <C-f> :FzfFindEditCmd<CR>
+command! FzfFindEdit call FzfFindEdit()
+nnoremap <C-f> :FzfFindEdit<CR>
 
 def FzfFindFileRegex()
     var preview_script = 'fzf_bat_preview.bash'
@@ -503,8 +503,8 @@ def FzfFindFileRegex()
     return
 enddef
 
-command! FzfFindFileRegexCmd call FzfFindFileRegex()
-nnoremap <C-h> :FzfFindFileRegexCmd<CR>
+command! FzfFindFileRegex call FzfFindFileRegex()
+nnoremap <C-h> :FzfFindFileRegex<CR>
 
 " ignore diacritcs on search a à á ã â A À Á Ã Â
 cnoremap <CR>
