@@ -45,7 +45,30 @@ noremap <space>   :Step<CR>
 noremap <enter>   :Step<CR>
 
 def EvalSmart()
-    execute 'Eval'
+    var lnum = line('.')
+    var text = getline(lnum)
+  
+    if text =~ '^#'
+      return
+    endif
+  
+    var colnum = col('.')
+    var lastcol = len(text)
+  
+    while colnum <= lastcol
+      cursor(lnum, colnum)
+  
+      try
+          silent! execute 'Eval'
+          return
+      catch
+          echo 'EVAIL FAILED'
+      endtry
+  
+      colnum += 1
+    endwhile
+  
+    return
 enddef
 
 let g:vimtex_view_enabled = 0
