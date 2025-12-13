@@ -7,12 +7,7 @@ map [index] l navigate_index up
 map [index] ; navigate_index expand
 map [index] : navigate_index expand-all
 
-## NAVEGAR
 map j scroll left
-map <F4> scroll down
-map <F5> scroll up
-map <F6> scroll half-down
-map <F7> scroll half-up
 map ; scroll right
 
 map r       rotate rotate-ccw
@@ -34,11 +29,17 @@ map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
 
+map <F1> goto top
+map <F4> scroll down
+map <F5> scroll up
+map <F6> scroll half-down
+map <F7> scroll half-up
 # this requires `sudo ln -s /usr/bin/setsid /usr/bin/ssid`
+map gg    feedkeys <F1>:exec<Space>ssid<Space>-f<Space>zb<Space>gg<Return>
 map k     feedkeys <F4>:exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
 map l     feedkeys <F5>:exec<Space>ssid<Space>-f<Space>zb<Space>l<Return>
-map <C-d> feedkeys <F6>:exec<Space>ssid<Space>-f<Space>zb<Space>cd<Return>
-map <C-u> feedkeys <F7>:exec<Space>ssid<Space>-f<Space>zb<Space>cu<Return>
+map <C-d> feedkeys <F6>:exec<Space>ssid<Space>-f<Space>zb<Space>ctrld<Return>
+map <C-u> feedkeys <F7>:exec<Space>ssid<Space>-f<Space>zb<Space>ctrlu<Return>
 
 map <Space> feedkeys :exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
 unmap <Button1>
