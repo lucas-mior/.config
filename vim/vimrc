@@ -187,6 +187,7 @@ def SyncTexAutoForward()
 enddef
 
 def SyncTexToggleAutoForward()
+    g:synctex_auto_forward_enable = !g:synctex_auto_forward_enable
     if g:synctex_auto_forward_enable && !g:synctex_auto_forward_disable
         echo 'SyncTex mode: ON'
     else
