@@ -34,16 +34,16 @@ map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
 
-map k     feedkeys <F4>:exec<Space>"ssid -f zb k"<Return>
-map l     feedkeys <F5>:exec<Space>"ssid -f zb l"<Return>
-map <C-d> feedkeys <F6>:exec<Space>"ssid -f zb cd"<Return>
-map <C-u> feedkeys <F7>:exec<Space>"ssid -f zb cu"<Return>
+map k     feedkeys <F4>:exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
+map l     feedkeys <F5>:exec<Space>ssid<Space>-f<Space>zb<Space>l<Return>
+map <C-d> feedkeys <F6>:exec<Space>ssid<Space>-f<Space>zb<Space>cd<Return>
+map <C-u> feedkeys <F7>:exec<Space>ssid<Space>-f<Space>zb<Space>cu<Return>
 
 # map k     feedkeys <F4>
 # map l     feedkeys <F5>
 # map <C-d> feedkeys <F6>
 # map <C-u> feedkeys <F7>
-map <Space> feedkeys :exec<Space>"ssid -f zb k"<Return>
+map <Space> feedkeys :exec<Space>ssid<Space>-f<Space>zb k<Return>
 unmap <Button1>
 unmap <C-k>
 unmap <C-l>
