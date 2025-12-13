@@ -459,6 +459,8 @@ def FzfFindEdit()
 
     var file = trim(system(cmd))
 
+    delete('/tmp/vimbuflist')
+
     if file ==# ''
         redraw!
         return
