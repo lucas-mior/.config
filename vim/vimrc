@@ -162,8 +162,8 @@ augroup END
 def SyncTexSetupAuto()
     autocmd CursorHold <buffer> silent! call SyncTexAutoForward()
 
-    nnoremap <buffer> <Space> :call s:SyncTexForward()<CR>
-    nnoremap <buffer> <leader>s :call s:SyncTexToggleAutoForward()<CR>
+    nnoremap <buffer> <Space> :call SyncTexForward()<CR>
+    nnoremap <buffer> <leader>s :call SyncTexToggleAutoForward()<CR>
     return
 enddef
 
@@ -174,7 +174,7 @@ def g:SyncTexBackward(line: string, afile: string)
     return
 enddef
 
-def s:SyncTexForward()
+def g:SyncTexForward()
     var cmd = ['zf', string(line('.')), string(col('.')), bufname('%')]
     job_start(cmd)
     return
@@ -182,12 +182,12 @@ enddef
 
 def SyncTexAutoForward()
     if s:synctex_auto_forward_enable && !s:synctex_auto_forward_disable
-        s:SyncTexForward()
+        g:SyncTexForward()
     endif
     return
 enddef
 
-def s:SyncTexToggleAutoForward()
+def SyncTexToggleAutoForward()
     s:synctex_auto_forward_enable = !s:synctex_auto_forward_enable
     if s:synctex_auto_forward_enable && !s:synctex_auto_forward_disable
         echo 'SyncTex mode: ON'
