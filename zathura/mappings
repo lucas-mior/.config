@@ -49,6 +49,7 @@ unmap <Button1>
 unmap <C-k>
 unmap <C-l>
 unmap d
+unmap u
 
 ## MARCAS
 map \" feedkeys :blist<Space>
