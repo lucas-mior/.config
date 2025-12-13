@@ -1,4 +1,4 @@
-set verbosefile=vimlog.txt
+" set verbosefile=vimlog.txt
 set verbose=7
 set nocompatible
 
@@ -74,12 +74,6 @@ nnoremap <leader>g :tab Git<CR>
 nnoremap <C-g>     :!gitwip.sh % <CR>
 
 let g:python_highlight_all = 1
-
-def GetSyntaxGroup()
-    var s = synID(line('.'), col('.'), 1)
-    echo synIDattr(s, 'name') .. ' -> ' .. synIDattr(synIDtrans(s), 'name')
-enddef
-command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 set tags=tags
 

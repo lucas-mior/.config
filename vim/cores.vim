@@ -1,5 +1,11 @@
 vim9script
   # Editor highlight groups
+  def GetSyntaxGroup()
+      var s = synID(line('.'), col('.'), 1)
+      echo synIDattr(s, 'name') .. ' -> ' .. synIDattr(synIDtrans(s), 'name')
+  enddef
+  command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
+
   hi ColorColumn      cterm=NONE   ctermbg=000   ctermfg=NONE
                     \ gui=NONE     guibg=#111111 guifg=NONE
   hi Conceal          cterm=NONE   ctermbg=000   ctermfg=NONE
