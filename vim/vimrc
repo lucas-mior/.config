@@ -416,25 +416,21 @@ enddef
 autocmd BufWritePost * call s:RunShellcheck()
 
 " meus highlights
-au BufRead *.mo,*.mod          set ft=modelica
-au BufRead *.sage              set ft=python
-au BufRead /var/tmp/fstab*     set ft=fstab
-au BufRead *.sp,*.MOD,         set ft=spice
-au BufRead *.plt               set ft=gnuplot
-au BufRead */X11/urxvt         set ft=xdefaults
-au BufRead */.config/zathura/* set ft=zathurarc
-au BufRead *.sent              set ft=sent
-au BufRead *.sed               set ft=sed
-au BufRead *.pgn               set ft=pgn
-au BufRead */COMMIT_EDITMSG    set ft=gitcommit
-au BufRead,BufNewFile *.tab    set ft=tab
-au BufRead ~/.config/*         set autochdir
-au BufRead *.bib               set autochdir
-
-augroup CustomBashSyntax
-  autocmd!
-  autocmd BufRead,BufNewFile /home/lucas/.config/lf/* setlocal filetype=lf
-augroup END
+au BufRead *.mo,*.mod          setlocal ft=modelica
+au BufRead *.sage              setlocal ft=python
+au BufRead /var/tmp/fstab*     setlocal ft=fstab
+au BufRead *.sp,*.MOD          setlocal ft=spice
+au BufRead *.plt               setlocal ft=gnuplot
+au BufRead */X11/urxvt         setlocal ft=xdefaults
+au BufRead */.config/zathura/* setlocal ft=zathurarc
+au BufRead *.sent              setlocal ft=sent
+au BufRead *.sed               setlocal ft=sed
+au BufRead *.pgn               setlocal ft=pgn
+au BufRead */COMMIT_EDITMSG    setlocal ft=gitcommit
+au BufRead,BufNewFile *.tab    setlocal ft=tab
+au BufRead ~/.config/*         setlocal autochdir
+au BufRead *.bib               setlocal autochdir
+au BufRead */.config/lf/*      setlocal filetype=lf
 
 " cd to file dir on startup
 " au VimEnter * lcd %:p:h
