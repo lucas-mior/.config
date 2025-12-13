@@ -37,13 +37,16 @@ call plug#end()
 command! Picon exe 'normal m`'
                \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
-" packadd termdebug
-" noremap <leader>b :Break<CR>
-" noremap <leader>e :Eval<CR>
-" noremap <leader>c :Continue<CR>
-" noremap <leader>s :Step<CR>
-" noremap <space>   :Step<CR>
-" noremap <enter>   :Step<CR>
+packadd termdebug
+noremap <C-@> :Break<CR>
+au CursorHold *.c call EvalSmart()
+noremap <leader>c :Continue<CR>
+noremap <space>   :Step<CR>
+noremap <enter>   :Step<CR>
+
+def EvalSmart()
+    execute 'Eval'
+enddef
 
 let g:vimtex_view_enabled = 0
 let g:vimtex_view_Auto = 0
