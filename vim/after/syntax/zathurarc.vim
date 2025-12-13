@@ -1,4 +1,5 @@
-syntax match key     "\(^map \)\@<=\S\+"
+syntax match mode "\(^map \)\@<=\[\S\+\]"
+syntax match key     "\(^map \)\@<=[^[ ]\+"
 syntax match sets    "\(^set \)\@<=\S\+"
 syntax match Comment "\(^\| \)#.*"
 
@@ -13,5 +14,6 @@ hi link Keysym Identifier
 hi link Action Special
 hi link Brace Special
 hi link SequenceSep Delimiter
+hi link mode Define
 
 let b:current_syntax = "zathurarc"
