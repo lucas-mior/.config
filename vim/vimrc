@@ -444,7 +444,7 @@ au WinResized * wincmd =
 def FzfFindEdit()
     var buflist = []
     for buf in range(1, bufnr('$'))
-      add(buflist, bufname(buf))
+        add(buflist, bufname(buf))
     endfor
     writefile(buflist, '/tmp/vimbuflist')
 
