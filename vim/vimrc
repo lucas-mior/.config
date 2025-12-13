@@ -52,6 +52,16 @@ def EvalSmart()
     return
   endif
 
+  var c_keywords = [
+    'if', 'else', 'while', 'for', 'do', 'switch', 'case', 'default',
+    'break', 'continue', 'return', 'goto',
+    'sizeof', 'typedef', 'struct', 'union', 'enum',
+    'static', 'extern', 'auto', 'register',
+    'const', 'volatile', 'restrict',
+    'void', 'char', 'short', 'int', 'long',
+    'float', 'double', 'signed', 'unsigned',
+  ]
+
   var colnum = col('.')
   var lastcol = len(text)
 
@@ -59,8 +69,23 @@ def EvalSmart()
     var ch = text[colnum - 1]
 
     if ch =~ '[_0-9A-Za-z]'
-      cursor(lnum, colnum)
-      return
+      # extract identifier starting here
+      var start = colnum
+      var end = colnum
+
+      while end <= lastcol && text[end - 1] =~ '[_0-9A-Za-z]'
+        end += 1
+      endwhile
+
+      var ident = text[start - 1 : end - 2]
+
+      if index(c_keywords, ident) < 0
+        cursor(lnum, start)
+        return
+      endif
+
+      colnum = end
+      continue
     endif
 
     colnum += 1
