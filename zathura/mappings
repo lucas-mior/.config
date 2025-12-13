@@ -34,6 +34,7 @@ map <F11> toggle_fullscreen
 map b     toggle_statusbar
 map <C-p> print
 
+# this requires `sudo ln -s /usr/bin/setsid /usr/bin/ssid`
 map k     feedkeys <F4>:exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
 map l     feedkeys <F5>:exec<Space>ssid<Space>-f<Space>zb<Space>l<Return>
 map <C-d> feedkeys <F6>:exec<Space>ssid<Space>-f<Space>zb<Space>cd<Return>
