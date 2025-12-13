@@ -45,10 +45,13 @@ noremap <space>   :Step<CR>
 noremap <enter>   :Step<CR>
 
 def EvalSmart()
+  var save_pos = getcurpos()
+
   var lnum = line('.')
   var text = getline(lnum)
 
   if text =~ '^#'
+    setpos('.', save_pos)
     return
   endif
 
@@ -93,7 +96,8 @@ def EvalSmart()
 
       if !is_typedef
         cursor(lnum, start)
-        return
+        execute 'Eval'
+        break
       endif
 
       colnum = end
@@ -102,6 +106,8 @@ def EvalSmart()
 
     colnum += 1
   endwhile
+
+  setpos('.', save_pos)
 enddef
 
 let g:vimtex_view_enabled = 0
