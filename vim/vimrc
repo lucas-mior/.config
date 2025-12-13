@@ -416,21 +416,21 @@ enddef
 autocmd BufWritePost * call s:RunShellcheck()
 
 " meus highlights
-au BufRead *.mo,*.mod          setlocal ft=modelica
-au BufRead *.sage              setlocal ft=python
-au BufRead /var/tmp/fstab*     setlocal ft=fstab
-au BufRead *.sp,*.MOD          setlocal ft=spice
-au BufRead *.plt               setlocal ft=gnuplot
-au BufRead */X11/urxvt         setlocal ft=xdefaults
-au BufRead */.config/zathura/* setlocal ft=zathurarc
-au BufRead *.sent              setlocal ft=sent
-au BufRead *.sed               setlocal ft=sed
-au BufRead *.pgn               setlocal ft=pgn
-au BufRead */COMMIT_EDITMSG    setlocal ft=gitcommit
-au BufRead,BufNewFile *.tab    setlocal ft=tab
+au BufRead *.mo,*.mod          setlocal filetype=modelica
+au BufRead *.sage              setlocal filetype=python
+au BufRead /var/tmp/fstab*     setlocal filetype=fstab
+au BufRead *.sp,*.MOD          setlocal filetype=spice
+au BufRead *.plt               setlocal filetype=gnuplot
+au BufRead */X11/urxvt         setlocal filetype=xdefaults
+au BufRead */.config/zathura/* setlocal filetype=zathurarc
+au BufRead *.sent              setlocal filetype=sent
+au BufRead *.sed               setlocal filetype=sed
+au BufRead *.pgn               setlocal filetype=pgn
+au BufRead */COMMIT_EDITMSG    setlocal filetype=gitcommit
+au BufRead,BufNewFile *.tab    setlocal filetype=tab
+au BufRead */.config/lf/*      setlocal filetype=lf
 au BufRead ~/.config/*         setlocal autochdir
 au BufRead *.bib               setlocal autochdir
-au BufRead */.config/lf/*      setlocal ft=lf
 
 " cd to file dir on startup
 " au VimEnter * lcd %:p:h
