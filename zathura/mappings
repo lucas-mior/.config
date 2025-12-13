@@ -30,6 +30,7 @@ map b     toggle_statusbar
 map <C-p> print
 
 map <F1> goto top
+map <F2> goto bottom
 map <F4> scroll down
 map <F5> scroll up
 map <F6> scroll half-down
@@ -37,6 +38,7 @@ map <F7> scroll half-up
 
 # this requires `sudo ln -s /usr/bin/setsid /usr/bin/ssid`
 map gg    feedkeys <F1>:exec<Space>ssid<Space>-f<Space>zb<Space>gg<Return>
+map G     feedkeys <F2>:exec<Space>ssid<Space>-f<Space>zb<Space>G<Return>
 map k     feedkeys <F4>:exec<Space>ssid<Space>-f<Space>zb<Space>k<Return>
 map l     feedkeys <F5>:exec<Space>ssid<Space>-f<Space>zb<Space>l<Return>
 map <C-d> feedkeys <F6>:exec<Space>ssid<Space>-f<Space>zb<Space>ctrld<Return>
