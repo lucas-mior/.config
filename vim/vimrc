@@ -36,10 +36,15 @@ command! Picon exe 'normal m`'
                \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
 " packadd termdebug
+" noremap <leader>b :Break<CR>
+" noremap <leader>e :Eval<CR>
+" noremap <leader>c :Continue<CR>
+" noremap <leader>s :Step<CR>
+" noremap <space>   :Step<CR>
+" noremap <enter>   :Step<CR>
 
 let g:vimtex_view_enabled = 0
 let g:vimtex_view_Auto = 0
-
 
 let g:vim_markdown_strikethrough = 1
 let g:netrw_banner=0
@@ -370,14 +375,6 @@ inoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 cnoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 cnoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
-
-" Termdebug
-noremap <leader>b :Break<CR>
-noremap <leader>e :Eval<CR>
-noremap <leader>c :Continue<CR>
-" noremap <leader>s :Step<CR>
-" noremap <space>   :Step<CR>
-" noremap <enter>   :Step<CR>
 
 au BufWritePost */key-handler                           !nsxiv_keyhandler_update_lf.sed % > $XDG_CONFIG_HOME/lf/nsxiv
 au BufWritePost ~/.config/tmux/tmux.conf                !tmux source-file %
