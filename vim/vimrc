@@ -384,19 +384,20 @@ inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 cnoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 cnoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 
-au BufWritePost */key-handler                           !nsxiv_keyhandler_update_lf.sed % > $XDG_CONFIG_HOME/lf/nsxiv
-au BufWritePost ~/.config/tmux/tmux.conf                !tmux source-file %
-au BufWritePost ~/.config/X11/*                         !xrdb ~/.config/X11/Xresources
-au BufWritePost ~/.config/sxhkd/sxhkdrc                 !pkill -SIGUSR1 sxhkd
-au BufWritePost ~/.config/dunst/dunstrc                 !killall dunst; setsid -f dunst 2>&1 > /dev/null
-au BufWritePost ~/.config/atalhos,*/atalhos.awk         !atalhos.awk   ~/.config/atalhos
-au BufWritePost ~/.config/ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
-au BufWritePost ~/.config/lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
+au BufWritePost ~/.config/X11/*                 !xrdb ~/.config/X11/Xresources
+au BufWritePost */nsxiv/key-handler             !nsxiv_keyhandler_update_lf.sed % > $XDG_CONFIG_HOME/lf/nsxiv
+au BufWritePost */tmux/tmux.conf                !tmux source-file %
+au BufWritePost */sxhkdrc                       !pkill -SIGUSR1 sxhkd
+au BufWritePost */dunst/dunstrc                 !killall dunst; setsid -f dunst 2>&1 > /dev/null
+au BufWritePost ~/.config/atalhos,*/atalhos.awk !atalhos.awk   ~/.config/atalhos
+au BufWritePost */ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
+au BufWritePost */lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
+
 au BufRead */Makefile,*.mk,
            \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
            \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
 au BufRead */Makefile setlocal textwidth=80
-" compilações
+
 au BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
 au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
 au BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
@@ -450,11 +451,11 @@ def FzfFindEdit()
 
     var cmd =
         '{/usr/bin/cat /tmp/vimbuflist; find . -type f}'
-        .. ' | grep -Ev ".git/(objects|refs|HEAD|index)"'
-        .. ' | grep -Ev "(.cache|bin)/"'
-        .. ' | grep -Ev ".(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
-        .. ' | grep -Ev ".(bcf|pdf|idx|mw)$"'
-        .. ' | grep -Ev "^./?$"'
+        .. ' | grep -Ev "\.git/(objects|refs|HEAD|index)"'
+        .. ' | grep -Ev "(\.cache|bin)/"'
+        .. ' | grep -Ev "\.(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
+        .. ' | grep -Ev "\.(bcf|pdf|idx|mw)$"'
+        .. ' | grep -Ev "^\./?$"'
         .. ' | fzf --bind one:accept'
 
     var file = trim(system(cmd))
