@@ -392,6 +392,7 @@ au BufWritePost */dunst/dunstrc                 !killall dunst; setsid -f dunst 
 au BufWritePost ~/.config/atalhos,*/atalhos.awk !atalhos.awk   ~/.config/atalhos
 au BufWritePost */ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
 au BufWritePost */lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
+au BufWritePost */src/dwmblocks2/*              !sudo ./build.sh install; restart.sh dwmblocks2
 
 au BufRead */Makefile,*.mk,
            \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
@@ -403,7 +404,6 @@ au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
 au BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
 au BufWritePost */src/a_python/*.py !python %
 au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
-au BufWritePost */src/dwmblocks2/*  !restart.sh dwmblocks2
 " au BufWritePost *.kt !android_studio_shiftf9.sh
 
 " au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
