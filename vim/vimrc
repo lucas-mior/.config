@@ -416,21 +416,21 @@ enddef
 autocmd BufWritePost * call s:RunShellcheck()
 
 " meus highlights
-au BufRead *.mo,*.mod          setlocal filetype=modelica
-au BufRead *.sage              setlocal filetype=python
-au BufRead /var/tmp/fstab*     setlocal filetype=fstab
-au BufRead *.sp,*.MOD          setlocal filetype=spice
-au BufRead *.plt               setlocal filetype=gnuplot
-au BufRead */X11/urxvt         setlocal filetype=xdefaults
-au BufRead */.config/zathura/* setlocal filetype=zathurarc
-au BufRead *.sent              setlocal filetype=sent
-au BufRead *.sed               setlocal filetype=sed
-au BufRead *.pgn               setlocal filetype=pgn
-au BufRead */COMMIT_EDITMSG    setlocal filetype=gitcommit
-au BufRead,BufNewFile *.tab    setlocal filetype=tab
-au BufRead */.config/lf/*      setlocal filetype=lf
-au BufRead ~/.config/*         setlocal autochdir
-au BufRead *.bib               setlocal autochdir
+au BufRead,BufNewFile *.mo,*.mod          setlocal filetype=modelica
+au BufRead,BufNewFile *.sage              setlocal filetype=python
+au BufRead,BufNewFile /var/tmp/fstab*     setlocal filetype=fstab
+au BufRead,BufNewFile *.sp,*.MOD          setlocal filetype=spice
+au BufRead,BufNewFile *.plt               setlocal filetype=gnuplot
+au BufRead,BufNewFile */X11/urxvt         setlocal filetype=xdefaults
+au BufRead,BufNewFile */.config/zathura/* setlocal filetype=zathurarc
+au BufRead,BufNewFile *.sent              setlocal filetype=sent
+au BufRead,BufNewFile *.sed               setlocal filetype=sed
+au BufRead,BufNewFile *.pgn               setlocal filetype=pgn
+au BufRead,BufNewFile */COMMIT_EDITMSG    setlocal filetype=gitcommit
+au BufRead,BufNewFile *.tab               setlocal filetype=tab
+au BufRead,BufNewFile */.config/lf/*      setlocal filetype=lf
+au BufRead,BufNewFile ~/.config/*         setlocal autochdir
+au BufRead,BufNewFile *.bib               setlocal autochdir
 
 " cd to file dir on startup
 " au VimEnter * lcd %:p:h
