@@ -1,5 +1,5 @@
 " set verbosefile=vimlog.txt
-set verbose=7
+" set verbose=7
 set nocompatible
 
 set undodir=/home/lucas/.local/share/vim/undo
