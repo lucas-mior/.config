@@ -32,7 +32,8 @@ Plug 'lervag/vimtex'
 
 call plug#end()
 
-command! Picon exe 'normal m`' | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
+command! Picon exe 'normal m`'
+               \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
 " packadd termdebug
 
