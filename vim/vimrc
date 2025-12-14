@@ -12,7 +12,6 @@ filetype off
 set runtimepath+=/usr/share/vim/vimfiles/
 filetype on
 syntax on
-let $MYVIMRC="/home/lucas/.config/vim/vimrc"
 set viminfo+=n/home/lucas/.local/share/vim/viminfo
 
 source /home/lucas/.config/vim/quit.vim
