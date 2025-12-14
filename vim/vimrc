@@ -237,7 +237,7 @@ def SyncTexSetupAuto()
     autocmd CursorHold <buffer> silent! call SyncTexAutoForward()
 
     nnoremap <buffer> <Space> :call <SID>SyncTexForward()<CR>
-    nnoremap <buffer> <leader>s :call SyncTexToggleAutoForward()<CR>
+    nnoremap <buffer> <leader>s :call <SID>SyncTexToggleAutoForward()<CR>
     return
 enddef
 
@@ -254,7 +254,7 @@ def SyncTexForward()
     return
 enddef
 
-def SyncTexAutoForward()
+def g:SyncTexAutoForward()
     if synctex_auto_forward_enable && !synctex_auto_forward_disable
         SyncTexForward()
     endif
