@@ -305,7 +305,7 @@ execute "set <FocusLost>=\<Esc>[O"
 autocmd FocusGained *.tex call SyncTexOnFocusGain()
 autocmd FocusLost   *.tex call SyncTexOnFocusLost()
 
-#" cursor: format and color (terminal has to support these escape sequences)
+# cursor: format and color (terminal has to support these escape sequences)
 &t_SI = &t_SI .. "\<Esc>[5 q\<Esc>]12;blue\x7"
 &t_EI = &t_EI .. "\<Esc>[2 q\<Esc>]12;yellow\x7"
 
@@ -327,7 +327,7 @@ set mousemodel=popup
 set dictionary="/usr/share/dict/words"
 set foldmethod=marker foldmarker={,} foldminlines=1 foldlevelstart=100
 
-#" Interface
+# Interface
 if exists('+termguicolors')
     &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
     &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
@@ -343,7 +343,7 @@ set splitbelow
 set splitright
 set wrap
 
-#" Find
+# Find
 set path+=**
 set pumheight=12
 set wildmenu
@@ -354,7 +354,7 @@ set completeopt=menu
 
 set infercase
 set hlsearch incsearch ignorecase smartcase
-#" Formatar
+# Formatar
 set backspace=indent,eol,start
 set tabstop=4 shiftwidth=4 expandtab
 set textwidth=80
