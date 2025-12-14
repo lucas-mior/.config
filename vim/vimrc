@@ -184,7 +184,7 @@ nnoremap <leader>o :LspHover<CR>
 def GitGutterNextHunkCycle()
     var line_num = line('.')
     execute 'GitGutterNextHunk'
-    if line('.') == line_num
+    if line('.') ==# line_num
         cursor(1, 1)
         execute 'GitGutterNextHunk'
     endif
