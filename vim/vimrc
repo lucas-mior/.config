@@ -45,10 +45,10 @@ noremap <leader>c :Continue<CR>
 noremap <space>   :Step<CR>
 noremap <enter>   :Step<CR>
 
-g:term_debug_on = v:false
+g:term_debug_on = false
 
-au User TermdebugStartPost let g:term_debug_on = v:true
-au User TermdebugStopPre   let g:term_debug_on = v:false
+au User TermdebugStartPost g:term_debug_on = true
+au User TermdebugStopPre   g:term_debug_on = false
 
 def EvalSmart()
     if !g:term_debug_on
@@ -242,7 +242,7 @@ def SyncTexSetupAuto()
 enddef
 
 def g:SyncTexBackward(line: string, afile: string)
-    s:synctex_auto_forward_disable = v:true
+    s:synctex_auto_forward_disable = true
     silent! execute 'edit +' .. line .. ' ' .. afile
     # redraw!
     return
@@ -277,7 +277,7 @@ var Synctex_focus_timer = -1
 
 def SyncTexOnFocusTimer(timer_id: number)
     s:synctex_focus_timer = -1
-    s:synctex_auto_forward_disable = v:false
+    s:synctex_auto_forward_disable = false
     return
 enddef
 
