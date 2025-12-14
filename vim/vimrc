@@ -282,7 +282,6 @@ def SyncTexOnFocusTimer(timer_id: number)
 enddef
 
 def g:SyncTexOnFocusGain()
-    execute '!dunstify focus_gain'
     if synctex_focus_timer != -1
         timer_stop(synctex_focus_timer)
     endif
@@ -291,7 +290,6 @@ def g:SyncTexOnFocusGain()
 enddef
 
 def g:SyncTexOnFocusLost()
-    execute '!dunstify focus_lost'
     if synctex_focus_timer != -1
         timer_stop(synctex_focus_timer)
         synctex_focus_timer = -1
