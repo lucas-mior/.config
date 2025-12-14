@@ -309,6 +309,7 @@ autocmd FocusLost   *.tex call SyncTexOnFocusLost()
 &t_SI = &t_SI .. "\<Esc>[5 q\<Esc>]12;blue\x7"
 &t_EI = &t_EI .. "\<Esc>[2 q\<Esc>]12;yellow\x7"
 
+set history=1000
 set titlelen=0  # don't limit title length
 set autowrite
 set breakindent autoindent smartindent
@@ -354,6 +355,9 @@ set completeopt=menu
 
 set infercase
 set hlsearch incsearch ignorecase smartcase
+# Make n always search forward, even when started with ?
+nnoremap <expr> n 'Nn'[v:searchforward]
+nnoremap <expr> N 'nN'[v:searchforward]
 # Formatar
 set backspace=indent,eol,start
 set tabstop=4 shiftwidth=4 expandtab
