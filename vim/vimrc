@@ -1,5 +1,7 @@
-" set verbosefile=vimlog.txt
-" set verbose=7
+vim9script
+
+# set verbosefile=vimlog.txt
+# set verbose=7
 set nocompatible
 
 set undodir=/home/lucas/.local/share/vim/undo
@@ -43,7 +45,7 @@ noremap <leader>c :Continue<CR>
 noremap <space>   :Step<CR>
 noremap <enter>   :Step<CR>
 
-let g:term_debug_on = v:false
+g:term_debug_on = v:false
 
 au User TermdebugStartPost let g:term_debug_on = v:true
 au User TermdebugStopPre   let g:term_debug_on = v:false
@@ -117,35 +119,35 @@ def EvalSmart()
     setpos('.', save_pos)
 enddef
 
-let g:vimtex_view_enabled = 0
-let g:vimtex_view_Auto = 0
+g:vimtex_view_enabled = 0
+g:vimtex_view_Auto = 0
 
-let g:vim_markdown_strikethrough = 1
-let g:netrw_banner=0
-let g:airline#extensions#tabline#enabled = 0
-let g:airline#extensions#tagbar#enabled = 0
-let g:airline#parts#ffenc#skip_expected_string='utf-8[unix]'
-let g:airline#extensions#tagbar#flags = ''
-let g:DiffColors = 1
+g:vim_markdown_strikethrough = 1
+g:netrw_banner = 0
+g:airline#extensions#tabline#enabled = 0
+g:airline#extensions#tagbar#enabled = 0
+g:airline#parts#ffenc#skip_expected_string = 'utf-8[unix]'
+g:airline#extensions#tagbar#flags = ''
+g:DiffColors = 1
 
-let g:gitgutter_signs = 1
-let g:gitgutter_highlight_lines = 1
-let g:gitgutter_highlight_linenrs = 0
-let g:gitgutter_sign_added = '+'
-let g:gitgutter_sign_modified = '~'
-let g:gitgutter_sign_removed = '-'
-let g:gitgutter_sign_removed_first_line = '^'
-let g:gitgutter_sign_removed_above_and_below = '{'
-let g:gitgutter_sign_modified_removed = 'w'
-let g:gitgutter_set_sign_backgrounds = 1
-let g:gitgutter_map_keys = 0
-let g:gitgutter_terminal_reports_focus = 0
+g:gitgutter_signs = 1
+g:gitgutter_highlight_lines = 1
+g:gitgutter_highlight_linenrs = 0
+g:gitgutter_sign_added = '+'
+g:gitgutter_sign_modified = '~'
+g:gitgutter_sign_removed = '-'
+g:gitgutter_sign_removed_first_line = '^'
+g:gitgutter_sign_removed_above_and_below = '{'
+g:gitgutter_sign_modified_removed = 'w'
+g:gitgutter_set_sign_backgrounds = 1
+g:gitgutter_map_keys = 0
+g:gitgutter_terminal_reports_focus = 0
 
-" fugitive
+# fugitive
 nnoremap <leader>g :tab Git<CR>
 nnoremap <C-g>     :!gitwip.sh % <CR>
 
-let g:python_highlight_all = 1
+g:python_highlight_all = 1
 
 set tags=tags
 
@@ -219,7 +221,7 @@ def ToggleMarkdownListItem()
     endif
     return
 enddef
-" <C-@> is <C-Space> (for what I am sure is a very good reason)
+# <C-@> is <C-Space> (for what I am sure is a very good reason)
 augroup MarkdownListToggle
     autocmd!
     autocmd FileType markdown
@@ -246,7 +248,7 @@ def g:SyncTexBackward(line: string, afile: string)
     return
 enddef
 
-def s:SyncTexForward()
+def SyncTexForward()
     var cmd = ['zf', string(line('.')), string(col('.')), bufname('%')]
     job_start(cmd)
     return
@@ -269,9 +271,9 @@ def SyncTexToggleAutoForward()
     return
 enddef
 
-let s:synctex_auto_forward_enable = v:false
-let s:synctex_auto_forward_disable = v:false
-let s:synctex_focus_timer = -1
+var synctex_auto_forward_enable = false
+var Synctex_auto_forward_disable = false
+var Synctex_focus_timer = -1
 
 def SyncTexOnFocusTimer(timer_id: number)
     s:synctex_focus_timer = -1
@@ -295,26 +297,26 @@ def SyncTexOnFocusLost()
     return
 enddef
 
-let &t_fe = "\<Esc>[?1004h"
-let &t_fd = "\<Esc>[?1004l"
+&t_fe = "\<Esc>[?1004h"
+&t_fd = "\<Esc>[?1004l"
 execute "set <FocusGained>=\<Esc>[I"
 execute "set <FocusLost>=\<Esc>[O"
 
 autocmd FocusGained *.tex call SyncTexOnFocusGain()
 autocmd FocusLost   *.tex call SyncTexOnFocusLost()
 
-"" cursor: format and color (terminal has to support these escape sequences)
-let &t_SI .= "\<Esc>[5 q\<Esc>]12;blue\x7"
-let &t_EI .= "\<Esc>[2 q\<Esc>]12;yellow\x7"
+#" cursor: format and color (terminal has to support these escape sequences)
+&t_SI = &t_SI .. "\<Esc>[5 q\<Esc>]12;blue\x7"
+&t_EI = &t_EI .. "\<Esc>[2 q\<Esc>]12;yellow\x7"
 
-set titlelen=0  " don't limit title length
+set titlelen=0  # don't limit title length
 set autowrite
 set breakindent autoindent smartindent
 set breakindentopt=sbr showbreak=>
 set cpoptions+=n
 set commentstring=#%s
 set shell=/usr/bin/zsh
-" set hidden
+# set hidden
 set noswapfile
 set timeoutlen=10000 ttimeoutlen=5
 set updatetime=100
@@ -325,23 +327,23 @@ set mousemodel=popup
 set dictionary="/usr/share/dict/words"
 set foldmethod=marker foldmarker={,} foldminlines=1 foldlevelstart=100
 
-"" Interface
+#" Interface
 if exists('+termguicolors')
-    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
     set termguicolors
     set background=dark
 endif
 set laststatus=1 showtabline=1 noshowmode showcmd
 set number relativenumber
-set cursorline cursorcolumn "deixa o VIM lento
+set cursorline cursorcolumn #deixa o VIM lento
 set scrolloff=5
 set visualbell t_vb=
 set splitbelow
 set splitright
 set wrap
 
-"" Find
+#" Find
 set path+=**
 set pumheight=12
 set wildmenu
@@ -352,14 +354,14 @@ set completeopt=menu
 
 set infercase
 set hlsearch incsearch ignorecase smartcase
-"" Formatar
+#" Formatar
 set backspace=indent,eol,start
 set tabstop=4 shiftwidth=4 expandtab
 set textwidth=80
-let &colorcolumn=join(range(81,999),",")
+&colorcolumn = join(range(81, 999), ",")
 set autoindent
 set autoread
-" set formatoptions-=c,r,o,/,b,n,i,j
+# set formatoptions-=c,r,o,/,b,n,i,j
 set conceallevel=2
 set termwinsize=10x0
 set noautochdir
@@ -368,25 +370,25 @@ filetype plugin on
 
 colorscheme default
 if &term =~ 'st\|xterm\|kitty\|alacritty\|tmux'
-    let &t_Ts = "\e[9m"   " Strikethrough
-    let &t_Te = "\e[29m"
-    let &t_Cs = "\e[4:3m" " Undercurl
-    let &t_Ce = "\e[4:0m"
+    &t_Ts = "\e[9m"   # Strikethrough
+    &t_Te = "\e[29m"
+    &t_Cs = "\e[4:3m" # Undercurl
+    &t_Ce = "\e[4:0m"
 endif
 
 source /home/lucas/.config/vim/lspconfig.vim
 
-let mapleader = '\'
-" set shortmess=at
+g:mapleader = '\'
+# set shortmess=at
 
 command! Vmake w | silent make -j1 clang | unsilent redraw!
 set makeprg=./build.sh
 nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
 nnoremap <leader>m :make<CR>
 
-" disable ex mode (what the hell is that shit?)
+# disable ex mode (what the hell is that shit?)
 map Q <Nop>
-" :help map-modes
+# :help map-modes
 nnoremap U u
 nnoremap <C-z> u
 inoremap <C-z> <esc>ui
@@ -395,14 +397,14 @@ vnoremap <C-x> d
 vnoremap S :s/
 nnoremap S :%s/
 
-" hjkl;
-" h é mapeado para f next (ver plugins)
+# hjkl;
+# h é mapeado para f next (ver plugins)
 noremap j h
 noremap ; l
 noremap k gj
 noremap l gk
 
-" some defaults dont make sense
+# some defaults dont make sense
 nnoremap Y y$
 nnoremap e ea
 nnoremap cd 0D
@@ -410,7 +412,7 @@ nnoremap ' `
 nnoremap ` '
 inoremap <C-h> <esc>dbxi
 
-" janela
+# janela
 nnoremap <C-k>  <C-w>w
 nnoremap <C-l>  <C-l><C-w>w
 tnoremap <C-k>  <C-w>w
@@ -448,7 +450,7 @@ tnoremap <C-w>K <esc><C-w>J
 tnoremap <C-w>L <esc><C-w>K
 tnoremap <C-w>: <esc><C-w>L
 
-" completions
+# completions
 inoremap <tab> <c-n>
 inoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
@@ -475,10 +477,10 @@ au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
 au BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
 au BufWritePost */src/a_python/*.py !python %
 au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
-" au BufWritePost *.kt !android_studio_shiftf9.sh
+# au BufWritePost *.kt !android_studio_shiftf9.sh
 
-" au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
-def s:RunShellcheck()
+# au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
+def RunShellcheck()
     if &filetype ==# 'sh'
       execute '!shellcheck -e SC2059 -x ' .. fnameescape(expand('%:p'))
     endif
@@ -503,14 +505,14 @@ au BufRead,BufNewFile */.config/lf/*      setlocal filetype=lf
 au BufRead,BufNewFile ~/.config/*         setlocal autochdir
 au BufRead,BufNewFile *.bib               setlocal autochdir
 
-" cd to file dir on startup
-" au VimEnter * lcd %:p:h
+# cd to file dir on startup
+# au VimEnter * lcd %:p:h
 
 au WinResized * wincmd =
-" augroup Mkdir
-"   autocmd!
-"   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
-" augroup END
+# augroup Mkdir
+#   autocmd!
+#   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
+# augroup END
 
 def FzfFindFile()
     var buflist = []
@@ -584,7 +586,7 @@ enddef
 command! FzfFindRegex call FzfFindRegex()
 nnoremap <C-h> :FzfFindRegex<CR>
 
-" ignore diacritcs on search a à á ã â A À Á Ã Â
+# ignore diacritcs on search a à á ã â A À Á Ã Â
 cnoremap <CR>
     \ <C-\>e getcmdtype() =~ '[?/]' ?
         \ substitute(getcmdline(), '\a', '[[=\0=]]', 'g') :
