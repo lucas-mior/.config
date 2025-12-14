@@ -96,8 +96,8 @@ def EvalSmart()
             var tags = taglist('^' .. ident .. '$')
             var is_typedef = v:false
   
-            for t in tags
-                if get(t, 'kind', '') ==# 't'
+            for tag in tags
+                if get(tag, 'kind', '') ==# 't'
                     is_typedef = v:true
                     break
                 endif
