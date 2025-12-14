@@ -254,7 +254,7 @@ def SyncTexForward()
     return
 enddef
 
-def g:SyncTexAutoForward()
+def SyncTexAutoForward()
     if synctex_auto_forward_enable && !synctex_auto_forward_disable
         SyncTexForward()
     endif
