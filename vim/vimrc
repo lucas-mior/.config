@@ -151,7 +151,7 @@ g:python_highlight_all = 1
 
 set tags=tags
 
-def Gototo()
+def g:Gototo()
     var cur_win = win_getid()
     var pos = getcurpos()
 
@@ -175,7 +175,7 @@ def Gototo()
     endif
     return
 enddef
-nnoremap <C-]> :call Gototo()<CR>
+nnoremap <C-]> :call g:Gototo()<CR>
 
 nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>L :LspDiagPrev<CR>
