@@ -590,7 +590,7 @@ enddef
 command! FzfFindRegex call FzfFindRegex()
 nnoremap <C-h> :FzfFindRegex<CR>
 
-# ignore diacritics on search a à á ã â ä A À Á Ã Â Ä
+# ignore diacritics on search a à á ã â ä A À Á Ã Â Ä \a
 cnoremap <CR>
     \ <C-\>e getcmdtype() =~ '[?/]' ?
         \ substitute(getcmdline(), '\%(\\\)\@<!\a', '[[=\0=]]', 'g') :
