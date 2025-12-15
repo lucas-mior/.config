@@ -32,7 +32,11 @@ function! SwitchOrFzf() abort
     elseif len(bufs) == 2
         execute 'buffer#'
     else
-        execute 'FzfFindFile'
+        if tabpagenr('$') > 1
+            execute 'normal gt'
+        else
+            execute 'FzfFindFile'
+        endif
     endif
 endfunction
 

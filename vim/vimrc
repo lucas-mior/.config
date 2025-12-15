@@ -527,7 +527,7 @@ au WinResized * wincmd =
 #   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
 # augroup END
 
-def FzfFindFile()
+def g:FzfFindFile()
     var buflist = []
     for buf in range(1, bufnr('$'))
         add(buflist, bufname(buf))
@@ -562,10 +562,9 @@ def FzfFindFile()
     return
 enddef
 
-command! FzfFindFile call FzfFindFile()
-nnoremap <C-f> :FzfFindFile<CR>
+nnoremap <C-f> :call g:FzfFindFile()<CR>
 
-def FzfFindRegex()
+def g:FzfFindRegex()
     var preview_script = 'fzf_bat_preview.bash'
 
     var cmd =
@@ -596,8 +595,7 @@ def FzfFindRegex()
     return
 enddef
 
-command! FzfFindRegex call FzfFindRegex()
-nnoremap <C-h> :FzfFindRegex<CR>
+nnoremap <C-h> :call g:FzfFindRegex()<CR>
 
 # ignore diacritics on search a à á ã â ä A À Á Ã Â Ä \a
 cnoremap <CR>
