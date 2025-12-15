@@ -421,8 +421,8 @@ for c in range(char2nr('a'), char2nr('z'))
   const lc = nr2char(c)
 
   execute printf('nnoremap m%s m%s', lc, uc)
-  execute printf("nnoremap '%s '%s", lc, uc)
-  execute printf('nnoremap `%s `%s', lc, uc)
+  execute printf("nnoremap '%s `%s", lc, uc)
+  execute printf("nnoremap `%s '%s", lc, uc)
 endfor
 
 # janela
