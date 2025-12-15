@@ -18,29 +18,9 @@ cnoremap wq<CR> :echoerr "press ZZ to save and quit"<CR>
 " sane mappings
 cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'MyQuit' : 'q')<CR>
 nnoremap ZZ :w<CR>:MyQuit<CR>
-nnoremap <tab> :call SwitchOrFzf()<CR>
-nnoremap <S-tab> gT
 " nnoremap <C-^> :MyAltFile<cr>
 " This requires running `stty -ixon` on your shellrc
 nnoremap <C-s> :w!<CR>:w!<CR>
-
-function! SwitchOrFzf() abort
-    let bufs = filter(range(1, bufnr('$')), 'buflisted(v:val)')
-    let ntabs = tabpagenr('$')
-  
-    if ntabs > 1
-        execute 'normal gt'
-        return
-    endif
-
-    if len(bufs) == 1
-        execute 'call FzfFindFile()'
-    elseif len(bufs) == 2
-        execute 'buffer#'
-    else
-        execute 'call FzfFindFile()'
-    endif
-endfunction
 
 " command! -nargs=0 MyAltFile :call MyAltFile()
 " function! MyAltFile()

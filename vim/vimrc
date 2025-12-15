@@ -54,15 +54,15 @@ def EvalSmart()
         return
     endif
     var save_pos = getcurpos()
-  
+
     var lnum = line('.')
     var text = getline(lnum)
-  
+
     if text =~ '^#'
         setpos('.', save_pos)
         return
     endif
-  
+
     var c_keywords = [
         'if', 'else', 'while', 'for', 'do', 'switch', 'case', 'default',
         'break', 'continue', 'return', 'goto',
@@ -72,49 +72,49 @@ def EvalSmart()
         'void', 'bool', 'char', 'short', 'int', 'long',
         'float', 'double', 'signed', 'unsigned',
     ]
-  
+
     var colnum = col('.')
     var lastcol = len(text)
-  
+
     while colnum <= lastcol
         if text[colnum - 1] =~ '[_0-9A-Za-z]'
             var start = colnum
             var end = colnum
-  
+
             while end <= lastcol && text[end - 1] =~ '[_0-9A-Za-z]'
                 end += 1
             endwhile
-  
+
             var ident = text[start - 1 : end - 2]
-  
+
             if index(c_keywords, ident) >= 0
                 colnum = end
                 continue
             endif
-  
+
             var tags = taglist('^' .. ident .. '$')
             var is_typedef = v:false
-  
+
             for tag in tags
                 if get(tag, 'kind', '') ==# 't'
                     is_typedef = v:true
                     break
                 endif
             endfor
-  
+
             if !is_typedef
                 cursor(lnum, start)
                 execute 'Eval'
                 break
             endif
-  
+
             colnum = end
             continue
         endif
-  
+
         colnum += 1
     endwhile
-  
+
     setpos('.', save_pos)
 enddef
 
@@ -602,6 +602,28 @@ cnoremap <CR>
     \ <C-\>e getcmdtype() =~ '[?/]' ?
         \ substitute(getcmdline(), '\%(\\\)\@<!\a', '[[=\0=]]', 'g') :
         \ getcmdline()<CR><CR>
+
+nnoremap <tab> :call g:SwitchOrFzf()<CR>
+nnoremap <S-tab> gT
+
+def g:SwitchOrFzf()
+    var bufs = filter(range(1, bufnr('$')), (_, v) => buflisted(v))
+    var ntabs = tabpagenr('$')
+
+    if ntabs > 1
+        execute 'normal gt'
+        return
+    endif
+
+    if len(bufs) == 1
+        g:FzfFindFile()
+    elseif len(bufs) == 2
+       var alt_buf = bufnr('#')
+       execute 'buffer ' .. alt_buf
+    else
+        g:FzfFindFile()
+    endif
+enddef
 
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
