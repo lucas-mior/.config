@@ -49,7 +49,7 @@ g:term_debug_on = v:false
 au User TermdebugStartPost g:term_debug_on = v:true
 au User TermdebugStopPre   g:term_debug_on = v:false
 
-def EvalSmart()
+def EvalSmart(): void
     if !g:term_debug_on
         return
     endif
@@ -150,7 +150,7 @@ g:python_highlight_all = 1
 
 set tags=tags
 
-def g:Gototo()
+def g:Gototo(): void
     var cur_win = win_getid()
     var pos = getcurpos()
 
@@ -180,7 +180,7 @@ nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
 
-def GitGutterNextHunkCycle()
+def GitGutterNextHunkCycle(): void
     var line_num = line('.')
     execute 'GitGutterNextHunk'
     if line('.') ==# line_num
@@ -193,7 +193,7 @@ enddef
 nnoremap <leader>p :call GitGutterNextHunkCycle()<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
 
-def g:ToggleMarkdownListItem()
+def g:ToggleMarkdownListItem(): void
     var cursor_line = line('.')
     var line_text = getline(cursor_line)
 
@@ -232,7 +232,7 @@ augroup SyncTexGroup
     autocmd FileType tex call SyncTexSetupAuto()
 augroup END
 
-def SyncTexSetupAuto()
+def SyncTexSetupAuto(): void
     autocmd CursorHold <buffer> silent! call SyncTexAutoForward()
 
     nnoremap <buffer> <Space> :call <SID>SyncTexForward()<CR>
@@ -240,27 +240,27 @@ def SyncTexSetupAuto()
     return
 enddef
 
-def g:SyncTexBackward(line: string, afile: string)
+def g:SyncTexBackward(line: string, afile: string): void
     synctex_auto_forward_disable = v:true
     silent! execute 'edit +' .. line .. ' ' .. afile
     # redraw!
     return
 enddef
 
-def SyncTexForward()
+def SyncTexForward(): void
     var cmd = ['zf', string(line('.')), string(col('.')), bufname('%')]
     job_start(cmd)
     return
 enddef
 
-def SyncTexAutoForward()
+def SyncTexAutoForward(): void
     if synctex_auto_forward_enable && !synctex_auto_forward_disable
         SyncTexForward()
     endif
     return
 enddef
 
-def SyncTexToggleAutoForward()
+def SyncTexToggleAutoForward(): void
     synctex_auto_forward_enable = !synctex_auto_forward_enable
     if synctex_auto_forward_enable && !synctex_auto_forward_disable
         echo 'SyncTex mode: ON'
@@ -274,13 +274,13 @@ var synctex_auto_forward_enable = v:false
 var synctex_auto_forward_disable = v:false
 var synctex_focus_timer = -1
 
-def SyncTexOnFocusTimer(timer_id: number)
+def SyncTexOnFocusTimer(timer_id: number): void
     synctex_focus_timer = -1
     synctex_auto_forward_disable = v:false
     return
 enddef
 
-def g:SyncTexOnFocusGain()
+def g:SyncTexOnFocusGain(): void
     if synctex_focus_timer != -1
         timer_stop(synctex_focus_timer)
     endif
@@ -288,7 +288,7 @@ def g:SyncTexOnFocusGain()
     return
 enddef
 
-def g:SyncTexOnFocusLost()
+def g:SyncTexOnFocusLost(): void
     if synctex_focus_timer != -1
         timer_stop(synctex_focus_timer)
         synctex_focus_timer = -1
@@ -493,7 +493,7 @@ au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
 # au BufWritePost *.kt !android_studio_shiftf9.sh
 
 # au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
-def RunShellcheck()
+def RunShellcheck(): void
     if &filetype ==# 'sh'
       execute '!shellcheck -e SC2059 -x ' .. fnameescape(expand('%:p'))
     endif
@@ -527,7 +527,7 @@ au WinResized * wincmd =
 #   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
 # augroup END
 
-def g:FzfFindFile()
+def g:FzfFindFile(): void
     var buflist = []
     for buf in range(1, bufnr('$'))
         add(buflist, bufname(buf))
@@ -564,7 +564,7 @@ enddef
 
 nnoremap <C-f> :call g:FzfFindFile()<CR>
 
-def g:FzfFindRegex()
+def g:FzfFindRegex(): void
     var preview_script = 'fzf_bat_preview.bash'
 
     var cmd =
@@ -606,7 +606,7 @@ cnoremap <CR>
 nnoremap <tab> :call g:SwitchOrFzf()<CR>
 nnoremap <S-tab> gT
 
-def g:SwitchOrFzf()
+def g:SwitchOrFzf(): void
     var bufs = filter(range(1, bufnr('$')), (_, v) => buflisted(v))
     var ntabs = tabpagenr('$')
 
