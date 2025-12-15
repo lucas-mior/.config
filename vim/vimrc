@@ -30,7 +30,6 @@ Plug 'ap/vim-css-color'
 Plug 'romainl/vim-cool'
 Plug 'dahu/vim-fanfingtastic'
 Plug 'vim-python/python-syntax'
-Plug 'preservim/tagbar'
 Plug 'lervag/vimtex'
 
 call plug#end()
@@ -194,7 +193,7 @@ enddef
 nnoremap <leader>p :call GitGutterNextHunkCycle()<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
 
-def ToggleMarkdownListItem()
+def g:ToggleMarkdownListItem()
     var cursor_line = line('.')
     var line_text = getline(cursor_line)
 
@@ -225,7 +224,7 @@ enddef
 augroup MarkdownListToggle
     autocmd!
     autocmd FileType markdown
-        \ nnoremap <buffer> <C-@> :call ToggleMarkdownListItem()<CR>
+        \ nnoremap <buffer> <C-@> :call g:ToggleMarkdownListItem()<CR>
 augroup END
 
 augroup SyncTexGroup
