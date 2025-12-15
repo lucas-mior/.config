@@ -415,6 +415,16 @@ nnoremap ' `
 nnoremap ` '
 inoremap <C-h> <esc>dbxi
 
+# use global marks also for lowercase letters
+for c in range(char2nr('a'), char2nr('z'))
+  const uc = nr2char(c - 32)
+  const lc = nr2char(c)
+
+  execute printf('nnoremap m%s m%s', lc, uc)
+  execute printf("nnoremap '%s '%s", lc, uc)
+  execute printf('nnoremap `%s `%s', lc, uc)
+endfor
+
 # janela
 nnoremap <C-k>  <C-w>w
 nnoremap <C-l>  <C-l><C-w>w
