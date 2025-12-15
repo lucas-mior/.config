@@ -26,9 +26,9 @@ nnoremap <C-s> :w!<CR>:w!<CR>
 
 function! SwitchOrFzf() abort
     let bufs = filter(range(1, bufnr('$')), 'buflisted(v:val)')
-    let tabs = tabpagenr('$')
+    let ntabs = tabpagenr('$')
   
-    if tabs > 1
+    if ntabs > 1
         execute 'normal gt'
         return
     endif
