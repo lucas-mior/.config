@@ -25,15 +25,15 @@ nnoremap <S-tab> gT
 nnoremap <C-s> :w!<CR>:w!<CR>
 
 function! SwitchOrFzf() abort
-  let bufs = filter(range(1, bufnr('$')), 'buflisted(v:val)')
-
-  if len(bufs) == 1
-    execute 'FzfFindFile'
-  elseif len(bufs) == 2
-    execute 'buffer#'
-  else
-    execute 'FzfFindFile'
-  endif
+    let bufs = filter(range(1, bufnr('$')), 'buflisted(v:val)')
+  
+    if len(bufs) == 1
+        execute 'FzfFindFile'
+    elseif len(bufs) == 2
+        execute 'buffer#'
+    else
+        execute 'FzfFindFile'
+    endif
 endfunction
 
 " command! -nargs=0 MyAltFile :call MyAltFile()
