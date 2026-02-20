@@ -290,9 +290,9 @@ cmd odp  $ word.bash  odf      $fx
 cmd odt  $ word.bash  odf      $fx
 cmd oxml $ word.bash  oxml     $fx
 cmd csv  $ word.bash  csv      $fx
-cmd flac $ echo "$fx" | xargs -I% av.zsh input="%" action=flac
-cmd mp3  $ echo "$fx" | xargs -I% av.zsh input="%" action=mp3
-cmd opus $ echo "$fx" | xargs -I% av.zsh input="%" action=opus
+cmd flac $ echo "$fx" | xargs -I% av.zsh "%" flac
+cmd mp3  $ echo "$fx" | xargs -I% av.zsh "%" mp3
+cmd opus $ echo "$fx" | xargs -I% av.zsh "%" opus
 
 ## FZF PROCURAR
 cmd fzf_jump ${{
