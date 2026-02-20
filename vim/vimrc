@@ -38,18 +38,22 @@ command! Picon exe 'normal m`'
                \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
 packadd termdebug
-noremap <C-@> :Break<CR>
-au CursorHold *.c call EvalSmart()
-noremap <leader>c :Continue<CR>
-noremap <space>   :Step<CR>
-noremap <enter>   :Step<CR>
+noremap <buffer> <C-@> :Break<CR>
+noremap <buffer> <leader>c :Continue<CR>
+noremap <buffer> <space>   :Step<CR>
+noremap <buffer> <enter>   :Step<CR>
+
+augroup CDebug
+    autocmd!
+    au CursorHold *.c call g:EvalSmart()
+augroup END
 
 g:term_debug_on = v:false
 
 au User TermdebugStartPost g:term_debug_on = v:true
 au User TermdebugStopPre   g:term_debug_on = v:false
 
-def EvalSmart(): void
+def g:EvalSmart(): void
     if !g:term_debug_on
         return
     endif
@@ -180,7 +184,7 @@ nnoremap <leader>l :LspDiagNextWrap<CR>
 nnoremap <leader>L :LspDiagPrev<CR>
 nnoremap <leader>o :LspHover<CR>
 
-def GitGutterNextHunkCycle(): void
+def g:GitGutterNextHunkCycle(): void
     var line_num = line('.')
     execute 'GitGutterNextHunk'
     if line('.') ==# line_num
@@ -190,7 +194,7 @@ def GitGutterNextHunkCycle(): void
     return
 enddef
 
-nnoremap <leader>p :call GitGutterNextHunkCycle()<CR>
+nnoremap <leader>p :call g:GitGutterNextHunkCycle()<CR>
 nnoremap <leader>u :GitGutterUndoHunk<CR><CR>
 
 def g:ToggleMarkdownListItem(): void
@@ -248,9 +252,13 @@ def g:SyncTexBackward(line: string, afile: string): void
 enddef
 
 def SyncTexForward(): void
-    var cmd = ['zf', string(line('.')), string(col('.')), bufname('%')]
+    var cmd = [
+        'zf',
+        'line=' .. string(line('.')),
+        'col='  .. string(col('.')),
+        'file=' .. fnameescape(bufname('%'))
+    ]
     job_start(cmd)
-    return
 enddef
 
 def SyncTexAutoForward(): void
@@ -366,7 +374,7 @@ set autoindent
 set autoread
 # set formatoptions-=c,r,o,/,b,n,i,j
 set conceallevel=2
-set termwinsize=10x0
+# set termwinsize=10x0
 set noautochdir
 au CursorHold * checktime
 filetype plugin on
@@ -386,8 +394,8 @@ g:mapleader = '\'
 
 command! Vmake w | silent make -j1 clang | unsilent redraw!
 set makeprg=./build.sh
-nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
-nnoremap <leader>m :make<CR>
+# nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
+nnoremap <leader>m :make<CR>:LspDiagNextWrap<CR>
 
 # disable ex mode (what the hell is that shit?)
 map Q <Nop>
@@ -502,6 +510,8 @@ enddef
 
 autocmd BufWritePost * call RunShellcheck()
 
+autocmd BufWritePost *.awk !gawk --lint -f %
+
 au BufRead,BufNewFile *.mo,*.mod          setlocal filetype=modelica
 au BufRead,BufNewFile *.sage              setlocal filetype=python
 au BufRead,BufNewFile /var/tmp/fstab*     setlocal filetype=fstab
@@ -598,10 +608,10 @@ enddef
 nnoremap <C-h> :call g:FzfFindRegex()<CR>
 
 # ignore diacritics on search a à á ã â ä A À Á Ã Â Ä \a
-cnoremap <CR>
-    \ <C-\>e getcmdtype() =~ '[?/]' ?
-        \ substitute(getcmdline(), '\%(\\\)\@<!\a', '[[=\0=]]', 'g') :
-        \ getcmdline()<CR><CR>
+# cnoremap <CR>
+#     \ <C-\>e getcmdtype() =~ '[?/]' ?
+#         \ substitute(getcmdline(), '\%(\\\)\@<!\a', '[[=\0=]]', 'g') :
+#         \ getcmdline()<CR><CR>
 
 nnoremap <tab> :call g:SwitchOrFzf()<CR>
 nnoremap <S-tab> gT

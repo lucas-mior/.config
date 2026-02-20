@@ -73,6 +73,16 @@ alias gdb='gdb -q'
 alias py='python'
 alias pdflatex='pdflatex -halt-on-error -interaction=nonstopmode'
 
+alias sys='sudo systemctl'
+journal () {
+    if [ -z "$1" ]; then
+        unit=""
+    else
+        unit="--unit=$1"
+    fi
+    sudo journalctl -xe $unit
+}
+
 ## GIT
 alias g='git'
 git () {
