@@ -1,5 +1,487 @@
-source /home/lucas/.config/lf/comandos
-source /home/lucas/.config/lf/mappings
+# shell       $
+# Read a shell command to execute.
+
+# shell-pipe  %
+# Read a shell command to execute piping its standard IO to the bottom statline.
+
+# shell-wait  !
+# Read a shell command to execute and wait for a key press in the end.
+
+# shell-async &
+# Read a shell command to execute asynchronously without standard IO.
+
+cmd on-cd &{{
+    name="${PWD/#$HOME/'~'}"
+    printf "\033]0;${name}/\007" > /dev/tty
+
+    # for file in *; do
+    #     if [[ $(cpusage.sh) -ge 90 ]]; then
+    #         continue
+    #     fi
+    #     mime="$(file -b --mime-type "$file")"
+    #     case "$mime" in
+    #         video/*) setsid -f vid.sh "$file" cache ;;
+    #         audio/*) setsid -f vid.sh "$file" cache ;;
+    #         */pdf)   setsid -f pdf.sh "$file" cache ;;
+    #         image/*) setsid -f stiv_draw "$file" cache ;;
+    #     esac
+    # done
+}}
+
+cmd on-quit &{{
+}}
+
+cmd on-redraw &{{
+    if [[ $lf_width -lt 70 ]]; then
+        lf -remote "send $id set preview false"
+        lf -remote "send $id set ratios 1"
+        $lf_cleaner
+    elif [[ $lf_width -lt 100 ]]; then
+        lf -remote "send $id set ratios 1:1"
+        lf -remote "send $id set preview true"
+    else
+        lf -remote "send $id set ratios 3:5"
+        lf -remote "send $id set preview true"
+    fi
+}}
+
+cmd start_shell ${{
+    echo "\$f: $f"
+    if [[ $f != "$fx" ]]; then
+        echo "\$fx: $fx"
+    fi
+    zsh
+}}
+
+cmd start_android_vim ${{
+    src="$(find app/src/main/java/ -iname "*.kt")"
+    setsid -f st -e vim $src
+}}
+
+cmd readlink ${{
+    set -x
+    mime="$(file --mime-type -b "$f")"
+    if [[ "$mime" = "inode/symlink" ]]; then
+        name="$(readlink -f "$f")"
+    else
+        if [[ "$(stat -c "%h" "$f")" -ge 2 ]]; then
+            name="$(find ~ -samefile "$f" | shuf -n 1)"
+        else
+            lf -remote "send $id echoerr \"File has no hard links.\""
+        fi
+    fi
+    if [[ -n "$name" ]]; then
+        dir="$(dirname "$name")"
+        lf -remote "send $id cd \"$dir\""
+        lf -remote "send $id select \"$name\""
+    fi
+    set +x
+}}
+
+## COPIAR, MOVER, COPIAR, COLAR, RECORTAR, LINK, RENOMEAR
+cmd move ${{
+    mv -vn  -t "$1" $fx & progress -mp $!
+}}
+cmd copi ${{
+    cp -rvn -t "$1" $fx --reflink=auto & progress -mp $!
+}}
+cmd link %{{
+    ln -sv  -t "$1" $fx
+}}
+
+cmd go %{{
+    qual=$(echo "$fx" | head -n 1)
+    qual="${qual##*/}"
+    case "$1" in
+        mv) mv  -vn -t "$2" $fx  & progress -mp $! ;;
+        cp) cp -rvn -t "$2" $fx --reflink=auto & progress -mp $! ;;
+        ln) for file in $fx; do
+                if [[ "$(file -b "$file")" = "directory" ]]; then
+                    link="-s"
+                else
+                    link=""
+                fi
+                ln $link -v -t "$2" "$file"
+            done
+    esac \
+    && lf -remote "send $id cd \"$2\""        \
+    && lf -remote "send $id select \"$qual\""
+}}
+cmd trans ${{
+    if [[ -z "$TRANSFILES" ]]; then
+        exit
+    fi
+    if [[ -f "$TRANSFILES" ]]; then
+        echo "" > "$TRANSFILES"
+    fi
+
+    echo "$fx" > "$TRANSFILES"
+    prim=$(head -n 1 "$TRANSFILES")
+    prim="${prim##*/}"
+
+    mvcpln.sh $1
+
+    destino="$(cat $MAGIC_TMP_FILE)"
+    if [[ ! -d $destino ]]; then
+        exit
+    fi
+    lf -remote "send $id cd \"$destino\""
+    lf -remote "send $id select \"$prim\""
+}}
+cmd retirar ${{
+    lf -remote 'send unselect; clear'
+    if [[ -d "$f" ]]; then
+        find "$f" -maxdepth 1 -mindepth 1 -exec mv -nv -t ./ {} + \
+            && rmdir "$f"
+    fi
+}}
+
+cmd colar ${{
+    load=$(cat $XDG_DATA_HOME/lf/files)
+    list=$(echo "$load" | sed '1d')
+    mode=$(echo "$load" | sed -n '1p')
+    prim=$(echo "$load" | sed -n '2p')
+    prim="${prim##*/}"
+    if [[ -e "$prim" ]]; then
+        i=1
+        while [[ -e "$prim.~$i~" ]]; do
+            i=$((i+1))
+        done
+        prim="$prim.~$i~"
+    fi
+
+    if [[ $mode == copy ]]; then
+        op="cp -rvn --reflink=auto"
+    fi
+    if [[ $mode == move ]]; then
+        op="mv  -vn"
+    fi
+
+    for file in $list; do
+        dir="$(dirname "$file")"
+        name="${file##*/}"
+        if [[ "$dir" == "$PWD" ]] && [[ $mode == move ]]; then
+            continue
+        fi
+
+        oldifs="$IFS"
+        IFS=" "
+
+        if [[ -e "$name" ]]; then
+            i=1
+            while [[ -e "$name.~$i~" ]]; do
+                i=$((i+1))
+            done
+            $op "$file" "$name.~$i~" & progress -mp $!
+        else
+            $op -t ./ "$file" & progress -mp $!
+        fi
+
+        IFS="$oldifs"
+    done
+
+    lf -remote 'send load'
+    lf -remote 'send clear'
+    lf -remote "send $id select \"$prim\""
+}}
+cmd paste_link %{{
+    list=$(sed '1d' $XDG_DATA_HOME/lf/files)
+
+    for file in $list; do
+        if [[ "$(file -b "$file")" == "directory" ]]; then
+            link="-s"
+        else
+            link=""
+        fi
+        ln $link -v -t ./ "$file" \
+            || cp -rvn --reflink=auto -t ./ "$file" & progress -mp $!
+    done
+    name="$(basename "$file")"
+    lf -remote 'send clear'
+    lf -remote "send select \"$name\""
+}}
+cmd rm_duplas %{{
+    lf -remote "send unselect; clear"
+    sleep 0.2
+    lf -remote "send $id glob-select \"*.~[1-9]~\""
+    sleep 0.2
+    lf -remote "send $id load"
+    sleep 0.2
+    lf -remote "send $id delete"
+}}
+
+cmd rename_A &{{
+    lf -remote "send $id rename"
+    lf -remote "send $id cmd-end"
+}}
+cmd rename_I &{{
+    lf -remote "send $id rename"
+    lf -remote "send $id cmd-home"
+}}
+cmd rename_a &{{
+    nome="${f##*/}."
+    ext="${nome#*.}"
+    n=$(echo "$ext" | wc -m)
+
+    lf -remote "send $id rename"
+    lf -remote "send $id cmd-end"
+
+    while [[ $n -gt 1 ]]; do
+        lf -remote "send $id cmd-left"
+        n=$((n-1))
+    done
+
+    # cw variant
+    if [[ -n "$1" ]]; then
+        lf -remote "send $id cmd-delete-home"
+    fi
+}}
+
+## TOUCH e MKDIR
+cmd touch ${{
+    ext="${1##*.}"
+    cp --reflink=auto "${XDG_TEMPLATES_DIR}/touch.${ext}" "$1" || touch "$1"
+    sleep 0.02s
+    lf -remote "send $id load"
+    lf -remote "send $id select \"$(pwd)//$1\""
+}}
+cmd mkdir %{{
+    mkdir -p $@
+    lf -remote "send $id load"
+    lf -remote "send $id select \"$(pwd)//$1\""
+}}
+
+## MUDANÇAS
+cmd chmod ${{
+    chmod $1 $fx
+}}
+cmd mk $ make && sudo make install
+cmd diff  !{{
+    num=$(echo "$fx" | wc -l)
+    if [[ $num -gt 2 ]]; then
+        vim -d $fx
+    else
+        old=$(basename "$(echo "$fx" | sed -n '1p')")
+        new=$(basename "$(echo "$fx" | sed -n '2p')")
+        lines="$(/usr/bin/diff $fx)"
+        if [[ $? = 0 ]]; then
+            lf -remote "send $id echomsg \"$GRE $old == $new $RES\" "
+        else
+            lf -remote "send $id echomsg \"$RED $old != $new $RES\" "
+            echo "$lines" > "${old%.*}${new%.*}.diff"
+        fi
+    fi
+}}
+cmd html $ markdown $f > ${f%%.*}.html
+cmd cue  $ cuesplit.sh
+
+## CONVERSÕES
+cmd jpg  $ imagem.bash jpg     $fx
+cmd png  $ imagem.bash png     $fx
+cmd webp $ imagem.bash webp    $fx
+cmd tes  $ texto.bash  tes $1  $fx
+cmd txt  $ texto.bash  txt     $fx
+cmd utf  $ texto.bash  utf     $fx
+cmd cat  $ texto.bash  cat     $fx
+cmd pdf  $ word.bash  pdf      $fx
+cmd odf  $ word.bash  odf      $fx
+cmd ods  $ word.bash  odf      $fx
+cmd odp  $ word.bash  odf      $fx
+cmd odt  $ word.bash  odf      $fx
+cmd oxml $ word.bash  oxml     $fx
+cmd csv  $ word.bash  csv      $fx
+cmd flac $ echo "$fx" | xargs -I% av.zsh input="%" action=flac
+cmd mp3  $ echo "$fx" | xargs -I% av.zsh input="%" action=mp3
+cmd opus $ echo "$fx" | xargs -I% av.zsh input="%" action=opus
+
+## FZF PROCURAR
+cmd fzf_jump ${{
+    if [[ $lf_hidden == false ]]; then
+        oque="$(arqs.bash lf_arquivos | xargs -0 -I % realpath "%")"
+    else
+        oque="$(arqs.bash lf_meta | xargs -0 -I % realpath "%")"
+    fi
+    if [[ ! -e $oque ]]; then
+        exit
+    fi
+
+    pasta="$(dirname "$oque")"
+    lf -remote "send $id cd     \"$pasta\""
+    lf -remote "send $id select \"$oque\""
+}}
+
+## EXTRAIR E COMPRIMIR
+cmd extract ${{
+    dir="${f}.extract"
+    mkdir -p "$dir"
+    cd "$dir"
+    extract.sh "${f}"
+    lf -remote "send $id select $dir"
+}}
+cmd zip !{{
+    mkdir $1
+    cp -r --reflink=auto $fx $1 & progress -mp $!
+    zip -r ${1}.zip ${1}
+    rm -rf $1
+}}
+
+cmd run !{{
+    if [[ -x "$f" ]]; then
+        $f
+    elif [[ "$f" =~ "Makefile" ]]; then
+        make && sudo make install 2>&1 | less -r
+    elif [[ "$f" =~ "docker-compose.yaml" ]]; then
+        sudo podman compose up --build --force-recreate subscriber
+    elif [[ "$f" =~ "podman-compose.yaml" ]]; then
+        sudo podman compose up --build --force-recreate subscriber
+    else
+        ext="${f##*.}"
+        case $ext in
+            bash) interpreter=bash     ;;
+             mos) interpreter=omc      ;;
+              ly) interpreter=lilypond ;;
+             zsh) interpreter=zsh      ;;
+              sh) interpreter=dash     ;;
+              py) interpreter=python   ;;
+               m) interpreter=octave   ;;
+             awk) interpreter=awk -f   ;;
+              pl) interpreter=perl     ;;
+             plt) interpreter=gnuplot  ;;
+              sp) interpreter=ngspice  ;;
+             lua) interpreter=lua      ;;
+               1) interpreter=man      ;;
+               *) lf -remote "send $id echomsg \" Inclua extensão ou torne o arquivo executável\"" ;;
+        esac
+        if [[ -z "$1" ]]; then
+            if [[ -n "$interpreter" ]]; then
+                $interpreter $f
+            fi
+        else
+            if [[ -n "$interpreter" ]]; then
+                $interpreter $f 2>&1 | less -r
+            fi
+        fi
+    fi
+}}
+
+## ABRIR
+cmd pdfa $ setsid pdfarranger $f > /dev/null 2>&1 &
+cmd kid  $ setsid kid3-qt  $f > /dev/null 2>&1 &
+cmd auda $ setsid audacity $f > /dev/null 2>&1 &
+cmd gimp $ setsid gimp     $f > /dev/null 2>&1 &
+cmd shot $ setsid shotwell $f > /dev/null 2>&1 &
+cmd gthu $ setsid gthumb   $f > /dev/null 2>&1 &
+cmd du   $ ncdu -e --color dark
+cmd openwith $ setsid -f openwith.sh $f > /dev/null 2>&1 &
+
+cmd open $ abridor.sh $fx
+
+## deixar livre
+map <home>
+map <end>
+map <pgdn>
+map <pgup>
+map d
+map p
+map y
+map m
+map M
+map y
+map g
+map c
+map u
+map h
+map t
+map <c-m>
+map <c-x>
+map <c-e>
+map w
+map <c-n>
+map <c-p>
+cmap <c-n>
+cmap <c-p>
+
+map <f-9> $stiv
+map F readlink
+
+## RENOMEAR
+map I  rename_I
+map a  rename_a
+map A  rename_A
+map cw rename_a cw
+map br $ brn2 -a $fs
+
+map r mark-save
+
+## COPIAR, COLAR, MOVER, LINK SIMBÓLICO, DELETAR
+map yy copy
+map dd cut
+map <c-x>m trans mv
+map <c-x>y trans cp
+map <c-x>k trans ln
+
+map ud clear
+map us unselect
+map uu :unselect; clear
+map <c-l> lastpane
+map <c-k> lastpane
+
+map S push :glob-select<space>
+map <c-space> push <space><up><up>
+map pp colar
+map pk paste_link
+
+map dD       rm_duplas
+map D        delete
+map <delete> lixeira
+
+cmap <up>   cmd-history-prev
+cmap <down> cmd-history-next
+cmap <c-h>  cmd-delete-word-back
+
+map <tab> $tmux next-window
+map du du
+map ds $ subdl $f
+map z extract
+map Z push :zip<space>
+map <enter> shell
+map <c-o> retirar
+map <c-n> $exec lfimg
+map o openwith
+
+map ; open
+map j updir
+map k down
+map l up
+
+map cm push :chmod<space>
+map co $sudo chown -R lucas:lucas $fx
+map tt push :touch<space>
+map td push :mkdir<space>
+map pa $patch -p1 < $f
+map df diff
+
+map wb :set number!; set relativenumber!
+map wh :set hidden!
+map wr :set reverse!; push gg
+map wn :set sortby name;  set info size
+map ws :set sortby size;  set info size
+map wt :set sortby time;  set info time
+map wa :set sortby atime; set info atime
+map wc :set sortby ctime; set info ctime
+map we :set sortby ext
+
+## executar scripts
+map s start_shell
+map xx run
+map xl run less
+map xz $ python ../scripts/draw_labels_yolo.py "$fx"
+
+map <c-f> fzf_jump
+map <c-s> fzf_multi
+
+map T tag-toggle
+map <c-a> start_android_vim
 source /home/lucas/.config/lf/nsxiv
 
 set ignorecase
