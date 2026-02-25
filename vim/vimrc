@@ -35,7 +35,7 @@ Plug 'lervag/vimtex'
 call plug#end()
 
 command! Picon exe 'normal m`'
-               \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
+                \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
 packadd termdebug
 noremap <buffer> <C-@> :Break<CR>
@@ -478,22 +478,22 @@ inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 cnoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 cnoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 
-au BufWritePost ~/.config/X11/*                 !xrdb ~/.config/X11/Xresources
+au BufWritePost ~/.config/X11/* !xrdb ~/.config/X11/Xresources
 au BufWritePost */nsxiv/key-handler             !nsxiv_keyhandler_update_lf.sed % > ~/.config/lf/nsxiv
-au BufWritePost */tmux/tmux.conf                !tmux source-file %
-au BufWritePost */sxhkdrc                       !pkill -SIGUSR1 sxhkd
-au BufWritePost */dunst/dunstrc                 !killall dunst; setsid -f dunst 2>&1 > /dev/null
+au BufWritePost */tmux/tmux.conf                 !tmux source-file %
+au BufWritePost */sxhkdrc                        !pkill -SIGUSR1 sxhkd
+au BufWritePost */dunst/dunstrc                  !killall dunst; setsid -f dunst 2>&1 > /dev/null
 au BufWritePost ~/.config/atalhos,*/atalhos.awk !atalhos.awk   ~/.config/atalhos
 au BufWritePost */ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
 au BufWritePost */lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
-au BufWritePost */src/dwmblocks2/*              !sudo ./build.sh install; restart.sh dwmblocks2
+au BufWritePost */src/dwmblocks2/* !sudo ./build.sh install; restart.sh dwmblocks2
 
 au BufRead */Makefile,*.mk,
            \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
            \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
 au BufRead */Makefile setlocal textwidth=80
 
-au BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
+au BufWritePost */src/a_c/*.c        !test_c_program.sh % execute
 au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
 au BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
 au BufWritePost */src/a_python/*.py !python %
@@ -514,18 +514,18 @@ autocmd BufWritePost *.awk !gawk --lint -f %
 
 au BufRead,BufNewFile *.mo,*.mod          setlocal filetype=modelica
 au BufRead,BufNewFile *.sage              setlocal filetype=python
-au BufRead,BufNewFile /var/tmp/fstab*     setlocal filetype=fstab
+au BufRead,BufNewFile /var/tmp/fstab* setlocal filetype=fstab
 au BufRead,BufNewFile *.sp,*.MOD          setlocal filetype=spice
 au BufRead,BufNewFile *.plt               setlocal filetype=gnuplot
-au BufRead,BufNewFile */X11/urxvt         setlocal filetype=xdefaults
+au BufRead,BufNewFile */X11/urxvt          setlocal filetype=xdefaults
 au BufRead,BufNewFile */.config/zathura/* setlocal filetype=zathurarc
 au BufRead,BufNewFile *.sent              setlocal filetype=sent
 au BufRead,BufNewFile *.sed               setlocal filetype=sed
 au BufRead,BufNewFile *.pgn               setlocal filetype=pgn
-au BufRead,BufNewFile */COMMIT_EDITMSG    setlocal filetype=gitcommit
+au BufRead,BufNewFile */COMMIT_EDITMSG     setlocal filetype=gitcommit
 au BufRead,BufNewFile *.tab               setlocal filetype=tab
-au BufRead,BufNewFile */.config/lf/*      setlocal filetype=lf
-au BufRead,BufNewFile ~/.config/*         setlocal autochdir
+au BufRead,BufNewFile */.config/lf/* setlocal filetype=lf
+au BufRead,BufNewFile ~/.config/* setlocal autochdir
 au BufRead,BufNewFile *.bib               setlocal autochdir
 
 # cd to file dir on startup
@@ -577,30 +577,40 @@ nnoremap <C-f> :call g:FzfFindFile()<CR>
 def g:FzfFindRegex(): void
     var preview_script = 'fzf_bat_preview.bash'
 
+    # Redirect stderr to /dev/null to prevent error messages from contaminating 'out'
     var cmd =
-        'rg --line-number --no-heading .'
+        'rg --line-number --no-heading . 2>/dev/null'
         .. ' | fzf --delimiter ":"'
         .. '       --bind one:accept'
         .. '       --preview-window=up,80%,border-rounded'
         .. '       --preview "' .. preview_script .. ' {1} {2}"'
 
     var out = systemlist(cmd)
-    if empty(out)
-        redraw!
+
+    # In some shells, a failed pipe might leave junk in the output list. 
+    # We clear the keyboard buffer and redraw before processing.
+    while getchar(0) != 0
+    endwhile
+    redraw!
+
+    if empty(out) || out[0] ==# ''
         return
     endif
 
-    var parts = split(out[0], ':', v:true)
+    var parts = split(out[0], ':', v:false)
     if len(parts) < 2
         return
     endif
 
-    var file = parts[0]
-    var line = str2nr(parts[1])
+    var file_path = parts[0]
+    var line_num = str2nr(parts[1])
 
-    execute 'edit ' .. fnameescape(file)
-    execute printf(':%d', line)
-    normal! zz
+    if filereadable(file_path)
+        execute 'edit ' .. fnameescape(file_path)
+        execute ':' .. line_num
+        normal! zz
+    endif
+
     redraw!
     return
 enddef
@@ -610,8 +620,8 @@ nnoremap <C-h> :call g:FzfFindRegex()<CR>
 # ignore diacritics on search a à á ã â ä A À Á Ã Â Ä \a
 # cnoremap <CR>
 #     \ <C-\>e getcmdtype() =~ '[?/]' ?
-#         \ substitute(getcmdline(), '\%(\\\)\@<!\a', '[[=\0=]]', 'g') :
-#         \ getcmdline()<CR><CR>
+#          \ substitute(getcmdline(), '\%(\\\)\@<!\a', '[[=\0=]]', 'g') :
+#          \ getcmdline()<CR><CR>
 
 nnoremap <tab> :call g:SwitchOrFzf()<CR>
 nnoremap <S-tab> gT

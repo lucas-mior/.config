@@ -251,6 +251,30 @@ cmd mkdir %{{
     lf -remote "send $id select \"$(pwd)//$1\""
 }}
 
+cmd yank_cecup %{{
+    {
+        printf "cecup.h:\n";
+        cat cecup.h;
+
+        printf "\n\nhooks.c:\n";
+        cat hooks.c;
+
+        printf "\n\nrsync.c:\n";
+        cat rsync.c;
+
+        printf "\n\nmain.c:\n";
+        cat main.c;
+
+        printf "\n\nconfig.c:\n";
+        cat config.c;
+
+        # printf "\n\ndirectory tree:\n";
+        # tree
+    } | xsel -b
+}}
+
+map yC yank_cecup
+
 ## MUDANÇAS
 cmd chmod ${{
     chmod $1 $fx
