@@ -254,19 +254,19 @@ cmd mkdir %{{
 cmd yank_cecup %{{
     {
         printf "cecup.h:\n";
-        cat cecup.h;
+        tail +18 cecup.h;
 
         printf "\n\nhooks.c:\n";
-        cat hooks.c;
+        tail +18 hooks.c;
 
         printf "\n\nrsync.c:\n";
-        cat rsync.c;
+        tail +18 rsync.c;
 
         printf "\n\nmain.c:\n";
-        cat main.c;
+        tail +18 main.c;
 
         printf "\n\nconfig.c:\n";
-        cat config.c;
+        tail +18 config.c;
 
         # printf "\n\ndirectory tree:\n";
         # tree
