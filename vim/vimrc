@@ -545,13 +545,14 @@ def g:FzfFindFile(): void
     writefile(buflist, '/tmp/vimbuflist')
 
     var cmd =
-        '{/usr/bin/cat /tmp/vimbuflist; find . -type f}'
+        '{/usr/bin/cat /tmp/vimbuflist; find . -type f 2>/dev/null}'
         .. ' | grep -Ev "\.git/(objects|refs|HEAD|index)"'
+        .. ' | grep -Ev "package/(src|pkg)"'
         .. ' | grep -Ev "(\.cache|bin)/"'
         .. ' | grep -Ev "\.(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
         .. ' | grep -Ev "\.(bcf|pdf|idx|mw)$"'
         .. ' | grep -Ev "^\./?$"'
-        .. ' | fzf --bind one:accept'
+        .. ' | fzf --bind one:accept 2>/dev/null'
 
     var file = trim(system(cmd))
 
@@ -577,9 +578,16 @@ nnoremap <C-f> :call g:FzfFindFile()<CR>
 def g:FzfFindRegex(): void
     var preview_script = 'fzf_bat_preview.bash'
 
-    # Redirect stderr to /dev/null to prevent error messages from contaminating 'out'
+    # Add your exclusions here using -g '!pattern'
+    # For example, excluding .git, binaries, and common TeX junk
     var cmd =
-        'rg --line-number --no-heading . 2>/dev/null'
+        'rg --line-number --no-heading'
+        .. ' -g "!.git/*"'
+        .. ' -g "!*.{o,bin,exe}"'
+        .. ' -g "!*.{pdf,log,aux,bbl,blg,toc}"'
+        .. ' -g "!package/{pkg,src}"'
+        .. ' -g "!node_modules/*"'
+        .. ' . 2>/dev/null'
         .. ' | fzf --delimiter ":"'
         .. '       --bind one:accept'
         .. '       --preview-window=up,80%,border-rounded'
@@ -587,8 +595,6 @@ def g:FzfFindRegex(): void
 
     var out = systemlist(cmd)
 
-    # In some shells, a failed pipe might leave junk in the output list. 
-    # We clear the keyboard buffer and redraw before processing.
     while getchar(0) != 0
     endwhile
     redraw!
