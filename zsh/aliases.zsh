@@ -72,17 +72,17 @@ alias co='chown -v'
 alias gdb='gdb -q'
 alias py='python'
 alias pdflatex='pdflatex -halt-on-error -interaction=nonstopmode'
-alias makepkg='I_have_to_fix_makepkg'
+# alias makepkg='I_have_to_fix_makepkg'
 
-I_have_to_fix_makepkg () {
-    set -x
+# I_have_to_fix_makepkg () {
+#     set -x
 
-    sudo find . -type d -print0 | xargs -0 chmod 775
-    sudo find . -mindepth 1 -not -iname "PKGBUILD" -print0 | xargs -0 rm -rf
-    /usr/bin/makepkg "$@"
+#     sudo find . -type d -print0 | xargs -0 chmod 775
+#     sudo find . -mindepth 1 -not -iname "PKGBUILD" -print0 | xargs -0 rm -rf
+#     /usr/bin/makepkg "$@"
 
-    set +x
-}
+#     set +x
+# }
 
 alias sys='sudo systemctl'
 journal () {

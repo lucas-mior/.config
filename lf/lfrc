@@ -251,8 +251,23 @@ cmd mkdir %{{
     lf -remote "send $id select \"$(pwd)//$1\""
 }}
 
+cmd yank_base %{{
+    {
+        printf "\nRead arena.c and util.c only for reference. Dont try to find bug in them.\n"
+        printf "util.c:\n";
+        tail +18 util.c;
+
+        printf "\n\narena.c:\n";
+        tail +18 arena.c;
+    } | xsel -b
+}}
+
 cmd yank_cecup %{{
     {
+        printf "\nRead the current version:\n"
+        # printf "build.sh:\n";
+        # tail +18 build.sh;
+
         printf "cecup.h:\n";
         tail +18 cecup.h;
 
@@ -265,15 +280,27 @@ cmd yank_cecup %{{
         printf "\n\nmain.c:\n";
         tail +18 main.c;
 
-        printf "\n\nconfig.c:\n";
-        tail +18 config.c;
+        # printf "\n\nconfig.c:\n";
+        # tail +18 config.c;
+
+        # printf "\n\npt_BR.po:\n";
+        # tail +18 po/pt_BR.po;
 
         # printf "\n\ndirectory tree:\n";
         # tree
     } | xsel -b
 }}
 
+cmd yank_file %{{
+    {
+        printf "\n$(basename "$f"):\n"
+        tail +18 "$f"
+    } | xsel -b
+}}
+
+map yB yank_base
 map yC yank_cecup
+map yF yank_file
 
 ## MUDANÇAS
 cmd chmod ${{
