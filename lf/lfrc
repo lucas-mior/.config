@@ -264,7 +264,7 @@ cmd yank_base %{{
 
 cmd yank_cecup %{{
     {
-        printf "\nRead the current version:\n"
+        # printf "\nRead the current version:\n"
         # printf "build.sh:\n";
         # tail +18 build.sh;
 
