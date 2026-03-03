@@ -253,12 +253,13 @@ cmd mkdir %{{
 
 cmd yank_base %{{
     {
-        printf "\nRead arena.c and util.c only for reference. Dont try to find bug in them.\n"
-        printf "util.c:\n";
-        tail +18 util.c;
+        printf "\nBelow are parts of util.c and arena.c, just for reference.\n"
+        printf "Read them and aknowledge that you understand them.\n"
+        printf "\nutil.c:\n";
+        tail +18 util.c | sed '/#if TESTING/Q';
 
-        printf "\n\narena.c:\n";
-        tail +18 arena.c;
+        printf "\narena.c:\n";
+        tail +18 arena.c | sed '/#if TESTING/Q';
     } | xsel -b
 }}
 
@@ -267,6 +268,8 @@ cmd yank_cecup %{{
         # printf "\nRead the current version:\n"
         # printf "build.sh:\n";
         # tail +18 build.sh;
+
+        printf "\nThe main program is below:\n"
 
         printf "cecup.h:\n";
         tail +18 cecup.h;
