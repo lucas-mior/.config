@@ -63,7 +63,7 @@ alias -g la='ls -A'
 alias -g lh='ls -A | grep "^\."'
 
 alias cp='cp -v --reflink=auto'
-alias rsync='rsync -HL -ur -ogt -P --fuzzy --info=progress2'
+alias rsync='rsync -H -ur -ogt -P --info=progress2'
 alias mv='mv -iv'
 alias rm='rm -v'
 alias mkd='mkdir -pv'

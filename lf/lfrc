@@ -269,25 +269,23 @@ cmd yank_cecup %{{
         # printf "build.sh:\n";
         # tail +18 build.sh;
 
-        printf "\nThe main program is below:\n"
-
-        printf "cecup.h:\n";
+        printf "\ncecup.h:\n";
         tail +18 cecup.h;
 
-        printf "\n\nhooks.c:\n";
-        tail +18 hooks.c;
+        printf "\n\naux.c:\n";
+        tail +18 aux.c;
 
-        printf "\n\nrsync.c:\n";
-        tail +18 rsync.c;
+        printf "\n\nwork.c:\n";
+        tail +18 work.c;
 
         printf "\n\nmain.c:\n";
         tail +18 main.c;
 
-        # printf "\n\nconfig.c:\n";
-        # tail +18 config.c;
+        printf "\n\nipc.c:\n";
+        tail +18 ipc.c;
 
-        # printf "\n\npt_BR.po:\n";
-        # tail +18 po/pt_BR.po;
+        printf "\n\non.c:\n";
+        tail +18 on.c;
 
         # printf "\n\ndirectory tree:\n";
         # tree

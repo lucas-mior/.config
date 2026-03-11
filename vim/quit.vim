@@ -10,14 +10,17 @@
 " :qa! -> quit vim, no matter what
 
 " old habits die hard
-cnoremap wq<CR> :echoerr "press ZZ to save and quit"<CR>
-" cnoremap w<CR> :echoerr "press CTRL-S to save"<CR>
-" command! -bang -nargs=? Edit :edit! | echo "Use another open method"
+cnoremap <expr> wq (getcmdtype() == ':' && getcmdpos() == 1) ? 
+      \ "\<C-u>echoerr 'press ZZ to save and quit'\<CR>" : "wq"
+
+cnoremap <expr> w (getcmdtype() == ':' && getcmdpos() == 1) ? 
+      \ "\<C-u>echoerr 'press CTRL-S to save'\<CR>" : "w"
+command! -bang -nargs=? Edit :edit! | echo "Use another open method"
 " cnoreabbrev e Edit
 
 " sane mappings
-cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'MyQuit' : 'q')<CR>
-nnoremap ZZ :w<CR>:MyQuit<CR>
+" cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'MyQuit' : 'q')<CR>
+" nnoremap ZZ :w<CR>:MyQuit<CR>
 
 " This requires running `stty -ixon` on your shellrc
 nnoremap <C-s> :w!<CR>:w!<CR>
@@ -48,4 +51,4 @@ def g:QuitIfLastBuffer(): void
 enddef
 
 " next line bugs PlugUpdate, comment when installing plugins
-autocmd BufDelete * :call QuitIfLastBuffer()
+" autocmd BufDelete * :call QuitIfLastBuffer()
