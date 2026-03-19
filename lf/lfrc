@@ -253,7 +253,7 @@ cmd mkdir %{{
 
 cmd yank_base %{{
     {
-        printf "\nBelow are parts of util.c and arena.c, just for reference.\n"
+        printf "\nBelow are the most important parts of util.c and arena.c, for reference.\n"
         printf "Read them and aknowledge that you understand them.\n"
         printf "\nutil.c:\n";
         tail +18 util.c | sed '/#if TESTING/Q';
@@ -281,14 +281,35 @@ cmd yank_cecup %{{
         printf "\n\nmain.c:\n";
         tail +18 main.c;
 
-        printf "\n\nipc.c:\n";
-        tail +18 ipc.c;
+        # printf "\n\nipc.c:\n";
+        # tail +18 ipc.c;
 
         printf "\n\non.c:\n";
         tail +18 on.c;
 
         # printf "\n\ndirectory tree:\n";
         # tree
+    } | xsel -b
+}}
+
+cmd yank_cecup3 ${{
+    name="$(basename "$f")"
+    dunstify "name=$name"
+    {
+        printf "Lets work with $name. Remember, your job is to read"
+        printf " the original gtk3 version of the file,"
+        printf " read the gtk4 version that you made,"
+        printf " and then rewrite the gtk4 version,"
+        printf " but without introducing bugs and changes unrelated to gtk."
+        printf " below is the gtk3 version of the file:\n\n"
+
+        tail +18 "gtk3/$name"
+
+        printf "\n\n below is the gtk4 version of the file:\n\n"
+
+        tail +18 "$name"
+
+        printf "\nnow write the corrected gtk4 version of $name."
     } | xsel -b
 }}
 
@@ -301,6 +322,7 @@ cmd yank_file %{{
 
 map yB yank_base
 map yC yank_cecup
+map yD yank_cecup3
 map yF yank_file
 
 ## MUDANÇAS
