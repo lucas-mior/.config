@@ -253,13 +253,15 @@ cmd mkdir %{{
 
 cmd yank_base %{{
     {
-        printf "\nBelow are the most important parts of util.c and arena.c, for reference.\n"
-        printf "Read them and aknowledge that you understand them.\n"
+        printf "\nBelow are the most important parts of util.c"
+        # printf "and arena.c,"
+        printf "for reference.\n"
+        printf "Read and aknowledge that you understand.\n"
         printf "\nutil.c:\n";
         tail +18 util.c | sed '/#if TESTING/Q';
 
-        printf "\narena.c:\n";
-        tail +18 arena.c | sed '/#if TESTING/Q';
+        # printf "\narena.c:\n";
+        # tail +18 arena.c | sed '/#if TESTING/Q';
     } | xsel -b
 }}
 
@@ -275,8 +277,8 @@ cmd yank_cecup %{{
         printf "\n\naux.c:\n";
         tail +18 aux.c;
 
-        printf "\n\nwork.c:\n";
-        tail +18 work.c;
+        # printf "\n\nwork.c:\n";
+        # tail +18 work.c;
 
         printf "\n\nmain.c:\n";
         tail +18 main.c;
@@ -286,6 +288,9 @@ cmd yank_cecup %{{
 
         printf "\n\non.c:\n";
         tail +18 on.c;
+
+        printf "\n\non_menu.c:\n";
+        tail +18 on_menu.c;
 
         # printf "\n\ndirectory tree:\n";
         # tree
@@ -312,6 +317,27 @@ cmd yank_cecup3 ${{
         printf "\nnow write the corrected gtk4 version of $name."
     } | xsel -b
 }}
+
+cmd yank_xmacros ${{
+    {
+        printf "\n\ngeneric.c:\n";
+        tail +18 generic.c;
+
+        printf "\n\nassert.c:\n";
+        tail +18 assert.c;
+
+        printf "\n\nxstructs.c:\n";
+        tail +18 xstructs.c;
+
+        printf "\n\nxenums.c:\n";
+        tail +18 xenums.c;
+
+        printf "\n\nmain.c:\n";
+        tail +18 main.c;
+    } | xsel -b
+}}
+
+map yX yank_xmacros
 
 cmd yank_file %{{
     {

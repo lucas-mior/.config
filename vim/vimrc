@@ -552,6 +552,8 @@ def g:FzfFindFile(): void
         .. ' | grep -Ev "\.(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
         .. ' | grep -Ev "\.(bcf|pdf|idx|mw)$"'
         .. ' | grep -Ev "^\./?$"'
+        .. ' | grep -Ev "^ *$"'
+        .. ' | sort | uniq'
         .. ' | fzf --bind one:accept 2>/dev/null'
 
     var file = trim(system(cmd))
@@ -650,6 +652,24 @@ def g:SwitchOrFzf(): void
         g:FzfFindFile()
     endif
 enddef
+
+def RightAlign(char: string)
+    if strlen(char) > 1
+        return
+    endif
+
+    var linelength: number = strlen(getline('.'))
+    right
+    var spaces: number = strlen(getline('.')) - linelength
+
+    execute "normal 0|d" .. spaces .. "l"
+    execute "normal f" .. char
+    normal P
+
+    return
+enddef
+
+command! -range -nargs=1 RightAlign :<line1>,<line2>call RightAlign(<args>)
 
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
