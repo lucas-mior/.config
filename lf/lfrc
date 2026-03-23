@@ -274,11 +274,14 @@ cmd yank_cecup %{{
         printf "\ncecup.h:\n";
         tail +18 cecup.h;
 
+        printf "\n\ntree_model.c:\n";
+        tail +18 tree_model.c;
+
         printf "\n\naux.c:\n";
         tail +18 aux.c;
 
-        # printf "\n\nwork.c:\n";
-        # tail +18 work.c;
+        printf "\n\nwork.c:\n";
+        tail +18 work.c;
 
         printf "\n\nmain.c:\n";
         tail +18 main.c;
