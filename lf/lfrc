@@ -275,7 +275,7 @@ cmd yank_base %{{
         printf "\nhash.c:\n";
         tail +18 hash.c | sed '/#if TESTING/Q';
 
-    } | xsel -b
+    } | xsel -i -b
 }}
 
 cmd yank_cecup %{{
@@ -310,7 +310,7 @@ cmd yank_cecup %{{
 
         printf "\n\nwork.c:\n";
         tail +18 work.c;
-    } | xsel -b
+    } | xsel -i -b
 }}
 
 cmd yank_cecup3 ${{
@@ -331,7 +331,7 @@ cmd yank_cecup3 ${{
         tail +18 "$name"
 
         printf "\nnow write the corrected gtk4 version of $name."
-    } | xsel -b
+    } | xsel -i -b
 }}
 
 cmd yank_xmacros ${{
@@ -350,7 +350,7 @@ cmd yank_xmacros ${{
 
         printf "\n\nmain.c:\n";
         tail +18 main.c;
-    } | xsel -b
+    } | xsel -i -b
 }}
 
 map yX yank_xmacros
@@ -359,7 +359,7 @@ cmd yank_file %{{
     {
         printf "\n$(basename "$f"):\n"
         tail +18 "$f"
-    } | xsel -b
+    } | xsel -i -b
 }}
 
 map yB yank_base
