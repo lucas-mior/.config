@@ -253,15 +253,28 @@ cmd mkdir %{{
 
 cmd yank_base %{{
     {
-        printf "\nBelow are the most important parts of util.c"
-        # printf "and arena.c,"
-        printf "for reference.\n"
-        printf "Read and aknowledge that you understand.\n"
+        printf "\nBelow are the most important parts of my C utility files"
+        printf " that I use on every C project."
+        printf "\nRead and aknowledge that you understand.\n"
+
+        printf "\ngeneric.c:\n";
+        tail +18 generic.c | sed '/#if TESTING/Q';
+
+        printf "\nassert.c:\n";
+        tail +18 assert.c | sed '/#if TESTING/Q';
+
+        printf "\nminmax.c:\n";
+        tail +18 minmax.c | sed '/#if TESTING/Q';
+
         printf "\nutil.c:\n";
         tail +18 util.c | sed '/#if TESTING/Q';
 
-        # printf "\narena.c:\n";
-        # tail +18 arena.c | sed '/#if TESTING/Q';
+        printf "\narena.c:\n";
+        tail +18 arena.c | sed '/#if TESTING/Q';
+
+        printf "\nhash.c:\n";
+        tail +18 hash.c | sed '/#if TESTING/Q';
+
     } | xsel -b
 }}
 

@@ -553,6 +553,7 @@ def g:FzfFindFile(): void
         .. ' | grep -Ev "\.(bcf|pdf|idx|mw)$"'
         .. ' | grep -Ev "^\./?$"'
         .. ' | grep -Ev "^ *$"'
+        .. ' | sed "s|^./||g"'
         .. ' | sort | uniq'
         .. ' | fzf --bind one:accept 2>/dev/null'
 
