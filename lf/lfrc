@@ -279,37 +279,20 @@ cmd yank_base %{{
 }}
 
 cmd yank_cecup %{{
+    copyfile () {
+        printf "\n$1:\n"
+        tail +18 "$1"
+    }
     {
-        # printf "\nRead the current version:\n"
-        # printf "build.sh:\n";
-        # tail +18 build.sh;
-
-        printf "\ncecup.h:\n";
-        tail +18 cecup.h;
-
-        printf "\n\ncolumns.c:\n";
-        tail +18 ipc.c;
-
-        printf "\n\nmain.c:\n";
-        tail +18 main.c;
-
-        printf "\n\ntree_model.c:\n";
-        tail +18 tree_model.c;
-
-        printf "\n\naux.c:\n";
-        tail +18 aux.c;
-
-        printf "\n\nipc.c:\n";
-        tail +18 ipc.c;
-
-        printf "\n\non.c:\n";
-        tail +18 on.c;
-
-        printf "\n\non_menu.c:\n";
-        tail +18 on_menu.c;
-
-        printf "\n\nwork.c:\n";
-        tail +18 work.c;
+        copyfile cecup.h
+        copyfile columns.c;
+        copyfile main.c
+        copyfile tree_model.c
+        copyfile aux.c
+        copyfile ipc.c
+        copyfile on.c
+        copyfile on_menu.c
+        copyfile work.c
     } | xsel -i -b
 }}
 
