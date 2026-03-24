@@ -299,9 +299,6 @@ cmd yank_cecup %{{
         printf "\n\naux.c:\n";
         tail +18 aux.c;
 
-        printf "\n\nwork.c:\n";
-        tail +18 work.c;
-
         printf "\n\nipc.c:\n";
         tail +18 ipc.c;
 
@@ -310,6 +307,9 @@ cmd yank_cecup %{{
 
         printf "\n\non_menu.c:\n";
         tail +18 on_menu.c;
+
+        printf "\n\nwork.c:\n";
+        tail +18 work.c;
     } | xsel -b
 }}
 
