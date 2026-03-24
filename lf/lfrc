@@ -289,43 +289,17 @@ cmd yank_cecup %{{
     } | xsel -i -b
 }}
 
-cmd yank_cecup3 ${{
-    name="$(basename "$f")"
-    dunstify "name=$name"
-    {
-        printf "Lets work with $name. Remember, your job is to read"
-        printf " the original gtk3 version of the file,"
-        printf " read the gtk4 version that you made,"
-        printf " and then rewrite the gtk4 version,"
-        printf " but without introducing bugs and changes unrelated to gtk."
-        printf " below is the gtk3 version of the file:\n\n"
-
-        tail +18 "gtk3/$name"
-
-        printf "\n\n below is the gtk4 version of the file:\n\n"
-
-        tail +18 "$name"
-
-        printf "\nnow write the corrected gtk4 version of $name."
-    } | xsel -i -b
-}}
-
 cmd yank_xmacros ${{
+    copyfile () {
+        printf "\n$1:\n"
+        tail +18 "$1"
+    }
     {
-        printf "\n\ngeneric.c:\n";
-        tail +18 generic.c;
-
-        printf "\n\nassert.c:\n";
-        tail +18 assert.c;
-
-        printf "\n\nxstructs.c:\n";
-        tail +18 xstructs.c;
-
-        printf "\n\nxenums.c:\n";
-        tail +18 xenums.c;
-
-        printf "\n\nmain.c:\n";
-        tail +18 main.c;
+        copyfile generic.c
+        copyfile assert.c
+        copyfile xstructs.c
+        copyfile xenums.c
+        copyfile main.c
     } | xsel -i -b
 }}
 
@@ -340,7 +314,6 @@ cmd yank_file %{{
 
 map yB yank_base
 map yC yank_cecup
-map yD yank_cecup3
 map yF yank_file
 
 ## MUDANÇAS
