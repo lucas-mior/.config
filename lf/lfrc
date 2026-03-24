@@ -274,6 +274,12 @@ cmd yank_cecup %{{
         printf "\ncecup.h:\n";
         tail +18 cecup.h;
 
+        printf "\n\ncolumns.c:\n";
+        tail +18 ipc.c;
+
+        printf "\n\nmain.c:\n";
+        tail +18 main.c;
+
         printf "\n\ntree_model.c:\n";
         tail +18 tree_model.c;
 
@@ -283,20 +289,14 @@ cmd yank_cecup %{{
         printf "\n\nwork.c:\n";
         tail +18 work.c;
 
-        printf "\n\nmain.c:\n";
-        tail +18 main.c;
-
-        # printf "\n\nipc.c:\n";
-        # tail +18 ipc.c;
+        printf "\n\nipc.c:\n";
+        tail +18 ipc.c;
 
         printf "\n\non.c:\n";
         tail +18 on.c;
 
         printf "\n\non_menu.c:\n";
         tail +18 on_menu.c;
-
-        # printf "\n\ndirectory tree:\n";
-        # tree
     } | xsel -b
 }}
 
