@@ -285,6 +285,7 @@ cmd yank_cecup %{{
         copyfile on.c
         copyfile on_menu.c
         copyfile work.c
+        copyfile ignore_patterns.c
     } | xsel -i -b
 }}
 
