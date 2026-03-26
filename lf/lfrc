@@ -278,14 +278,14 @@ cmd yank_cecup %{{
     }
     {
         copyfile cecup.h
-        copyfile columns.c
-        copyfile main.c
+        # copyfile columns.c
+        # copyfile main.c
         copyfile tree_model.c
         copyfile aux.c
         copyfile on.c
         copyfile on_menu.c
         copyfile work.c
-        copyfile ignore_patterns.c
+        # copyfile ignore_patterns.c
     } | xsel -i -b
 }}
 
