@@ -275,6 +275,7 @@ cmd yank_cecup %{{
     copyfile () {
         printf "\n$1:\n"
         tail +18 "$1"
+        printf "\nRemember: when suggesting code, NEVER CHANGE CODE STYLE!!!\n"
     }
     {
         copyfile cecup.h
@@ -282,6 +283,7 @@ cmd yank_cecup %{{
         copyfile main.c
         copyfile tree_model.c
         copyfile aux.c
+        copyfile update.c
         copyfile on.c
         copyfile on_menu.c
         copyfile work.c
@@ -293,6 +295,7 @@ cmd yank_xmacros ${{
     copyfile () {
         printf "\n$1:\n"
         tail +18 "$1"
+        printf "\nRemember: when suggesting code, NEVER CHANGE CODE STYLE!!!\n"
     }
     {
         copyfile generic.c
@@ -308,7 +311,8 @@ map yX yank_xmacros
 cmd yank_file %{{
     {
         printf "\n$(basename "$f"):\n"
-        tail +18 "$f"
+        tail +18 "$f" | sed '/#if TESTING/q' | sed '$d'
+        printf "\nRemember: when suggesting code, NEVER CHANGE CODE STYLE!!!\n"
     } | xsel -i -b
 }}
 

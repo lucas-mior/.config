@@ -31,6 +31,7 @@ Plug 'romainl/vim-cool'
 Plug 'dahu/vim-fanfingtastic'
 Plug 'vim-python/python-syntax'
 Plug 'lervag/vimtex'
+Plug 'ahf/cocci-syntax'
 
 call plug#end()
 
@@ -379,6 +380,17 @@ set noautochdir
 au CursorHold * checktime
 filetype plugin on
 
+def UpdateColorColumn()
+    if &textwidth > 0
+        # Method chaining (->) is very clean in Vim9
+        &l:colorcolumn = range(&textwidth + 1, 999)->join(',')
+    else
+        &l:colorcolumn = ''
+    endif
+enddef
+
+autocmd BufEnter,FileType * UpdateColorColumn()
+
 colorscheme default
 if &term =~ 'st\|xterm\|kitty\|alacritty\|tmux'
     &t_Ts = "\e[9m"   # Strikethrough
@@ -519,6 +531,8 @@ au BufRead,BufNewFile *.sp,*.MOD          setlocal filetype=spice
 au BufRead,BufNewFile *.plt               setlocal filetype=gnuplot
 au BufRead,BufNewFile */X11/urxvt          setlocal filetype=xdefaults
 au BufRead,BufNewFile */.config/zathura/* setlocal filetype=zathurarc
+au BufRead,BufNewFile */src/cecup/*.c     setlocal textwidth=100
+au BufRead,BufNewFile */src/cecup/*.h     setlocal textwidth=100
 au BufRead,BufNewFile *.sent              setlocal filetype=sent
 au BufRead,BufNewFile *.sed               setlocal filetype=sed
 au BufRead,BufNewFile *.pgn               setlocal filetype=pgn

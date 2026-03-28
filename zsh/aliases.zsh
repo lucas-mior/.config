@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+alias spatch='flatpak run io.github.coccinelle.coccinelle'
+
 random() {
     seq ${1:-10} | shuf -n 1
 }
