@@ -698,7 +698,30 @@ def CopyFileWithHeader(is_visual: bool)
     else
         header = $"{filename}:\n"
         var lines = getline(1, '$')
-        body = join(lines, "\n")
+
+        if &filetype == 'c'
+            var filtered: list<string> = []
+            var skipping_comments = true
+
+            for line in lines
+                if skipping_comments
+                    if line =~ '^\s*\(//\|/\*\|\s*\*\|\s*$\)'
+                        continue
+                    endif
+                    skipping_comments = false
+                endif
+
+                if line =~ '^#if TESTING'
+                    add(filtered, "// skipping #if TESTING block for brevity...")
+                    break
+                endif
+
+                add(filtered, line)
+            endfor
+            body = join(filtered, "\n")
+        else
+            body = join(lines, "\n")
+        endif
     endif
 
     setreg('+', header .. body)
