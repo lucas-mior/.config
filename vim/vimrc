@@ -407,7 +407,8 @@ g:mapleader = '\'
 command! Vmake w | silent make -j1 clang | unsilent redraw!
 set makeprg=./build.sh
 # nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
-nnoremap <leader>m :make<CR>:LspDiagNextWrap<CR>
+# nnoremap <leader>m :make<CR>:LspDiagNextWrap<CR>
+nnoremap <leader>m :!./build.sh \|\| ../build.sh<CR>:LspDiagNextWrap<CR>
 
 # disable ex mode (what the hell is that shit?)
 map Q <Nop>
