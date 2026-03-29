@@ -693,7 +693,7 @@ def CopyFileWithHeader(is_visual: bool)
 
     if is_visual
         header = $"some parts of {filename}:\n"
-        var region = getregion(getpos("'<"), getpos("'>"), {type: visualmode()})
+        var region = getregion(getpos("'<"), getpos("'>"))
         body = join(region, "\n")
     else
         header = $"{filename}:\n"
