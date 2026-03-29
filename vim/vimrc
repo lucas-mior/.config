@@ -405,10 +405,51 @@ g:mapleader = '\'
 # set shortmess=at
 
 command! Vmake w | silent make -j1 clang | unsilent redraw!
-set makeprg=./build.sh
+set makeprg=thebuild.sh
 # nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
 # nnoremap <leader>m :make<CR>:LspDiagNextWrap<CR>
-nnoremap <leader>m :!./build.sh \|\| ../build.sh<CR>:LspDiagNextWrap<CR>
+
+def JumpToNextFileWithDiag()
+    var current_file: string = expand('%:p')
+    var c_files: list<string> = glob('*.c', false, true)
+    
+    if empty(c_files)
+        return
+    endif
+
+    var absolute_files: list<string> = []
+    for f in c_files
+        var abs_path: string = fnamemodify(f, ':p')
+        add(absolute_files, abs_path)
+    endfor
+
+    var current_idx: number = index(absolute_files, current_file)
+    var start_idx: number = 0
+    if current_idx != -1
+        start_idx = current_idx
+    endif
+
+    var num_files: number = len(absolute_files)
+    
+    for i in range(num_files)
+        var idx: number = (start_idx + i) % num_files
+        var target: string = absolute_files[idx]
+        
+        execute 'hide edit ' .. target
+        
+        var placed: list<dict<any>> = sign_getplaced('', {group: '*'})
+        var signs: list<dict<any>> = placed[0].signs
+        
+        if !empty(signs)
+            execute 'LspDiagNextWrap'
+            return
+        endif
+    endfor
+    
+    return
+enddef
+
+nnoremap <leader>m :!./build.sh \|\| ../build.sh<CR><ScriptCmd>JumpToNextFileWithDiag()<CR>
 
 # disable ex mode (what the hell is that shit?)
 map Q <Nop>
