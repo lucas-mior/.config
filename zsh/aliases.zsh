@@ -126,10 +126,10 @@ cat () {
 zshbuild () {
     if [ -f "./build.sh" ]; then
         ./build.sh "$1"
+    elif [ -f "../build.sh" ]; then
+        ../build.sh "$1"
     elif [ -f "./Makefile" ]; then
         make "$1"
-    else
-        build
     fi
 }
 
@@ -148,7 +148,7 @@ fstab ()  {
        && sudo mkinitcpio -P
 }
 
-alias -g build.sh='./build.sh'
+alias -g build.sh='zshbuild'
 
 alias ncdu='ncdu --color dark'
 alias df='df -h'

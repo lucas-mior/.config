@@ -686,5 +686,27 @@ enddef
 
 command! -range -nargs=1 RightAlign :<line1>,<line2>call RightAlign(<args>)
 
+def CopyFileWithHeader(is_visual: bool)
+    var filename: string = expand('%:t')
+    var header: string = ""
+    var body: string = ""
+
+    if is_visual
+        header = $"some functions of {filename}:\n"
+        var region = getregion(getpos("'<"), getpos("'>"), {type: visualmode()})
+        body = join(region, "\n")
+    else
+        header = $"{filename}:\n"
+        var lines = getline(1, '$')
+        body = join(lines, "\n")
+    endif
+
+    setreg('+', header .. body)
+    echomsg "Copied to clipboard with header."
+enddef
+
+nnoremap <silent> <leader>fc <ScriptCmd>CopyFileWithHeader(false)<CR>
+xnoremap <silent> <leader>fc <ScriptCmd>CopyFileWithHeader(true)<CR>
+
 source /home/lucas/.config/vim/.arquivos.vim
 source /home/lucas/.config/vim/cores.vim
