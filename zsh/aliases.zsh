@@ -125,11 +125,11 @@ cat () {
 
 zshbuild () {
     if [ -f "./build.sh" ]; then
-        ./build.sh "$1"
+        ./build.sh "$@"
     elif [ -f "../build.sh" ]; then
-        ../build.sh "$1"
+        ../build.sh "$@"
     elif [ -f "./Makefile" ]; then
-        make "$1"
+        make "$@"
     fi
 }
 

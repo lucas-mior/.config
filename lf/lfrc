@@ -311,8 +311,7 @@ map yX yank_xmacros
 cmd yank_file %{{
     {
         printf "\n$(basename "$f"):\n"
-        tail +18 "$f" | sed '/#if TESTING/q' | sed '$d'
-        printf "\nRemember: when suggesting code, NEVER CHANGE CODE STYLE!!!\n"
+        tail +18 "$f" | sed '/#if TESTING/Q'
     } | xsel -i -b
 }}
 

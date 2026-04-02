@@ -51,8 +51,8 @@ augroup END
 
 g:term_debug_on = v:false
 
-au User TermdebugStartPost g:term_debug_on = v:true
-au User TermdebugStopPre   g:term_debug_on = v:false
+autocmd User TermdebugStartPost g:term_debug_on = v:true
+autocmd User TermdebugStopPre   g:term_debug_on = v:false
 
 def g:EvalSmart(): void
     if !g:term_debug_on
@@ -377,7 +377,7 @@ set autoread
 set conceallevel=2
 # set termwinsize=10x0
 set noautochdir
-au CursorHold * checktime
+autocmd CursorHold * checktime
 filetype plugin on
 
 def UpdateColorColumn()
@@ -409,9 +409,9 @@ set makeprg=thebuild.sh
 # nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
 # nnoremap <leader>m :make<CR>:LspDiagNextWrap<CR>
 
-def JumpToNextFileWithDiag()
+def g:JumpToNextFileWithDiag()
     var current_file: string = expand('%:p')
-    var c_files: list<string> = glob('*.c', false, true)
+    var c_files: list<string> = glob('src/*.c', false, true)
     
     if empty(c_files)
         return
@@ -449,7 +449,8 @@ def JumpToNextFileWithDiag()
     return
 enddef
 
-nnoremap <leader>m :!./build.sh \|\| ../build.sh<CR><ScriptCmd>JumpToNextFileWithDiag()<CR>
+nnoremap <leader>m :!CC=clang ./build.sh \|\| CC=clang ../build.sh<CR>call g:JumpToNextFileWithDiag()<CR>
+nnoremap <leader>m :make<CR>
 
 # disable ex mode (what the hell is that shit?)
 map Q <Nop>
@@ -532,26 +533,26 @@ inoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 cnoremap <expr> <C-k> pumvisible() ? '<C-n>' : '<C-k>'
 cnoremap <expr> <C-l> pumvisible() ? '<C-p>' : '<C-l>'
 
-au BufWritePost ~/.config/X11/* !xrdb ~/.config/X11/Xresources
-au BufWritePost */nsxiv/key-handler             !nsxiv_keyhandler_update_lf.sed % > ~/.config/lf/nsxiv
-au BufWritePost */tmux/tmux.conf                 !tmux source-file %
-au BufWritePost */sxhkdrc                        !pkill -SIGUSR1 sxhkd
-au BufWritePost */dunst/dunstrc                  !killall dunst; setsid -f dunst 2>&1 > /dev/null
-au BufWritePost ~/.config/atalhos,*/atalhos.awk !atalhos.awk   ~/.config/atalhos
-au BufWritePost */ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
-au BufWritePost */lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
-au BufWritePost */src/dwmblocks2/* !sudo ./build.sh install; restart.sh dwmblocks2
+autocmd BufWritePost ~/.config/X11/* !xrdb ~/.config/X11/Xresources
+autocmd BufWritePost */nsxiv/key-handler             !nsxiv_keyhandler_update_lf.sed % > ~/.config/lf/nsxiv
+autocmd BufWritePost */tmux/tmux.conf                 !tmux source-file %
+autocmd BufWritePost */sxhkdrc                        !pkill -SIGUSR1 sxhkd
+autocmd BufWritePost */dunst/dunstrc                  !killall dunst; setsid -f dunst 2>&1 > /dev/null
+autocmd BufWritePost ~/.config/atalhos,*/atalhos.awk !atalhos.awk   ~/.config/atalhos
+autocmd BufWritePost */ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
+autocmd BufWritePost */lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
+autocmd BufWritePost */src/dwmblocks2/* !sudo ./build.sh install; restart.sh dwmblocks2
 
-au BufRead */Makefile,*.mk,
+autocmd BufRead */Makefile,*.mk,
            \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
            \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
-au BufRead */Makefile setlocal textwidth=80
+autocmd BufRead */Makefile setlocal textwidth=80
 
-au BufWritePost */src/a_c/*.c        !test_c_program.sh % execute
-au BufWritePost */src/0wayland/*.c  !test_c_program.sh %
-au BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
-au BufWritePost */src/a_python/*.py !python %
-au BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
+autocmd BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
+autocmd BufWritePost */src/0wayland/*.c  !test_c_program.sh %
+autocmd BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
+autocmd BufWritePost */src/a_python/*.py !python %
+autocmd BufWritePost */src/a_rust/*.rs   !rustc % -o /tmp/%.out && /tmp/%.out
 # au BufWritePost *.kt !android_studio_shiftf9.sh
 
 # au BufWritePost *.sh,*.bash,*.zsh,PKGBUILD,PKGBUILD.install   !shellcheck -e SC2059 -x %
@@ -566,28 +567,28 @@ autocmd BufWritePost * call RunShellcheck()
 
 autocmd BufWritePost *.awk !gawk --lint -f %
 
-au BufRead,BufNewFile *.mo,*.mod          setlocal filetype=modelica
-au BufRead,BufNewFile *.sage              setlocal filetype=python
-au BufRead,BufNewFile /var/tmp/fstab* setlocal filetype=fstab
-au BufRead,BufNewFile *.sp,*.MOD          setlocal filetype=spice
-au BufRead,BufNewFile *.plt               setlocal filetype=gnuplot
-au BufRead,BufNewFile */X11/urxvt          setlocal filetype=xdefaults
-au BufRead,BufNewFile */.config/zathura/* setlocal filetype=zathurarc
-au BufRead,BufNewFile */src/cecup/*.c     setlocal textwidth=100
-au BufRead,BufNewFile */src/cecup/*.h     setlocal textwidth=100
-au BufRead,BufNewFile *.sent              setlocal filetype=sent
-au BufRead,BufNewFile *.sed               setlocal filetype=sed
-au BufRead,BufNewFile *.pgn               setlocal filetype=pgn
-au BufRead,BufNewFile */COMMIT_EDITMSG     setlocal filetype=gitcommit
-au BufRead,BufNewFile *.tab               setlocal filetype=tab
-au BufRead,BufNewFile */.config/lf/* setlocal filetype=lf
-au BufRead,BufNewFile ~/.config/* setlocal autochdir
-au BufRead,BufNewFile *.bib               setlocal autochdir
+autocmd BufRead,BufNewFile *.mo,*.mod          setlocal filetype=modelica
+autocmd BufRead,BufNewFile *.sage              setlocal filetype=python
+autocmd BufRead,BufNewFile /var/tmp/fstab* setlocal filetype=fstab
+autocmd BufRead,BufNewFile *.sp,*.MOD          setlocal filetype=spice
+autocmd BufRead,BufNewFile *.plt               setlocal filetype=gnuplot
+autocmd BufRead,BufNewFile */X11/urxvt          setlocal filetype=xdefaults
+autocmd BufRead,BufNewFile */.config/zathura/* setlocal filetype=zathurarc
+autocmd BufRead,BufNewFile */src/cecup/*.c     setlocal textwidth=100
+autocmd BufRead,BufNewFile */src/cecup/*.h     setlocal textwidth=100
+autocmd BufRead,BufNewFile *.sent              setlocal filetype=sent
+autocmd BufRead,BufNewFile *.sed               setlocal filetype=sed
+autocmd BufRead,BufNewFile *.pgn               setlocal filetype=pgn
+autocmd BufRead,BufNewFile */COMMIT_EDITMSG     setlocal filetype=gitcommit
+autocmd BufRead,BufNewFile *.tab               setlocal filetype=tab
+autocmd BufRead,BufNewFile */.config/lf/* setlocal filetype=lf
+autocmd BufRead,BufNewFile ~/.config/* setlocal autochdir
+autocmd BufRead,BufNewFile *.bib               setlocal autochdir
 
 # cd to file dir on startup
 # au VimEnter * lcd %:p:h
 
-au WinResized * wincmd =
+autocmd WinResized * wincmd =
 # augroup Mkdir
 #   autocmd!
 #   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
