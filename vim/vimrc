@@ -39,10 +39,10 @@ command! Picon exe 'normal m`'
                 \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
 packadd termdebug
-noremap <buffer> <C-@> :Break<CR>
-noremap <buffer> <leader>c :Continue<CR>
-noremap <buffer> <space>   :Step<CR>
-noremap <buffer> <enter>   :Step<CR>
+nnoremap <buffer> <C-@> :Break<CR>
+nnoremap <buffer> <leader>c :Continue<CR>
+nnoremap <buffer> <space>   :Step<CR>
+nnoremap <buffer> <enter>   :Step<CR>
 
 augroup CDebug
     autocmd!
