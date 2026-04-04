@@ -431,7 +431,7 @@ def g:JumpToNextFileWithDiag()
 
     var num_files: number = len(absolute_files)
     
-    for i in range(num_files)
+    for i in range(1, num_files)
         var idx: number = (start_idx + i) % num_files
         var target: string = absolute_files[idx]
         
@@ -441,16 +441,23 @@ def g:JumpToNextFileWithDiag()
         var signs: list<dict<any>> = placed[0].signs
         
         if !empty(signs)
-            execute 'LspDiagNextWrap'
-            return
+            try
+                execute 'LspDiagNextWrap'
+                return
+            catch
+                # If LspDiagNextWrap fails (e.g., signs are not from LSP), 
+                # ignore the error and let the loop continue to the next file
+            endtry
         endif
     endfor
     
     return
 enddef
 
-nnoremap <leader>m :!CC=clang ./build.sh \|\| CC=clang ../build.sh<CR>call g:JumpToNextFileWithDiag()<CR>
-nnoremap <leader>m :make<CR>
+# nnoremap <leader>m :!CC=clang ./build.sh fast_feedback \|\| CC=clang ../build.sh fast_feedback<CR>call g:JumpToNextFileWithDiag()<CR>
+nnoremap <leader>m :!CC=clang ./build.sh fast_feedback \|\| CC=clang ../build.sh fast_feedback<CR>
+nnoremap <leader>j :call g:JumpToNextFileWithDiag()<CR>
+# nnoremap <leader>m :make<CR>
 
 # disable ex mode (what the hell is that shit?)
 map Q <Nop>
@@ -548,7 +555,11 @@ autocmd BufRead */Makefile,*.mk,
            \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
 autocmd BufRead */Makefile setlocal textwidth=80
 
-autocmd BufWritePost */src/a_c/*.c       !test_c_program.sh % execute
+augroup test_c_autocmd
+  autocmd!
+  autocmd BufWritePost */src/a_c/*.c !test_c_program.sh % "execute"
+augroup END
+
 autocmd BufWritePost */src/0wayland/*.c  !test_c_program.sh %
 autocmd BufWritePost */src/a_c++/*.cpp   !g++ -Wall -Wextra -Wpedantic % -o /tmp/%.out && /tmp/%.out
 autocmd BufWritePost */src/a_python/*.py !python %
@@ -602,15 +613,7 @@ def g:FzfFindFile(): void
     writefile(buflist, '/tmp/vimbuflist')
 
     var cmd =
-        '{/usr/bin/cat /tmp/vimbuflist; find . -type f 2>/dev/null}'
-        .. ' | grep -Ev "\.git/(objects|refs|HEAD|index)"'
-        .. ' | grep -Ev "package/(src|pkg)"'
-        .. ' | grep -Ev "(\.cache|bin)/"'
-        .. ' | grep -Ev "\.(aux|run.xml|bbl|blg|toc|tol|lot|loq|lof|lol|log)$"'
-        .. ' | grep -Ev "\.(bcf|pdf|idx|mw)$"'
-        .. ' | grep -Ev "^\./?$"'
-        .. ' | grep -Ev "^ *$"'
-        .. ' | sed "s|^./||g"'
+        '{ /usr/bin/cat /tmp/vimbuflist; rg --files --no-messages; }'
         .. ' | sort | uniq'
         .. ' | fzf --bind one:accept 2>/dev/null'
 
