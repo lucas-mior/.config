@@ -405,7 +405,7 @@ g:mapleader = '\'
 # set shortmess=at
 
 command! Vmake w | silent make -j1 clang | unsilent redraw!
-set makeprg=thebuild.sh
+set makeprg=thebuild.sh\ nocolor
 # nnoremap <leader>m :Vmake<CR>:LspDiag current<CR>
 # nnoremap <leader>m :make<CR>:LspDiagNextWrap<CR>
 
@@ -613,7 +613,9 @@ def g:FzfFindFile(): void
     writefile(buflist, '/tmp/vimbuflist')
 
     var cmd =
-        '{ /usr/bin/cat /tmp/vimbuflist; rg --files --hidden --no-messages; find .git/hooks -type f 2>/dev/null; }'
+        '{ /usr/bin/cat /tmp/vimbuflist; '
+        .. '  rg --files --no-messages; '
+        .. '  find .git/hooks -type f 2>/dev/null; }'
         .. ' | sed "s|^./||g"'
         .. ' | sort | uniq'
         .. ' | fzf --bind one:accept 2>/dev/null'
