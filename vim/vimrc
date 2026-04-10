@@ -242,6 +242,7 @@ def SyncTexSetupAuto(): void
 
     nnoremap <buffer> <Space> :call <SID>SyncTexForward()<CR>
     nnoremap <buffer> <leader>s :call <SID>SyncTexToggleAutoForward()<CR>
+    set scrolloff=100
     return
 enddef
 

@@ -123,7 +123,7 @@ cat () {
     done
 }
 
-zshbuild () {
+build.sh () {
     if [ -f "./build.sh" ]; then
         ./build.sh "$@"
     elif [ -f "../build.sh" ]; then
@@ -132,6 +132,7 @@ zshbuild () {
         make "$@"
     fi
 }
+# alias -g build.sh='zshbuild'
 
 alias du='du -h'
 alias lsblk='lsblk -o NAME,SIZE,LABEL,FSTYPE,FSVER,MOUNTPOINTS,PARTLABEL | lsblk.awk'
@@ -147,8 +148,6 @@ fstab ()  {
        && sudo systemctl daemon-reload \
        && sudo mkinitcpio -P
 }
-
-alias -g build.sh='zshbuild'
 
 alias ncdu='ncdu --color dark'
 alias df='df -h'

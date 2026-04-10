@@ -172,13 +172,13 @@ hi Exception        cterm=NONE   ctermbg=NONE  ctermfg=011
 hi PreProc          cterm=NONE   ctermbg=NONE  ctermfg=005 
                   \ gui=NONE     guibg=NONE    guifg=#ff00ff
 hi Include          cterm=NONE   ctermbg=NONE  ctermfg=013 
-                  \ gui=NONE     guibg=NONE    guifg=#dd00ff
+                  \ gui=NONE     guibg=NONE    guifg=#dd00ee
 hi Define           cterm=NONE   ctermbg=NONE  ctermfg=013 
-                  \ gui=NONE     guibg=NONE    guifg=#ff00dd
+                  \ gui=NONE     guibg=NONE    guifg=#bb00ee
 hi Macro            cterm=NONE   ctermbg=NONE  ctermfg=005 
                   \ gui=NONE     guibg=NONE    guifg=#0077aa
 hi PreCondit        cterm=NONE   ctermbg=NONE  ctermfg=005 
-                  \ gui=NONE     guibg=NONE    guifg=#dd22dd
+                  \ gui=NONE     guibg=NONE    guifg=#ff22bb
 
 hi Type             cterm=NONE   ctermbg=NONE  ctermfg=010 
                   \ gui=NONE     guibg=NONE    guifg=#00cc00
