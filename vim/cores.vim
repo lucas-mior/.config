@@ -176,7 +176,7 @@ hi Include          cterm=NONE   ctermbg=NONE  ctermfg=013
 hi Define           cterm=NONE   ctermbg=NONE  ctermfg=013 
                   \ gui=NONE     guibg=NONE    guifg=#bb00ee
 hi Macro            cterm=NONE   ctermbg=NONE  ctermfg=005 
-                  \ gui=NONE     guibg=NONE    guifg=#0077aa
+                  \ gui=NONE     guibg=NONE    guifg=#8888ff
 hi PreCondit        cterm=NONE   ctermbg=NONE  ctermfg=005 
                   \ gui=NONE     guibg=NONE    guifg=#ff22bb
 
