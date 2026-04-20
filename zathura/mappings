@@ -56,6 +56,9 @@ unmap <C-l>
 unmap d
 unmap u
 
+map D toggle_page_mode
+map F cycle_first_column
+
 ## MARCAS
 map \" feedkeys :blist<Space>
 map <A-a> feedkeys :bmark<Space>a<Return>

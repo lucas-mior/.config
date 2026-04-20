@@ -549,7 +549,7 @@ autocmd BufWritePost */dunst/dunstrc                  !killall dunst; setsid -f 
 autocmd BufWritePost ~/.config/atalhos,*/atalhos.awk !atalhos.awk   ~/.config/atalhos
 autocmd BufWritePost */ls_colors.css,*/ls_colors.awk !ls_colors.awk ~/.config/ls_colors.css
 autocmd BufWritePost */lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf_icons.conf
-autocmd BufWritePost */src/dwmblocks2/* !sudo ./build.sh install; restart.sh dwmblocks2
+# autocmd BufWritePost */src/dwmblocks2/* !sudo ./build.sh install; restart.sh dwmblocks2
 
 autocmd BufRead */Makefile,*.mk,
            \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
