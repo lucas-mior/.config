@@ -13,7 +13,7 @@ lastpane () {
 zle -N lastpane
 
 ## Atalhos
-    bindkey '^e' edit-command-line
+    # bindkey '^e' edit-command-line
     bindkey '^I' first-tab
     bindkey '^H' backward-delete-word
     bindkey '^L' lastpane

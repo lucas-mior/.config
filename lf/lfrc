@@ -52,6 +52,7 @@ cmd start_shell ${{
     fi
     zsh
 }}
+map s start_shell
 
 cmd start_android_vim ${{
     src="$(find app/src/main/java/ -iname "*.kt")"
@@ -310,14 +311,36 @@ map yX yank_xmacros
 
 cmd yank_file %{{
     {
-        printf "\n$(basename "$f"):\n"
-        tail +18 "$f"
+        printf "\n$(basename "$f"):\n\n"
+                # awk '
+                #     BEGIN { skipping = 1 }
+                #     skipping && /^[[:space:]]*\/\*/ { in_block = 1; next }
+                #     skipping && in_block { if (/\*\//) in_block = 0; next }
+                #     skipping && /^[[:space:]]*(#|\/\/|[[:space:]]*$)/ { next }
+                #     { skipping = 0; print }
+                sed '/#if TESTING/Q' "$f"
     } | xsel -i -b
 }}
+
+cmd uncache %{{
+    video="$(readlink -e "$f")"
+    identifier=$(stat -c "%Y_%y_%s" -- "$video" \
+                    | awk -F_ '{
+                        printf("%s", $1);
+                        printf(".%s.", gensub(".*\\.([0-9]+).*", "\\1", "g", $2));
+                        print $3
+                    }')
+    find "${XDG_CACHE_HOME}/preview/" -type f -iname "${identifier}*" -delete
+    lf -remote "send $id reload"
+}}
+map <c-r> uncache
 
 map yB yank_base
 map yC yank_cecup
 map yF yank_file
+
+map <c-c> % printf "$f"               | xsel -i -b
+map yf    % printf "$(basename "$f")" | xsel -i -b
 
 ## MUDANÇAS
 cmd chmod ${{
@@ -540,7 +563,6 @@ map wc :set sortby ctime; set info ctime
 map we :set sortby ext
 
 ## executar scripts
-map s start_shell
 map xx run
 map xl run less
 map xz $ python ../scripts/draw_labels_yolo.py "$fx"
@@ -566,12 +588,13 @@ set tabstop 4
 set scrolloff 5
 set promptfmt "\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
 set statfmt "\033[36m%p\033[0m| %c| %u| %g| %S| \033[01;32m%t|\033[0m ->\033[01;38;2;128;128;128m %l"
-set mouse
+set nomouse
 
 set dupfilefmt '%f~%n~'
 
 # set sixel
 set preview
+# set previewer bugbug.sh
 set previewer piscou
 set cleaner /usr/local/bin/stiv_clear
 # $1 previous file name

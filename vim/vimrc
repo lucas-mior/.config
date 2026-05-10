@@ -393,7 +393,7 @@ enddef
 autocmd BufEnter,FileType * UpdateColorColumn()
 
 colorscheme default
-if &term =~ 'st\|xterm\|kitty\|alacritty\|tmux'
+if &term =~ 'st\|xterm\|kitty\|alacritty\|tmux\|contour'
     &t_Ts = "\e[9m"   # Strikethrough
     &t_Te = "\e[29m"
     &t_Cs = "\e[4:3m" # Undercurl
@@ -552,7 +552,7 @@ autocmd BufWritePost */lf_icons.conf,*/lf_icons.awk  !lf_icons.awk  ~/.config/lf
 # autocmd BufWritePost */src/dwmblocks2/* !sudo ./build.sh install; restart.sh dwmblocks2
 
 autocmd BufRead */Makefile,*.mk,
-           \*/src/dmenu/*,*/src/sent/*,*/src/st/*,*/src/swarp/*,
+           \*/src/dmenu/*,*/src/sent/*,*/src/swarp/*,
            \*/src/lf/*,*/src/nsxiv/*,*/src/nsxiv-extra/* setlocal noexpandtab
 autocmd BufRead */Makefile setlocal textwidth=80
 
@@ -605,6 +605,12 @@ autocmd WinResized * wincmd =
 #   autocmd!
 #   autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
 # augroup END
+
+def g:TriggerStBug(): void
+    var cmd = 'fzf'
+    var what = trim(system(cmd))
+    return
+enddef
 
 def g:FzfFindFile(): void
     var buflist = []

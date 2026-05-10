@@ -1,0 +1,243 @@
+
+[colors]
+transparent_background_colors = true
+
+[colors.bright]
+black = "#333333"
+blue = "#0077f9"
+cyan = "#0077bb"
+green = "#00cc00"
+magenta = "#dd00dd"
+red = "#ff4400"
+white = "#f1f1f1"
+yellow = "#f9bb00"
+
+[colors.cursor]
+cursor = "#ffff00"
+text = "CellForeground"
+
+[colors.dim]
+black = "#666666"
+blue = "#7aa6da"
+cyan = "#70c0b1"
+green = "#b9ca4a"
+magenta = "#c397d8"
+red = "#d54e53"
+white = "#eaeaea"
+yellow = "#e7c547"
+
+[colors.hints.end]
+background = "#1d1f21"
+foreground = "#e9ff5e"
+
+[colors.hints.start]
+background = "#e9ff5e"
+foreground = "#1d1f21"
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 16
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 17
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 18
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 19
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 20
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 21
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 22
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 23
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 24
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 25
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 26
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 27
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 28
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 29
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 30
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 31
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 32
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 33
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 34
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 35
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 36
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 37
+
+[[colors.indexed_colors]]
+color = "#ff00ff"
+index = 38
+
+[colors.line_indicator]
+background = "None"
+foreground = "None"
+
+[colors.normal]
+black = "#000000"
+blue = "#0088f5"
+cyan = "#00aaaa"
+green = "#00f500"
+magenta = "#f500f5"
+red = "#f50000"
+white = "#ffffff"
+yellow = "#f5f500"
+
+[colors.primary]
+background = "#000000"
+foreground = "#ffffff"
+
+[colors.selection]
+background = "#585858"
+text = "CellForeground"
+
+[colors.vi_mode_cursor]
+cursor = "#ffff00"
+text = "CellForeground"
+
+[cursor]
+vi_mode_style = "None"
+
+[cursor.style]
+blinking = "Off"
+shape = "Block"
+
+[font]
+builtin_box_drawing = true
+size = 12.0
+
+[font.bold]
+family = "monospace"
+style = "Bold"
+
+[font.bold_italic]
+family = "monospace"
+style = "Bold Italic"
+
+[font.glyph_offset]
+x = 0
+y = 0
+
+[font.italic]
+family = "monospace"
+style = "Italic"
+
+[font.normal]
+family = "monospace"
+style = "Regular"
+
+[font.offset]
+x = 1
+y = 1
+
+[[keyboard.bindings]]
+action = "ToggleViMode"
+key = "X"
+mode = "~Search"
+mods = "Shift|Control"
+
+[[keyboard.bindings]]
+action = "Up"
+key = "L"
+mode = "Vi|~Search"
+
+[[keyboard.bindings]]
+action = "Down"
+key = "K"
+mode = "Vi|~Search"
+
+[[keyboard.bindings]]
+action = "Left"
+key = "J"
+mode = "Vi|~Search"
+
+[[keyboard.bindings]]
+action = "Right"
+key = "Semicolon"
+mode = "Vi|~Search"
+
+[general]
+live_config_reload = true
+
+[scrolling]
+history = 10000
+
+[selection]
+save_to_clipboard = false
+semantic_escape_chars = """,│`|:"' ()[]{}<>\t"""
+
+[window]
+opacity = 0.9
+startup_mode = "Windowed"
+title = "Alacritty"
+
+[window.class]
+general = "Alacritty"
+instance = "Alacritty"
+
+[window.dimensions]
+columns = 0
+lines = 0
+
+[window.position]
+x = 0
+y = 0
+
+[keyboard]

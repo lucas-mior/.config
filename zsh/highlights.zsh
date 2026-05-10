@@ -22,13 +22,22 @@ ZSH_HIGHLIGHT_STYLES[single-hyphen-option]=none
 ZSH_HIGHLIGHT_STYLES[double-hyphen-option]=none
 ZSH_HIGHLIGHT_STYLES[back-quoted-argument]=none
 ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]=fg=magenta
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]=fg=yellow
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]=fg=yellow
-ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]=fg=yellow
+
+# --- VARIABLE HIGHLIGHTING ---
+# This handles variables outside of quotes (e.g., echo $HOME)
+ZSH_HIGHLIGHT_STYLES[variable]=fg=cyan
+
+# Base Quote Colors (The "red" strings)
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]=fg=red
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]=fg=red
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]=fg=red
+
+# Inner Quote Elements (Variables/Quotes inside "")
 ZSH_HIGHLIGHT_STYLES[rc-quote]=fg=cyan
 ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]=fg=cyan
 ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]=fg=cyan
 ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]=fg=cyan
+
 ZSH_HIGHLIGHT_STYLES[assign]=none
 ZSH_HIGHLIGHT_STYLES[redirection]=fg=yellow
 ZSH_HIGHLIGHT_STYLES[comment]=fg=#cccccc
@@ -37,5 +46,5 @@ ZSH_HIGHLIGHT_STYLES[numeric-fd]=none
 ZSH_HIGHLIGHT_STYLES[arg0]=fg=green
 
 typeset -A ZSH_HIGHLIGHT_REGEXP
-ZSH_HIGHLIGHT_REGEXP+=('\bsudo\b'   'fg=black,bold,bg=green')
+ZSH_HIGHLIGHT_REGEXP+=('\bsudo\b'    'fg=black,bold,bg=green')
 ZSH_HIGHLIGHT_REGEXP+=('\brm -rf\b' 'fg=black,bold,bg=green')
