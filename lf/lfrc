@@ -41,7 +41,7 @@ cmd load-git-prompt &{{
     export GIT_PS1_COMPRESSSPARSESTATE=auto
 
     git="$(__git_ps1 "[%s]")" || true
-    fmt="\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m \033[36m$git"
+    fmt="\033[36m$git \033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
     lf -remote "send $id set promptfmt \"$fmt\""
 }}
 
