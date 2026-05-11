@@ -3,7 +3,8 @@ enpt () {
 }
 
 restart () {
-    killall "$1"
+    killall --signal TERM "$1"
+    killall --signal KILL "$1"
     setsid -f "$@" >/dev/null 2>&1 
 }
 

@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 alias spatch='flatpak run io.github.coccinelle.coccinelle'
+alias chafa='chafa --format sixel --margin-bottom 4'
 
 random() {
     seq ${1:-10} | shuf -n 1

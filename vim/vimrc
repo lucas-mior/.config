@@ -352,6 +352,7 @@ set visualbell t_vb=
 set splitbelow
 set splitright
 set wrap
+set synmaxcol=300
 
 # Find
 set path+=**
