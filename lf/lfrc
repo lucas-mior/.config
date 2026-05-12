@@ -42,7 +42,10 @@ cmd load-git-prompt &{{
     export GIT_PS1_SHOWCOLORHINTS=1
 
     git="$(__git_ps1 "[%s]" | tr -d '\001\002')" || true
-    fmt="$git \033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
+    if [ -n "$git" ]; then
+        git="$git "
+    fi
+    fmt="${git}\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
     lf -remote "send $id set promptfmt \"$fmt\""
 }}
 
