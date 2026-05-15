@@ -123,9 +123,9 @@ hi Terminal         cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi Title            cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
-hi Visual           cterm=NONE   ctermbg=230   ctermfg=NONE
+hi Visual           cterm=NONE   ctermbg=259   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
-hi VisualNOS   cterm=UNDERLINE   ctermbg=230   ctermfg=NONE
+hi VisualNOS   cterm=UNDERLINE   ctermbg=259   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi WarningMsg       cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
