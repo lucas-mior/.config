@@ -8,19 +8,19 @@ enddef
 command! -nargs=0 GetSyntaxGroup :call GetSyntaxGroup()
 
 hi ColorColumn      cterm=NONE   ctermbg=000   ctermfg=NONE
-                  \ gui=NONE     guibg=#111111 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Conceal          cterm=NONE   ctermbg=000   ctermfg=NONE
-                  \ gui=NONE     guibg=#000000 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Cursor           cterm=NONE   ctermbg=000   ctermfg=NONE
-                  \ gui=NONE     guibg=#000000 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi lCursor          cterm=NONE   ctermbg=000   ctermfg=NONE
-                  \ gui=NONE     guibg=#000000 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi CursorIM         cterm=NONE   ctermbg=000   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi CursorColumn     cterm=NONE   ctermbg=000   ctermfg=NONE
-                  \ gui=NONE     guibg=#000000 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi CursorLine       cterm=NONE   ctermbg=000   ctermfg=NONE
-                  \ gui=NONE     guibg=#000000 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Directory        cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi DiffAdd          cterm=BOLD   ctermbg=018   ctermfg=NONE
@@ -30,15 +30,15 @@ hi DiffChange       cterm=BOLD   ctermbg=019   ctermfg=NONE
 hi DiffDelete       cterm=BOLD   ctermbg=017   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi DiffText cterm=BOLD,UNDERLINE ctermbg=017   ctermfg=NONE
-                  \ gui=NONE     guibg=NONE guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi EndOfBuffer      cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi ErrorMsg         cterm=NONE   ctermbg=001   ctermfg=007 
-                  \ gui=NONE     guibg=#ff0000 guifg=#ffffff
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi VertSplit        cterm=NONE   ctermbg=000   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi Folded           cterm=NONE   ctermbg=000   ctermfg=NONE
-                  \ gui=NONE     guibg=NONE    guifg=#555555
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi FoldColumn       cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi SignColumn       cterm=NONE   ctermbg=NONE  ctermfg=NONE
@@ -46,9 +46,9 @@ hi SignColumn       cterm=NONE   ctermbg=NONE  ctermfg=NONE
 hi IncSearch        cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi LineNr           cterm=BOLD   ctermbg=NONE  ctermfg=003 
-                  \ gui=NONE     guibg=NONE    guifg=#cccc00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi LineNrAbove      cterm=NONE   ctermbg=NONE  ctermfg=003 
-                  \ gui=NONE     guibg=NONE    guifg=#cccc00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi LineNrBelow      cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi CursorLineNr     cterm=BOLD   ctermbg=NONE  ctermfg=003 
@@ -58,7 +58,7 @@ hi CursorLineFold   cterm=NONE   ctermbg=NONE  ctermfg=NONE
 hi CursorLineSign   cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi MatchParen       cterm=NONE   ctermbg=007   ctermfg=000 
-                  \ gui=NONE     guibg=#ffffff guifg=#000000
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi MessageWindow    cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi ModeMsg          cterm=NONE   ctermbg=NONE  ctermfg=NONE
@@ -72,15 +72,15 @@ hi Normal           cterm=NONE   ctermbg=NONE  ctermfg=NONE
 hi Pmenu            cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi PmenuSel         cterm=BOLD   ctermbg=007   ctermfg=000 
-                  \ gui=NONE     guibg=#ffffff guifg=#000000
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi PmenuKind        cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi PmenuKindSel     cterm=NONE   ctermbg=015   ctermfg=008 
-                  \ gui=NONE     guibg=#cccccc guifg=#000000
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi PmenuExtra       cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi PmenuExtraSel    cterm=NONE   ctermbg=001   ctermfg=007 
-                  \ gui=NONE     guibg=#ff0000 guifg=#ffffff
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi PmenuSbar        cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi PmenuThumb       cterm=NONE   ctermbg=NONE  ctermfg=NONE
@@ -114,7 +114,7 @@ hi StatusLineTerm   cterm=NONE   ctermbg=NONE  ctermfg=NONE
 hi StatusLineTerm   cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi TabLine          cterm=ITALIC ctermbg=230   ctermfg=000 
-                  \ gui=NONE     guibg=#cccccc guifg=#000000
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi TabLineFill      cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi TabLineSel       cterm=BOLD   ctermbg=000   ctermfg=007 
@@ -124,85 +124,85 @@ hi Terminal         cterm=NONE   ctermbg=NONE  ctermfg=NONE
 hi Title            cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi Visual           cterm=NONE   ctermbg=230   ctermfg=NONE
-                  \ gui=NONE     guibg=#404040 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi VisualNOS   cterm=UNDERLINE   ctermbg=230   ctermfg=NONE
-                  \ gui=NONE     guibg=#404040 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi WarningMsg       cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi WildMenu         cterm=BOLD   ctermbg=007   ctermfg=000 
-                  \ gui=NONE     guibg=#ffffff guifg=#000000
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 # Syntax highlight groups
 hi Comment          cterm=ITALIC ctermbg=NONE  ctermfg=246 
-                  \ gui=NONE     guibg=NONE    guifg=#989898
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 hi Constant         cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ff3300
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi String           cterm=NONE   ctermbg=NONE  ctermfg=001 
-                  \ gui=NONE     guibg=NONE    guifg=#ff0000
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Character        cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ff3300
-hi Number           cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ff3300
-hi Boolean          cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ff3300
-hi Float            cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ff3300
+                  \ gui=NONE     guibg=NONE    guifg=NONE
+hi Number           cterm=NONE   ctermbg=NONE  ctermfg=009
+                  \ gui=NONE     guibg=NONE    guifg=NONE
+hi Boolean          cterm=NONE   ctermbg=NONE  ctermfg=009 
+                  \ gui=NONE     guibg=NONE    guifg=NONE
+hi Float            cterm=NONE   ctermbg=NONE  ctermfg=009 
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 hi Identifier       cterm=NONE   ctermbg=NONE  ctermfg=007 
-                  \ gui=NONE     guibg=NONE    guifg=#ffffff
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Function         cterm=NONE   ctermbg=NONE  ctermfg=006 
-                  \ gui=NONE     guibg=NONE    guifg=#01a3a3
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 hi Statement        cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ee9900
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Conditional      cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ffbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Repeat           cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ffbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Label            cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#cccc00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Operator         cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ee9900
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Keyword          cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#cccc00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Exception        cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ee9900
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 hi PreProc          cterm=NONE   ctermbg=NONE  ctermfg=005 
-                  \ gui=NONE     guibg=NONE    guifg=#ff00ff
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Include          cterm=NONE   ctermbg=NONE  ctermfg=013 
-                  \ gui=NONE     guibg=NONE    guifg=#dd00ee
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Define           cterm=NONE   ctermbg=NONE  ctermfg=013 
-                  \ gui=NONE     guibg=NONE    guifg=#bb00ee
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Macro            cterm=NONE   ctermbg=NONE  ctermfg=005 
-                  \ gui=NONE     guibg=NONE    guifg=#8888ff
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi PreCondit        cterm=NONE   ctermbg=NONE  ctermfg=005 
-                  \ gui=NONE     guibg=NONE    guifg=#ff22bb
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 hi Type             cterm=NONE   ctermbg=NONE  ctermfg=010 
-                  \ gui=NONE     guibg=NONE    guifg=#00cc00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi StorageClass     cterm=BOLD   ctermbg=NONE  ctermfg=010 
-                  \ gui=NONE     guibg=NONE    guifg=#00cc00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Structure        cterm=NONE   ctermbg=NONE  ctermfg=004 
-                  \ gui=NONE     guibg=NONE    guifg=#0080ee
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Typedef          cterm=NONE   ctermbg=NONE  ctermfg=010 
-                  \ gui=NONE     guibg=NONE    guifg=#00ee00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 hi Special          cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ddbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi SpecialChar      cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ddbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Tag              cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ddbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Delimiter        cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ddbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi SpecialComment   cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ddbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi Debug            cterm=NONE   ctermbg=NONE  ctermfg=011 
-                  \ gui=NONE     guibg=NONE    guifg=#ddbb00
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 hi debugPC          cterm=NONE   ctermbg=230   ctermfg=NONE
-                  \ gui=NONE     guibg=#555555 guifg=NONE
+                  \ gui=NONE     guibg=NONE    guifg=NONE
 
 # Others?
 hi Underlined    cterm=UNDERLINE ctermbg=NONE  ctermfg=NONE

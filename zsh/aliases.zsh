@@ -166,6 +166,7 @@ alias blue='bluetoothctl'
 alias qute='qutebrowser'
 alias kid='kid3-qt -style kvantum-dark'
 alias cat0='/usr/bin/cat'
+alias grep0='/usr/bin/grep'
 alias diff0='/usr/bin/diff'
 
 vg () { grep -iRl "$1" ./* | xargs -o vim "+/$1" ; }

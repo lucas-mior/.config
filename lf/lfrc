@@ -26,27 +26,9 @@ cmd on-cd &{{
     #         image/*) setsid -f stiv_draw "$file" cache ;;
     #     esac
     # done
-    lf -remote "send $id load-git-prompt"
 }}
 
 cmd on-quit &{{
-}}
-
-cmd load-git-prompt &{{
-    source /usr/share/git/completion/git-prompt.sh
-    export GIT_PS1_SHOWDIRTYSTATE=auto
-    export GIT_PS1_SHOWSTASHSTATE=auto
-    export GIT_PS1_SHOWUNTRACKEDFILES=auto
-    export GIT_PS1_SHOWUPSTREAM=auto
-    export GIT_PS1_COMPRESSSPARSESTATE=auto
-    export GIT_PS1_SHOWCOLORHINTS=1
-
-    git="$(__git_ps1 "[%s]" | tr -d '\001\002')" || true
-    if [ -n "$git" ]; then
-        git="$git "
-    fi
-    fmt="${git}\033[01;38;5;136m%w/\033[0m\033[1m%f\033[0m"
-    lf -remote "send $id set promptfmt \"$fmt\""
 }}
 
 cmd on-redraw &{{
@@ -61,34 +43,6 @@ cmd on-redraw &{{
         lf -remote "send $id set ratios 3:5"
         lf -remote "send $id set preview true"
     fi
-    lf -remote "send $id load-git-prompt"
-}}
-
-cmd on-load &{{
-    cd "$(dirname "$1")" || exit 1
-    [ "$(git rev-parse --is-inside-git-dir 2>/dev/null)" = false ] || exit 0
-
-    cmds=""
-
-    for file in "$@"; do
-        case "$file" in
-            */.git|*/.git/*) continue;;
-        esac
-
-        status=$(git status --porcelain --ignored -- "$file" | cut -c1-2 | head -n1)
-        if [ "$status" = "!!" ]; then
-            status="Z"
-        fi
-
-        if [ -n "$status" ]; then
-            cmds="${cmds}addcustominfo ${file} \"$status\"; "
-        else
-            cmds="${cmds}addcustominfo ${file} ''; "
-        fi
-    done
-
-    lf -remote "send $id :$cmds"
-    lf -remote "send $id load-git-prompt"
 }}
 
 cmd edit-config ${{
@@ -624,12 +578,12 @@ map pa $patch -p1 < $f
 map df diff
 
 set sortby name
-set info custom
+set info size
 
 map wb :set number!; set relativenumber!
 map wh :set hidden!
 map wr :set reverse!; push gg
-map wn :set sortby name;  set info custom
+map wn :set sortby name;  set info size
 map ws :set sortby size;  set info size
 map wt :set sortby time;  set info time
 map wa :set sortby atime; set info atime
@@ -695,8 +649,8 @@ set shell bash
 set ifs "\n"
 set filesep "\n"
 
-# set period 60
-set watch true
+set period 60
+# set watch
 
 :on-cd
 source /home/lucas/.config/lf/.pastas

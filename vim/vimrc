@@ -414,7 +414,7 @@ set makeprg=thebuild.sh\ nocolor
 def g:JumpToNextFileWithDiag()
     var current_file: string = expand('%:p')
     var c_files: list<string> = glob('src/*.c', false, true)
-    
+  
     if empty(c_files)
         return
     endif
@@ -432,16 +432,16 @@ def g:JumpToNextFileWithDiag()
     endif
 
     var num_files: number = len(absolute_files)
-    
+  
     for i in range(1, num_files)
         var idx: number = (start_idx + i) % num_files
         var target: string = absolute_files[idx]
-        
+      
         execute 'hide edit ' .. target
-        
+      
         var placed: list<dict<any>> = sign_getplaced('', {group: '*'})
         var signs: list<dict<any>> = placed[0].signs
-        
+      
         if !empty(signs)
             try
                 execute 'LspDiagNextWrap'
@@ -452,7 +452,7 @@ def g:JumpToNextFileWithDiag()
             endtry
         endif
     endfor
-    
+  
     return
 enddef
 

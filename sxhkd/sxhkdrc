@@ -18,7 +18,7 @@ super + d
 super + control + m
     {mullvad-vpn}
 super + {z,                     shift+z,                     e}
-    {urxvtc -e clip1.sh --copy, urxvtc -e clip1.sh --remove, clip.sh qr}
+    {st -e clip1.sh --copy, st -e clip1.sh --remove, clip.sh qr}
 super + {shift + r,  shift + p, o; b}
     {$TERMINAL -e trans -I, passmenu --type && dunstify "ready", $TERMINAL -e bluetoothctl}
 super + {b, control + t}
