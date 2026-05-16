@@ -20,6 +20,7 @@ source /home/lucas/.config/vim/quit.vim
 
 call plug#begin('~/.config/vim/plugged')
 
+Plug 'preservim/tagbar'
 Plug 'vim-airline/vim-airline'
 Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-commentary'
@@ -32,6 +33,8 @@ Plug 'dahu/vim-fanfingtastic'
 Plug 'vim-python/python-syntax'
 Plug 'lervag/vimtex'
 Plug 'ahf/cocci-syntax'
+Plug 'kana/vim-textobj-user'
+Plug 'kana/vim-textobj-function'
 
 call plug#end()
 
@@ -126,12 +129,37 @@ enddef
 g:vimtex_view_enabled = 0
 g:vimtex_view_Auto = 0
 
-g:vim_markdown_strikethrough = 1
-g:netrw_banner = 0
 g:airline#extensions#tabline#enabled = 0
-g:airline#extensions#tagbar#enabled = 0
-g:airline#parts#ffenc#skip_expected_string = 'utf-8[unix]'
+g:airline#extensions#tagbar#enabled = 1
+g:airline#extensions#tagbar#searchmethod = 'scoped-stl'
 g:airline#extensions#tagbar#flags = ''
+g:airline#parts#ffenc#skip_expected_string = 'utf-8[unix]'
+
+legacy function AirlineThemePatch(palette)
+    let l:fg_g = synIDattr(synIDtrans(hlID('Function')), 'fg', 'gui')
+    let l:fg_c = synIDattr(synIDtrans(hlID('Function')), 'fg', 'cterm')
+
+    " Fallback to default Cyan if synIDattr returns empty or invalid
+    if empty(l:fg_g) || l:fg_g ==# '-1'
+        let l:fg_g = '#00aaaa'
+    endif
+    if empty(l:fg_c) || l:fg_c ==# '-1'
+        let l:fg_c = '6'
+    endif
+
+    let a:palette.accents.tagbar_function = [
+        \ l:fg_g,
+        \ '',
+        \ l:fg_c,
+        \ '',
+        \ ''
+        \ ]
+endfunction
+
+g:airline_theme_patch_func = 'AirlineThemePatch'
+
+airline#parts#define_accent('tagbar', 'tagbar_function')
+
 g:DiffColors = 1
 
 g:gitgutter_signs = 1
