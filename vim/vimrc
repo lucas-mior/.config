@@ -160,6 +160,30 @@ g:airline_theme_patch_func = 'AirlineThemePatch'
 
 airline#parts#define_accent('tagbar', 'tagbar_function')
 
+# Tagbar layout configuration
+g:tagbar_left = 1
+g:tagbar_width = 40
+g:tagbar_sort = 0
+
+# Automatically open/close Tagbar based on terminal width
+def ToggleTagbarOnSize(): void
+    if &columns > 90
+        if !tagbar#IsOpen()
+            execute 'TagbarOpen'
+            wincmd p
+        endif
+    else
+        if tagbar#IsOpen()
+            execute 'TagbarClose'
+        endif
+    endif
+enddef
+
+augroup AutoTagbarResize
+    autocmd!
+    autocmd VimEnter,VimResized * ToggleTagbarOnSize()
+augroup END
+
 g:DiffColors = 1
 
 g:gitgutter_signs = 1
