@@ -165,9 +165,9 @@ def DrawVisibleImages()
 
             var cmd: string = ''
             if engine == 'chafa'
-                cmd = 'chafa -f sixel -s ' .. available_cols .. 'x' .. visible_lines .. ' ' .. shellescape(full_path)
+                cmd = 'chafa -f sixel --animate off -s ' .. available_cols .. 'x' .. visible_lines .. ' ' .. shellescape(full_path)
             elseif engine == 'magick' || engine == 'convert'
-                var magick_args: string = shellescape(full_path) .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
+                var magick_args: string = shellescape(full_path .. '[0]') .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
                 cmd = engine .. ' ' .. magick_args
             else
                 echoerr "Invalid g:sixel_markdown_engine."
