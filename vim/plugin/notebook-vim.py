@@ -88,13 +88,13 @@ def _compile_exec_and_last_expr(code, filename):
 
 class NotebookInput(io.TextIOBase):
     def readline(self, size=-1):
-        raise EOFError("input() is not supported by python-notebook.vim run-all")
+        raise EOFError("input() is not supported by notebook-python.vim run-all")
 
 
 def _run_cell(cell, namespace):
     cell_index = int(cell["index"])
     code = _cell_code(cell)
-    filename = "<python-notebook-cell-{}>".format(cell_index)
+    filename = "<notebook-python-cell-{}>".format(cell_index)
 
     result = {
         "index": cell_index,
@@ -155,7 +155,7 @@ def main():
 
     namespace = {
         "__name__": "__main__",
-        "__file__": _strip_null_bytes(payload.get("buffer_path", "<python-notebook-buffer>")),
+        "__file__": _strip_null_bytes(payload.get("buffer_path", "<notebook-python-buffer>")),
     }
 
     results = []

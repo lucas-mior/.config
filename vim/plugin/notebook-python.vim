@@ -555,10 +555,10 @@ def RunPythonNotebookFromScratch()
 enddef
 
 def SetupNotebookSyntax()
-    syntax clear MdNotebookOutput
-    syntax clear MdNotebookError
-    syntax clear MdNotebookStdout
-    syntax clear MdNotebookResult
+    silent! syntax clear MdNotebookOutput
+    silent! syntax clear MdNotebookError
+    silent! syntax clear MdNotebookStdout
+    silent! syntax clear MdNotebookResult
 
     execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output:start\s*$/ end=/^\s*#\s*mdnb-output:end\s*$/ keepend containedin=ALL'
     execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend containedin=ALL'
