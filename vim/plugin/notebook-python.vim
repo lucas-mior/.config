@@ -853,7 +853,7 @@ def BuildErrorBlock(result: dict<any>): list<string>
     return block
 enddef
 
-def SixelCacheKey(path: string, available_cols: number, available_lines: number, engine: string): string
+def SixelCacheKey(path: string, available_cols: number, available_lines: number, crop_top_lines: number, engine: string): string
     var file_size: number = getfsize(path)
     var file_mtime: number = getftime(path)
     var extra_key: string = ''
@@ -865,16 +865,16 @@ def SixelCacheKey(path: string, available_cols: number, available_lines: number,
         extra_key = ':' .. ImageMagickCommand() .. ':' .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
     endif
 
-    return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. available_cols .. 'x' .. available_lines .. extra_key
+    return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. extra_key
 enddef
 
-def GenerateFigureSixel(path: string, available_cols: number, available_lines: number): string
+def GenerateFigureSixel(path: string, available_cols: number, available_lines: number, crop_top_lines: number): string
     if !filereadable(path)
         return ''
     endif
 
     var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
-    var cache_key: string = SixelCacheKey(path, available_cols, available_lines, engine)
+    var cache_key: string = SixelCacheKey(path, available_cols, available_lines, crop_top_lines, engine)
     if has_key(figure_sixel_cache, cache_key)
         return figure_sixel_cache[cache_key]
     endif
@@ -898,17 +898,18 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
         endif
 
         var max_pixel_width: number = max([1, available_cols * SixelCellWidth()])
-        var max_pixel_height: number = max([1, available_lines * SixelCellHeight()])
+        var crop_top_pixels: number = max([0, crop_top_lines * SixelCellHeight()])
+        var crop_height_pixels: number = max([1, available_lines * SixelCellHeight()])
         var prepared_path: string = tempname() .. '.png'
 
         try
-            systemlist([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(max_pixel_height)])
+            systemlist([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)])
             if v:shell_error != 0 || !filereadable(prepared_path)
                 return ''
             endif
 
-            # The helper already resized the PNG proportionally to fit inside
-            # the available pixel box, then applied the transparent-palette
+            # The helper resizes the PNG proportionally by width, crops the
+            # visible vertical slice, then applies the transparent-palette
             # preparation. Do not pass -s here, because that would resize the
             # prepared paletted image again.
             sixel_data = system(['chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path])
@@ -995,7 +996,8 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
         return
     endif
 
-    var sixel_data: string = GenerateFigureSixel(path, available_cols, visible_lines)
+    var crop_top_lines: number = visible_start - start_lnum
+    var sixel_data: string = GenerateFigureSixel(path, available_cols, visible_lines, crop_top_lines)
     if empty(sixel_data)
         DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[could not render figure as sixel]')
         return

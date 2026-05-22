@@ -249,52 +249,53 @@ def _resample_filter(Image):
     return Image.LANCZOS
 
 
-def _proportional_fit_size(width, height, max_width, max_height):
+def _width_constrained_size(width, height, max_width):
     width = max(1, int(width))
     height = max(1, int(height))
     max_width = max(1, int(max_width))
-    max_height = max(1, int(max_height))
 
-    scale = min(max_width / width, max_height / height)
+    # Do not upscale smaller figures to the full terminal width. Upscaling a
+    # small or square Matplotlib figure makes it look unexpectedly huge and
+    # causes vertical cropping even when the original image would fit. Only
+    # shrink figures that exceed the available horizontal pixel box.
+    scale = min(1.0, max_width / width)
     fitted_width = max(1, int(round(width * scale)))
     fitted_height = max(1, int(round(height * scale)))
-
-    # Rounding can push one dimension one pixel past the box; clamp while
-    # preserving the original aspect ratio as closely as possible.
-    if fitted_width > max_width:
-        fitted_width = max_width
-        fitted_height = max(1, int(round(fitted_width * height / width)))
-
-    if fitted_height > max_height:
-        fitted_height = max_height
-        fitted_width = max(1, int(round(fitted_height * width / height)))
 
     return fitted_width, fitted_height
 
 
-def _prepare_sixel_png(input_path, output_path, max_pixel_width, max_pixel_height):
+def _crop_vertical(image, crop_top, crop_height):
+    crop_top = max(0, int(crop_top))
+    crop_height = max(1, int(crop_height))
+
+    if crop_top >= image.height:
+        return image.crop((0, image.height - 1, image.width, image.height))
+
+    crop_bottom = min(image.height, crop_top + crop_height)
+    return image.crop((0, crop_top, image.width, crop_bottom))
+
+
+def _prepare_sixel_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels):
     max_pixel_width = max(1, int(max_pixel_width))
-    max_pixel_height = max(1, int(max_pixel_height))
+    crop_top_pixels = max(0, int(crop_top_pixels))
+    crop_height_pixels = max(1, int(crop_height_pixels))
 
     from PIL import Image
 
     with Image.open(input_path) as image:
         rgba = image.convert("RGBA")
-        fitted_size = _proportional_fit_size(
-            rgba.width,
-            rgba.height,
-            max_pixel_width,
-            max_pixel_height,
-        )
+        fitted_size = _width_constrained_size(rgba.width, rgba.height, max_pixel_width)
         resized = rgba.resize(fitted_size, _resample_filter(Image))
-        sixel_friendly = _rgba_to_sixel_friendly_palette(Image, resized)
+        cropped = _crop_vertical(resized, crop_top_pixels, crop_height_pixels)
+        sixel_friendly = _rgba_to_sixel_friendly_palette(Image, cropped)
         sixel_friendly.save(output_path, format="PNG", optimize=False)
 
 
 def _prepare_sixel_png_cli(argv):
-    if len(argv) != 6:
+    if len(argv) != 7:
         print(
-            "usage: notebook-vim.py --prepare-sixel-png INPUT_PNG OUTPUT_PNG MAX_WIDTH MAX_HEIGHT",
+            "usage: notebook-vim.py --prepare-sixel-png INPUT_PNG OUTPUT_PNG MAX_WIDTH CROP_TOP CROP_HEIGHT",
             file=sys.stderr,
         )
         return 2
@@ -304,13 +305,14 @@ def _prepare_sixel_png_cli(argv):
 
     try:
         max_pixel_width = int(argv[4])
-        max_pixel_height = int(argv[5])
+        crop_top_pixels = int(argv[5])
+        crop_height_pixels = int(argv[6])
     except ValueError:
-        print("MAX_WIDTH and MAX_HEIGHT must be integers", file=sys.stderr)
+        print("MAX_WIDTH, CROP_TOP, and CROP_HEIGHT must be integers", file=sys.stderr)
         return 2
 
     try:
-        _prepare_sixel_png(input_path, output_path, max_pixel_width, max_pixel_height)
+        _prepare_sixel_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels)
     except Exception as exc:
         print("could not prepare sixel PNG: {}".format(exc), file=sys.stderr)
         return 1
