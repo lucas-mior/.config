@@ -153,6 +153,20 @@ def StripNullBytesFromLines(lines: list<string>): list<string>
     return mapnew(lines, (_, line_str) => StripNullBytes(line_str))
 enddef
 
+def LastNonBlankLineInRange(start_lnum: number, end_lnum: number, fallback_lnum: number): number
+    var lnum: number = end_lnum
+
+    while lnum >= start_lnum
+        if getline(lnum) !~# '^\s*$'
+            return lnum
+        endif
+
+        lnum -= 1
+    endwhile
+
+    return fallback_lnum
+enddef
+
 def EnsureBufferMatchList()
     if !exists('b:python_notebook_match_ids')
         b:python_notebook_match_ids = []
@@ -525,12 +539,14 @@ def ParseNotebookCells(): list<dict<any>>
             lines = getline(1, max_lnum)
         endif
 
+        var insert_after: number = LastNonBlankLineInRange(1, max_lnum, max_lnum)
+
         add(cells, {
             'index': 0,
             'marker_lnum': 0,
             'code_start': 1,
             'code_end': max_lnum,
-            'insert_after': max_lnum,
+            'insert_after': insert_after,
             'lines': StripNullBytesFromLines(lines),
         })
 
@@ -539,13 +555,14 @@ def ParseNotebookCells(): list<dict<any>>
 
     if markers[0] > 1
         var pre_lines: list<string> = getline(1, markers[0] - 1)
+        var pre_insert_after: number = LastNonBlankLineInRange(1, markers[0] - 1, markers[0] - 1)
 
         add(cells, {
             'index': len(cells),
             'marker_lnum': 0,
             'code_start': 1,
             'code_end': markers[0] - 1,
-            'insert_after': markers[0] - 1,
+            'insert_after': pre_insert_after,
             'lines': StripNullBytesFromLines(pre_lines),
         })
     endif
@@ -564,12 +581,17 @@ def ParseNotebookCells(): list<dict<any>>
             code_lines = getline(code_start, code_end)
         endif
 
+        var insert_after: number = marker_lnum
+        if code_start <= code_end
+            insert_after = LastNonBlankLineInRange(code_start, code_end, marker_lnum)
+        endif
+
         add(cells, {
             'index': len(cells),
             'marker_lnum': marker_lnum,
             'code_start': code_start,
             'code_end': code_end,
-            'insert_after': max([marker_lnum, code_end]),
+            'insert_after': insert_after,
             'lines': StripNullBytesFromLines(code_lines),
         })
     endfor
