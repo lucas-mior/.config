@@ -1,18 +1,19 @@
 vim9script
 
-# python-notebook.vim
+# notebook-python.vim
 # Minimal Jupyter-like Python notebook runner for Vim.
 #
 # Install:
 #
-#   ~/.vim/plugin/python-notebook.vim
+#   ~/.vim/plugin/notebook-python.vim
+#   ~/.vim/plugin/notebook-vim.py
 #
 # Activation:
 #
 #   The plugin is globally loaded by Vim, but notebook behavior only activates
 #   for Python buffers containing one of these comments near the top:
 #
-#       # python-notebook: enable
+#       # notebook-python: enable
 #       # mdnb: enable
 #
 # Cell syntax:
@@ -28,8 +29,10 @@ vim9script
 #   :PythonNotebookRunAll
 #   :PythonNotebookClearOutputs
 #
-# Press <C-l> in an active notebook buffer to clear generated output, restart
-# Python state from scratch, and run every cell from the top.
+# Shortcuts in active notebook buffers:
+#
+#   <C-l>      run everything from the top, from scratch
+#   <leader>b clear all generated outputs
 
 if exists('g:loaded_python_notebook_vim')
     finish
@@ -37,16 +40,21 @@ endif
 g:loaded_python_notebook_vim = 1
 
 var script_sid: string = expand('<SID>')
+var script_dir: string = expand('<sfile>:p:h')
 
 if !exists('g:python_notebook_python')
     g:python_notebook_python = 'python3'
 endif
 
+if !exists('g:python_notebook_helper')
+    g:python_notebook_helper = script_dir .. '/notebook-vim.py'
+endif
+
 if !exists('g:python_notebook_cache_dir')
     if exists('$XDG_CACHE_HOME') && !empty($XDG_CACHE_HOME)
-        g:python_notebook_cache_dir = $XDG_CACHE_HOME .. '/python-notebook-vim'
+        g:python_notebook_cache_dir = $XDG_CACHE_HOME .. '/notebook-python-vim'
     else
-        g:python_notebook_cache_dir = expand('~/.cache/python-notebook-vim')
+        g:python_notebook_cache_dir = expand('~/.cache/notebook-python-vim')
     endif
 endif
 
@@ -71,6 +79,10 @@ def StripNullBytesFromLines(lines: list<string>): list<string>
     return mapnew(lines, (_, line_str) => StripNullBytes(line_str))
 enddef
 
+def NotebookHelperPath(): string
+    return expand(string(g:python_notebook_helper))
+enddef
+
 def EnsureBufferMatchList()
     if !exists('b:python_notebook_match_ids')
         b:python_notebook_match_ids = []
@@ -81,6 +93,7 @@ def EnsureNotebookHighlightGroups()
     execute 'highlight default link MdNotebookOutput Comment'
     execute 'highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE'
     execute 'highlight MdNotebookStdout ctermfg=White ctermbg=NONE guifg=#ffffff guibg=NONE'
+    execute 'highlight MdNotebookResult ctermfg=Blue ctermbg=NONE guifg=#5fafff guibg=NONE'
 enddef
 
 def HasNotebookAnnotation(): bool
@@ -92,7 +105,7 @@ def HasNotebookAnnotation(): bool
     for lnum in range(1, max_lnum)
         var line_str: string = getline(lnum)
 
-        if line_str =~# '^\s*#\s*python-notebook:\s*enable\s*$'
+        if line_str =~# '^\s*#\s*notebook-python:\s*enable\s*$'
             return true
         endif
 
@@ -186,6 +199,28 @@ def AddNotebookLineMatch(group_name: string, row: number)
     add(b:python_notebook_match_ids, matchadd(group_name, '\%' .. row .. 'l.*', 100))
 enddef
 
+def AddOutputSectionMatches(group_name: string, header_lnum: number, output_end: number): number
+    AddNotebookLineMatch(group_name, header_lnum)
+
+    var row: number = header_lnum + 1
+    while row <= output_end
+        var row_text: string = getline(row)
+
+        if row_text =~# '^\s*#\s*mdnb-output:end\s*$'
+            break
+        endif
+
+        if IsOutputSectionHeader(row_text)
+            break
+        endif
+
+        AddNotebookLineMatch(group_name, row)
+        row += 1
+    endwhile
+
+    return row
+enddef
+
 def RefreshNotebookMatches()
     if !exists('b:python_notebook_active')
         return
@@ -226,25 +261,12 @@ def RefreshNotebookMatches()
                 var row_text: string = getline(row)
 
                 if row_text =~# '^\s*#\s*stdout:\s*$'
-                    AddNotebookLineMatch('MdNotebookStdout', row)
+                    row = AddOutputSectionMatches('MdNotebookStdout', row, output_end)
+                    continue
+                endif
 
-                    var stdout_row: number = row + 1
-                    while stdout_row <= output_end
-                        var stdout_text: string = getline(stdout_row)
-
-                        if stdout_text =~# '^\s*#\s*mdnb-output:end\s*$'
-                            break
-                        endif
-
-                        if IsOutputSectionHeader(stdout_text)
-                            break
-                        endif
-
-                        AddNotebookLineMatch('MdNotebookStdout', stdout_row)
-                        stdout_row += 1
-                    endwhile
-
-                    row = stdout_row
+                if row_text =~# '^\s*#\s*result:\s*$'
+                    row = AddOutputSectionMatches('MdNotebookResult', row, output_end)
                     continue
                 endif
 
@@ -359,198 +381,6 @@ def ParseNotebookCells(): list<dict<any>>
     return cells
 enddef
 
-def HelperPythonLines(): list<string>
-    var lines: list<string> =<< trim END
-        import ast
-        import contextlib
-        import io
-        import json
-        import reprlib
-        import sys
-        import traceback
-
-        def _strip_null_bytes(text):
-            if text is None:
-                return ""
-            if not isinstance(text, str):
-                text = str(text)
-            return text.replace("\x00", "")
-
-        def _strip_null_bytes_list(lines):
-            return [_strip_null_bytes(line) for line in lines]
-
-        def _cell_code(cell):
-            if "lines" in cell and isinstance(cell["lines"], list):
-                return "\n".join(_strip_null_bytes_list(cell["lines"]))
-
-            return _strip_null_bytes(cell.get("code", ""))
-
-        def _safe_repr(value):
-            try:
-                text = reprlib.Repr().repr(value)
-            except Exception as exc:
-                text = "<repr failed: {}>".format(exc)
-
-            return _strip_null_bytes(text)
-
-        def _split_lines(text):
-            text = _strip_null_bytes(text)
-            if not text:
-                return []
-            return text.rstrip("\n").splitlines()
-
-        def _extract_cell_error_line(exc_tb, filename):
-            current = exc_tb
-            found = 0
-
-            while current is not None:
-                frame = current.tb_frame
-
-                if frame.f_code.co_filename == filename:
-                    found = current.tb_lineno
-
-                current = current.tb_next
-
-            return found
-
-        def _compile_exec_and_last_expr(code, filename):
-            code = _strip_null_bytes(code)
-            tree = ast.parse(code, filename=filename, mode="exec")
-
-            if not tree.body:
-                return None, None
-
-            last = tree.body[-1]
-
-            if not isinstance(last, ast.Expr):
-                return compile(tree, filename, "exec"), None
-
-            exec_body = tree.body[:-1]
-            exec_tree = ast.Module(body=exec_body, type_ignores=[])
-            ast.fix_missing_locations(exec_tree)
-
-            expr_tree = ast.Expression(last.value)
-            ast.fix_missing_locations(expr_tree)
-
-            exec_code = None
-            if exec_body:
-                exec_code = compile(exec_tree, filename, "exec")
-
-            expr_code = compile(expr_tree, filename, "eval")
-            return exec_code, expr_code
-
-        class NotebookInput(io.TextIOBase):
-            def readline(self, size=-1):
-                raise EOFError("input() is not supported by python-notebook.vim run-all")
-
-        def _run_cell(cell, namespace):
-            cell_index = int(cell["index"])
-            code = _cell_code(cell)
-            filename = "<python-notebook-cell-{}>".format(cell_index)
-
-            result = {
-                "index": cell_index,
-                "stdout": [],
-                "stderr": [],
-                "result": None,
-                "error": [],
-                "error_line": 0,
-                "ok": True,
-            }
-
-            stdout_buf = io.StringIO()
-            stderr_buf = io.StringIO()
-            old_stdin = sys.stdin
-
-            try:
-                exec_code, expr_code = _compile_exec_and_last_expr(code, filename)
-
-                with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
-                    sys.stdin = NotebookInput()
-
-                    if exec_code is not None:
-                        exec(exec_code, namespace, namespace)
-
-                    if expr_code is not None:
-                        value = eval(expr_code, namespace, namespace)
-                        if value is not None:
-                            result["result"] = _safe_repr(value)
-
-            except BaseException as exc:
-                result["ok"] = False
-                result["error"] = _strip_null_bytes_list(
-                    traceback.format_exception(type(exc), exc, exc.__traceback__)
-                )
-                result["error_line"] = _extract_cell_error_line(exc.__traceback__, filename)
-
-            finally:
-                sys.stdin = old_stdin
-                result["stdout"] = _split_lines(stdout_buf.getvalue())
-                result["stderr"] = _split_lines(stderr_buf.getvalue())
-
-            return result
-
-        def main():
-            if len(sys.argv) != 3:
-                print("usage: helper.py INPUT_JSON OUTPUT_JSON", file=sys.stderr)
-                return 2
-
-            input_path = sys.argv[1]
-            output_path = sys.argv[2]
-
-            with open(input_path, "r", encoding="utf-8") as f:
-                payload = json.load(f)
-
-            cells = payload.get("cells", [])
-            stop_on_error = bool(payload.get("stop_on_error", True))
-
-            namespace = {
-                "__name__": "__main__",
-                "__file__": _strip_null_bytes(payload.get("buffer_path", "<python-notebook-buffer>")),
-            }
-
-            results = []
-
-            for cell in cells:
-                cell_result = _run_cell(cell, namespace)
-                results.append(cell_result)
-
-                if stop_on_error and not cell_result["ok"]:
-                    break
-
-            response = {
-                "ok": True,
-                "results": results,
-            }
-
-            with open(output_path, "w", encoding="utf-8") as f:
-                json.dump(response, f)
-
-            return 0
-
-        if __name__ == "__main__":
-            raise SystemExit(main())
-    END
-
-    return lines
-enddef
-
-def EnsureHelperScript(): string
-    var cache_dir: string = g:python_notebook_cache_dir
-    if mkdir(cache_dir, 'p') == 0 && !isdirectory(cache_dir)
-        return ''
-    endif
-
-    var helper_path: string = cache_dir .. '/python-notebook-helper.py'
-    var lines: list<string> = HelperPythonLines()
-
-    if writefile(lines, helper_path) != 0
-        return ''
-    endif
-
-    return helper_path
-enddef
-
 def CommentLine(line_str: string): string
     var clean_line: string = StripNullBytes(line_str)
 
@@ -613,11 +443,19 @@ def BuildErrorBlock(result: dict<any>): list<string>
 enddef
 
 def RunPythonNotebookFromScratch()
-    var python_cmd: string = g:python_notebook_python
+    var python_cmd: string = string(g:python_notebook_python)
+    var helper_path: string = NotebookHelperPath()
 
     if empty(python_cmd) || !executable(python_cmd)
         echohl ErrorMsg
-        echomsg 'python-notebook.vim: Python executable not found: ' .. python_cmd
+        echomsg 'notebook-python.vim: Python executable not found: ' .. python_cmd
+        echohl None
+        return
+    endif
+
+    if empty(helper_path) || !filereadable(helper_path)
+        echohl ErrorMsg
+        echomsg 'notebook-python.vim: helper script not found: ' .. helper_path
         echohl None
         return
     endif
@@ -631,15 +469,6 @@ def RunPythonNotebookFromScratch()
         ClearNotebookOutputs()
 
         var cells: list<dict<any>> = ParseNotebookCells()
-        var helper_path: string = EnsureHelperScript()
-
-        if empty(helper_path)
-            echohl ErrorMsg
-            echomsg 'python-notebook.vim: could not write helper script'
-            echohl None
-            return
-        endif
-
         var input_path: string = tempname()
         var output_path: string = tempname()
 
@@ -651,7 +480,7 @@ def RunPythonNotebookFromScratch()
 
         if writefile([json_encode(payload)], input_path) != 0
             echohl ErrorMsg
-            echomsg 'python-notebook.vim: could not write helper input'
+            echomsg 'notebook-python.vim: could not write helper input'
             echohl None
             return
         endif
@@ -660,7 +489,7 @@ def RunPythonNotebookFromScratch()
 
         if v:shell_error != 0 || !filereadable(output_path)
             echohl ErrorMsg
-            echomsg 'python-notebook.vim: helper failed'
+            echomsg 'notebook-python.vim: helper failed'
             for line_str in helper_output
                 echomsg StripNullBytes(line_str)
             endfor
@@ -729,6 +558,7 @@ def SetupNotebookSyntax()
     syntax clear MdNotebookOutput
     syntax clear MdNotebookError
     syntax clear MdNotebookStdout
+    syntax clear MdNotebookResult
 
     execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output:start\s*$/ end=/^\s*#\s*mdnb-output:end\s*$/ keepend containedin=ALL'
     execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend containedin=ALL'
@@ -751,6 +581,7 @@ def EnablePythonNotebookForBuffer(): bool
     execute 'command! -buffer PythonNotebookClearOutputs call ' .. script_sid .. 'ClearNotebookOutputs()'
 
     nnoremap <buffer> <silent> <C-L> <Cmd>PythonNotebookRunAll<CR>
+    nnoremap <buffer> <silent> <Leader>b <Cmd>PythonNotebookClearOutputs<CR>
 
     execute 'augroup PythonNotebookBuffer_' .. bufnr('%')
     autocmd! * <buffer>
@@ -758,14 +589,14 @@ def EnablePythonNotebookForBuffer(): bool
     execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'
     augroup END
 
-    echomsg 'python-notebook.vim: enabled for this buffer'
+    echomsg 'notebook-python.vim: enabled for this buffer'
     return true
 enddef
 
 def TryEnablePythonNotebook(noisy: bool = false): bool
     if exists('b:python_notebook_active')
         if noisy
-            echomsg 'python-notebook.vim: already enabled for this buffer'
+            echomsg 'notebook-python.vim: already enabled for this buffer'
         endif
         return true
     endif
@@ -773,7 +604,7 @@ def TryEnablePythonNotebook(noisy: bool = false): bool
     if !IsPythonBuffer()
         if noisy
             echohl WarningMsg
-            echomsg 'python-notebook.vim: current buffer is not a Python buffer'
+            echomsg 'notebook-python.vim: current buffer is not a Python buffer'
             echohl None
         endif
         return false
@@ -782,8 +613,8 @@ def TryEnablePythonNotebook(noisy: bool = false): bool
     if !HasNotebookAnnotation()
         if noisy
             echohl WarningMsg
-            echomsg 'python-notebook.vim: annotation not found near top of file'
-            echomsg 'python-notebook.vim: add: # python-notebook: enable'
+            echomsg 'notebook-python.vim: annotation not found near top of file'
+            echomsg 'notebook-python.vim: add: # notebook-python: enable'
             echohl None
         endif
         return false
@@ -813,14 +644,19 @@ def ClearPythonNotebookCommand()
 enddef
 
 def PythonNotebookStatus()
-    echomsg 'python-notebook.vim status:'
+    var python_cmd: string = string(g:python_notebook_python)
+    var helper_path: string = NotebookHelperPath()
+
+    echomsg 'notebook-python.vim status:'
     echomsg '  filetype: ' .. &filetype
     echomsg '  extension: ' .. expand('%:e')
     echomsg '  is python buffer: ' .. string(IsPythonBuffer())
     echomsg '  annotation found: ' .. string(HasNotebookAnnotation())
     echomsg '  active: ' .. string(exists('b:python_notebook_active'))
-    echomsg '  python executable: ' .. string(g:python_notebook_python)
-    echomsg '  python executable found: ' .. string(executable(string(g:python_notebook_python)))
+    echomsg '  python executable: ' .. python_cmd
+    echomsg '  python executable found: ' .. string(executable(python_cmd))
+    echomsg '  helper script: ' .. helper_path
+    echomsg '  helper script found: ' .. string(filereadable(helper_path))
 enddef
 
 execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'
