@@ -88,7 +88,28 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_sixel_engine')
-    g:python_notebook_sixel_engine = 'chafa'
+    g:python_notebook_sixel_engine = 'imagemagick'
+endif
+
+# Sixel engine options:
+#
+#   let g:python_notebook_sixel_engine = 'chafa'
+#   let g:python_notebook_sixel_engine = 'imagemagick'
+#
+# ImageMagick writes sixel in pixel units, while chafa's -s option uses
+# terminal cell units. These defaults are only an approximation of one
+# terminal cell in pixels; tune them if the ImageMagick backend is too large
+# or too small for your terminal/font.
+if !exists('g:python_notebook_imagemagick_command')
+    g:python_notebook_imagemagick_command = ''
+endif
+
+if !exists('g:python_notebook_imagemagick_cell_width')
+    g:python_notebook_imagemagick_cell_width = 10
+endif
+
+if !exists('g:python_notebook_imagemagick_cell_height')
+    g:python_notebook_imagemagick_cell_height = 20
 endif
 
 var output_start_marker_prefix: string = '# nb-output: start'
@@ -147,6 +168,45 @@ def NotebookFigureLines(): number
     endif
 
     return figure_lines
+enddef
+
+def ImageMagickCommand(): string
+    var configured_command: string = GetStringSetting('python_notebook_imagemagick_command', '')
+    if !empty(configured_command)
+        return expand(configured_command)
+    endif
+
+    if executable('magick')
+        return 'magick'
+    endif
+
+    if executable('convert')
+        return 'convert'
+    endif
+
+    return ''
+enddef
+
+def ImageMagickCellWidth(): number
+    var cell_width: number = GetNumberSetting('python_notebook_imagemagick_cell_width', 10)
+    if cell_width <= 0
+        cell_width = 10
+    endif
+
+    return cell_width
+enddef
+
+def ImageMagickCellHeight(): number
+    var cell_height: number = GetNumberSetting('python_notebook_imagemagick_cell_height', 20)
+    if cell_height <= 0
+        cell_height = 20
+    endif
+
+    return cell_height
+enddef
+
+def IsImageMagickEngine(engine: string): bool
+    return engine ==# 'imagemagick' || engine ==# 'magick' || engine ==# 'convert'
 enddef
 
 def StripNullBytes(text: string): string
@@ -768,11 +828,16 @@ def BuildErrorBlock(result: dict<any>): list<string>
     return block
 enddef
 
-def SixelCacheKey(path: string, available_cols: number, available_lines: number): string
+def SixelCacheKey(path: string, available_cols: number, available_lines: number, engine: string): string
     var file_size: number = getfsize(path)
     var file_mtime: number = getftime(path)
+    var extra_key: string = ''
 
-    return path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. available_cols .. 'x' .. available_lines
+    if IsImageMagickEngine(engine)
+        extra_key = ':' .. ImageMagickCommand() .. ':' .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
+    endif
+
+    return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. available_cols .. 'x' .. available_lines .. extra_key
 enddef
 
 def GenerateFigureSixel(path: string, available_cols: number, available_lines: number): string
@@ -780,12 +845,12 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
         return ''
     endif
 
-    var cache_key: string = SixelCacheKey(path, available_cols, available_lines)
+    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var cache_key: string = SixelCacheKey(path, available_cols, available_lines, engine)
     if has_key(figure_sixel_cache, cache_key)
         return figure_sixel_cache[cache_key]
     endif
 
-    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
     var sixel_data: string = ''
 
     if engine ==# 'chafa'
@@ -794,6 +859,20 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
         endif
 
         var cmd: string = 'chafa -f sixel --dither diffusion -s ' .. available_cols .. 'x' .. available_lines .. ' ' .. shellescape(path)
+        sixel_data = system(cmd)
+    elseif IsImageMagickEngine(engine)
+        var magick_cmd: string = ImageMagickCommand()
+        if empty(magick_cmd) || !executable(magick_cmd)
+            return ''
+        endif
+
+        var pixel_width: number = max([1, available_cols * ImageMagickCellWidth()])
+        var pixel_height: number = max([1, available_lines * ImageMagickCellHeight()])
+
+        # ImageMagick's SIXEL coder works in pixels, not terminal cells. Resize
+        # to the approximate pixel box represented by the Vim placeholder area,
+        # then ask ImageMagick to write sixel to stdout.
+        var cmd: string = shellescape(magick_cmd) .. ' ' .. shellescape(path) .. ' -resize ' .. pixel_width .. 'x' .. pixel_height .. ' sixel:-'
         sixel_data = system(cmd)
     else
         return ''
@@ -1201,6 +1280,9 @@ def PythonNotebookStatus()
     echomsg '  figure lines: ' .. string(NotebookFigureLines())
     echomsg '  sixel engine: ' .. GetStringSetting('python_notebook_sixel_engine', 'chafa')
     echomsg '  chafa found: ' .. string(executable('chafa'))
+    echomsg '  imagemagick command: ' .. ImageMagickCommand()
+    echomsg '  imagemagick command found: ' .. string(!empty(ImageMagickCommand()) && executable(ImageMagickCommand()))
+    echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth()) .. 'x' .. string(ImageMagickCellHeight())
 enddef
 
 execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'
