@@ -46,6 +46,16 @@ if !exists('g:sixel_markdown_csv_plotter')
     g:sixel_markdown_csv_plotter = script_dir .. '/md-sixel-csv.py'
 endif
 
+# Canonical CSV plot cache size. CSVs are plotted once into this "big" PNG,
+# then resized/cropped as needed for the current terminal geometry.
+if !exists('g:sixel_markdown_csv_plot_width')
+    g:sixel_markdown_csv_plot_width = 600
+endif
+
+if !exists('g:sixel_markdown_csv_plot_height')
+    g:sixel_markdown_csv_plot_height = 400
+endif
+
 # Enable/disable animation disk cache
 if !exists('g:sixel_markdown_animation_cache_enabled')
     g:sixel_markdown_animation_cache_enabled = 1
@@ -133,7 +143,23 @@ def CacheRoot(): string
     return g:sixel_markdown_cache_dir
 enddef
 
-def CsvDiskCacheId(full_path: string, px_width: number, total_px_height: number): string
+def CsvPlotWidth(): number
+    var width: number = str2nr(string(g:sixel_markdown_csv_plot_width))
+    if width <= 0
+        width = 600
+    endif
+    return width
+enddef
+
+def CsvPlotHeight(): number
+    var height: number = str2nr(string(g:sixel_markdown_csv_plot_height))
+    if height <= 0
+        height = 400
+    endif
+    return height
+enddef
+
+def CsvDiskCacheId(full_path: string): string
     var file_size: number = getfsize(full_path)
     var file_mtime: number = getftime(full_path)
 
@@ -142,31 +168,31 @@ def CsvDiskCacheId(full_path: string, px_width: number, total_px_height: number)
     endif
 
     # CSV invalidation is based on file size + mtime.
-    # The path avoids collisions, and the plot geometry is included because
-    # different target sizes produce different PNG plots.
+    # Path avoids collisions. Canonical plot size is included because changing
+    # g:sixel_markdown_csv_plot_width/height should create a new plot cache.
     var source_key: string = fnamemodify(full_path, ':p') .. ':' .. file_size .. ':' .. file_mtime
-    var render_key: string = px_width .. 'x' .. total_px_height
+    var plot_key: string = CsvPlotWidth() .. 'x' .. CsvPlotHeight()
 
-    return DiskCacheHash(source_key .. ':' .. render_key)
+    return DiskCacheHash(source_key .. ':' .. plot_key)
 enddef
 
 def CsvDiskCachePath(cache_id: string): string
     return CacheRoot() .. '/csv/' .. cache_id .. '.png'
 enddef
 
-def CsvSourceCacheKey(full_path: string, px_width: number, total_px_height: number): string
+def CsvSourceCacheKey(full_path: string): string
     var file_size: number = getfsize(full_path)
     var file_mtime: number = getftime(full_path)
 
     if file_size < 0 || file_mtime < 0
-        return full_path
+        return 'csv:' .. full_path
     endif
 
-    return 'csv:' .. full_path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. px_width .. 'x' .. total_px_height
+    return 'csv:' .. full_path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. CsvPlotWidth() .. 'x' .. CsvPlotHeight()
 enddef
 
-def GenerateCsvPlot(full_path: string, px_width: number, total_px_height: number): string
-    var cache_id: string = CsvDiskCacheId(full_path, px_width, total_px_height)
+def GenerateCsvPlot(full_path: string): string
+    var cache_id: string = CsvDiskCacheId(full_path)
     if empty(cache_id)
         return ''
     endif
@@ -207,9 +233,9 @@ def GenerateCsvPlot(full_path: string, px_width: number, total_px_height: number
         '--output',
         output_path,
         '--width',
-        string(px_width),
+        string(CsvPlotWidth()),
         '--height',
-        string(total_px_height),
+        string(CsvPlotHeight()),
     ]
 
     system(cmd)
@@ -761,12 +787,12 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         var source_cache_key: string = full_path
 
         if is_csv
-            render_path = GenerateCsvPlot(full_path, px_width, total_px_height)
+            render_path = GenerateCsvPlot(full_path)
             if empty(render_path)
                 lnum += 1
                 continue
             endif
-            source_cache_key = CsvSourceCacheKey(full_path, px_width, total_px_height)
+            source_cache_key = CsvSourceCacheKey(full_path)
         endif
 
         var cache_key: string = source_cache_key .. ':' .. px_width .. 'x' .. total_px_height .. '-crop' .. px_crop_h .. '+' .. px_crop_y
