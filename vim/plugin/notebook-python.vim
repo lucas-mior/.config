@@ -66,10 +66,10 @@ if !exists('g:python_notebook_annotation_scan_lines')
     g:python_notebook_annotation_scan_lines = 40
 endif
 
-var output_start_marker: string = '# mdnb-output:start'
-var output_end_marker: string = '# mdnb-output:end'
-var error_start_marker: string = '# mdnb-error:start'
-var error_end_marker: string = '# mdnb-error:end'
+var output_start_marker_prefix: string = '# mdnb-output: start'
+var output_end_marker: string = '# mdnb-output: end'
+var error_start_marker: string = '# mdnb-error: start'
+var error_end_marker: string = '# mdnb-error: end'
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -162,12 +162,28 @@ def IsCellMarker(line_str: string): bool
     return line_str =~# '^\s*#\s*%%'
 enddef
 
+def IsOutputStart(line_str: string): bool
+    return line_str =~# '^\s*#\s*mdnb-output\s*:\s*start\>'
+enddef
+
+def IsOutputEnd(line_str: string): bool
+    return line_str =~# '^\s*#\s*mdnb-output\s*:\s*end\s*$'
+enddef
+
+def IsErrorStart(line_str: string): bool
+    return line_str =~# '^\s*#\s*mdnb-error\s*:\s*start\>'
+enddef
+
+def IsErrorEnd(line_str: string): bool
+    return line_str =~# '^\s*#\s*mdnb-error\s*:\s*end\s*$'
+enddef
+
 def IsGeneratedStart(line_str: string): bool
-    return line_str =~# '^\s*#\s*mdnb-\(output\|error\):start\s*$'
+    return IsOutputStart(line_str) || IsErrorStart(line_str)
 enddef
 
 def IsGeneratedEnd(line_str: string): bool
-    return line_str =~# '^\s*#\s*mdnb-\(output\|error\):end\s*$'
+    return IsOutputEnd(line_str) || IsErrorEnd(line_str)
 enddef
 
 def FindGeneratedEnd(start_lnum: number): number
@@ -184,8 +200,8 @@ def FindGeneratedEnd(start_lnum: number): number
     return 0
 enddef
 
-def IsOutputSectionHeader(line_str: string): bool
-    return line_str =~# '^\s*#\s*\(stdout\|stderr\|result\):\s*$'
+def OutputHeaderHasKind(line_str: string, kind: string): bool
+    return line_str =~# '\[' && line_str =~# '\<' .. kind .. '\>'
 enddef
 
 def JsonValueToString(value: any): string
@@ -232,26 +248,9 @@ def AddNotebookLineMatch(group_name: string, row: number)
     add(b:python_notebook_match_ids, matchadd(group_name, '\%' .. row .. 'l.*', 100))
 enddef
 
-def AddOutputSectionMatches(group_name: string, header_lnum: number, output_end: number): number
-    AddNotebookLineMatch(group_name, header_lnum)
-
-    var row: number = header_lnum + 1
-    while row <= output_end
-        var row_text: string = getline(row)
-
-        if row_text =~# '^\s*#\s*mdnb-output:end\s*$'
-            break
-        endif
-
-        if IsOutputSectionHeader(row_text)
-            break
-        endif
-
-        AddNotebookLineMatch(group_name, row)
-        row += 1
-    endwhile
-
-    return row
+def AddNotebookHeaderWordMatch(group_name: string, row: number, word: string)
+    EnsureBufferMatchList()
+    add(b:python_notebook_match_ids, matchadd(group_name, '\%' .. row .. 'l.*\zs\<' .. word .. '\>', 110))
 enddef
 
 def RefreshNotebookMatches()
@@ -269,7 +268,7 @@ def RefreshNotebookMatches()
     while lnum <= max_lnum
         var line_str: string = getline(lnum)
 
-        if line_str =~# '^\s*#\s*mdnb-error:start\s*$'
+        if IsErrorStart(line_str)
             var end_lnum: number = FindGeneratedEnd(lnum)
             if end_lnum <= 0
                 end_lnum = lnum
@@ -283,28 +282,50 @@ def RefreshNotebookMatches()
             continue
         endif
 
-        if line_str =~# '^\s*#\s*mdnb-output:start\s*$'
+        if IsOutputStart(line_str)
             var output_end: number = FindGeneratedEnd(lnum)
             if output_end <= 0
                 output_end = lnum
             endif
 
-            var row: number = lnum + 1
-            while row <= output_end
-                var row_text: string = getline(row)
+            var has_stdout: bool = OutputHeaderHasKind(line_str, 'stdout')
+            var has_stderr: bool = OutputHeaderHasKind(line_str, 'stderr')
+            var has_result: bool = OutputHeaderHasKind(line_str, 'result')
 
-                if row_text =~# '^\s*#\s*stdout:\s*$'
-                    row = AddOutputSectionMatches('MdNotebookStdout', row, output_end)
-                    continue
+            if has_stdout
+                AddNotebookHeaderWordMatch('MdNotebookStdout', lnum, 'stdout')
+            endif
+
+            if has_stderr
+                AddNotebookHeaderWordMatch('MdNotebookStdout', lnum, 'stderr')
+            endif
+
+            if has_result
+                AddNotebookHeaderWordMatch('MdNotebookResult', lnum, 'result')
+            endif
+
+            var body_start: number = lnum + 1
+            var body_end: number = output_end - 1
+
+            if body_start <= body_end
+                if has_result && !has_stdout && !has_stderr
+                    for row in range(body_start, body_end)
+                        AddNotebookLineMatch('MdNotebookResult', row)
+                    endfor
+                elseif has_result
+                    if body_start <= body_end - 1
+                        for row in range(body_start, body_end - 1)
+                            AddNotebookLineMatch('MdNotebookStdout', row)
+                        endfor
+                    endif
+
+                    AddNotebookLineMatch('MdNotebookResult', body_end)
+                else
+                    for row in range(body_start, body_end)
+                        AddNotebookLineMatch('MdNotebookStdout', row)
+                    endfor
                 endif
-
-                if row_text =~# '^\s*#\s*result:\s*$'
-                    row = AddOutputSectionMatches('MdNotebookResult', row, output_end)
-                    continue
-                endif
-
-                row += 1
-            endwhile
+            endif
 
             lnum = output_end + 1
             continue
@@ -312,6 +333,23 @@ def RefreshNotebookMatches()
 
         lnum += 1
     endwhile
+enddef
+
+def JumpToFirstNotebookError(): bool
+    var lnum: number = 1
+    var max_lnum: number = line('$')
+
+    while lnum <= max_lnum
+        if IsErrorStart(getline(lnum))
+            call cursor(lnum, 1)
+            silent! normal! zz
+            return true
+        endif
+
+        lnum += 1
+    endwhile
+
+    return false
 enddef
 
 def ClearNotebookOutputs()
@@ -430,6 +468,28 @@ def ExtendCommented(lines: list<string>, source_lines: list<string>)
     endfor
 enddef
 
+def BuildOutputHeader(has_stdout: bool, has_stderr: bool, has_result: bool): string
+    var parts: list<string> = []
+
+    if has_stdout
+        add(parts, 'stdout')
+    endif
+
+    if has_stderr
+        add(parts, 'stderr')
+    endif
+
+    if has_result
+        add(parts, 'result')
+    endif
+
+    if empty(parts)
+        return output_start_marker_prefix .. ' []'
+    endif
+
+    return output_start_marker_prefix .. ' [' .. join(parts, ', ') .. ']'
+enddef
+
 def BuildOutputBlock(result: dict<any>): list<string>
     var block: list<string> = []
 
@@ -437,24 +497,25 @@ def BuildOutputBlock(result: dict<any>): list<string>
     var stderr_lines: list<string> = JsonValueToStringList(get(result, 'stderr', []))
     var result_text: string = JsonValueToString(get(result, 'result', ''))
 
-    if empty(stdout_lines) && empty(stderr_lines) && empty(result_text)
+    var has_stdout: bool = !empty(stdout_lines)
+    var has_stderr: bool = !empty(stderr_lines)
+    var has_result: bool = !empty(result_text)
+
+    if !has_stdout && !has_stderr && !has_result
         return block
     endif
 
-    add(block, output_start_marker)
+    add(block, BuildOutputHeader(has_stdout, has_stderr, has_result))
 
-    if !empty(stdout_lines)
-        add(block, '# stdout:')
+    if has_stdout
         ExtendCommented(block, stdout_lines)
     endif
 
-    if !empty(stderr_lines)
-        add(block, '# stderr:')
+    if has_stderr
         ExtendCommented(block, stderr_lines)
     endif
 
-    if !empty(result_text)
-        add(block, '# result:')
+    if has_result
         add(block, CommentLine(result_text))
     endif
 
@@ -577,6 +638,7 @@ def RunPythonNotebookFromScratch()
         endfor
 
         RefreshNotebookMatches()
+        JumpToFirstNotebookError()
 
         delete(input_path)
         delete(output_path)
@@ -593,8 +655,8 @@ def SetupNotebookSyntax()
     silent! syntax clear MdNotebookStdout
     silent! syntax clear MdNotebookResult
 
-    execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output:start\s*$/ end=/^\s*#\s*mdnb-output:end\s*$/ keepend containedin=ALL'
-    execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend containedin=ALL'
+    execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output\s*:\s*start.*$/ end=/^\s*#\s*mdnb-output\s*:\s*end\s*$/ keepend containedin=ALL'
+    execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error\s*:\s*start.*$/ end=/^\s*#\s*mdnb-error\s*:\s*end\s*$/ keepend containedin=ALL'
 
     EnsureNotebookHighlightGroups()
     RefreshNotebookMatches()
