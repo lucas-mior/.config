@@ -24,9 +24,12 @@ vim9script
 #
 # Generated output:
 #
-#   # nb-output: start [stdout, result]
+#   # nb-output: start [stdout, result, figure]
 #   # stdout text
 #   # result text
+#   # nb-figure: /path/to/figure.png
+#   #
+#   #
 #   # nb-output: end
 #
 # Generated errors:
@@ -41,6 +44,7 @@ vim9script
 #   :PythonNotebookTryEnable
 #   :PythonNotebookRunAll
 #   :PythonNotebookClearOutputs
+#   :PythonNotebookDrawFigures
 #
 # Shortcuts in active notebook buffers:
 #
@@ -79,10 +83,22 @@ if !exists('g:python_notebook_annotation_scan_lines')
     g:python_notebook_annotation_scan_lines = 40
 endif
 
+if !exists('g:python_notebook_figure_lines')
+    g:python_notebook_figure_lines = 18
+endif
+
+if !exists('g:python_notebook_sixel_engine')
+    g:python_notebook_sixel_engine = 'chafa'
+endif
+
 var output_start_marker_prefix: string = '# nb-output: start'
 var output_end_marker: string = '# nb-output: end'
 var error_start_marker: string = '# nb-error: start'
 var error_end_marker: string = '# nb-error: end'
+var figure_marker_prefix: string = '# nb-figure: '
+
+var figure_sixel_cache: dict<string> = {}
+var figure_draw_timer: number = -1
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -116,6 +132,19 @@ def NotebookHelperPath(): string
     return expand(GetStringSetting('python_notebook_helper', script_dir .. '/notebook-vim.py'))
 enddef
 
+def NotebookCacheDir(): string
+    return expand(GetStringSetting('python_notebook_cache_dir', expand('~/.cache/notebook-python-vim')))
+enddef
+
+def NotebookFigureLines(): number
+    var figure_lines: number = GetNumberSetting('python_notebook_figure_lines', 18)
+    if figure_lines <= 0
+        figure_lines = 18
+    endif
+
+    return figure_lines
+enddef
+
 def StripNullBytes(text: string): string
     return substitute(text, '\%x00', '', 'g')
 enddef
@@ -132,6 +161,7 @@ enddef
 
 def EnsureNotebookHighlightGroups()
     execute 'highlight default link MdNotebookOutput Comment'
+    execute 'highlight MdNotebookFigure ctermfg=DarkGray ctermbg=NONE guifg=#808080 guibg=NONE'
     execute 'highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE'
     execute 'highlight MdNotebookStdout ctermfg=White ctermbg=NONE guifg=#ffffff guibg=NONE'
     execute 'highlight MdNotebookResult ctermfg=Blue ctermbg=NONE guifg=#5fafff guibg=NONE'
@@ -191,6 +221,14 @@ def IsErrorEnd(line_str: string): bool
     return line_str =~# '^\s*#\s*nb-error\s*:\s*end\s*$'
 enddef
 
+def IsFigureLine(line_str: string): bool
+    return line_str =~# '^\s*#\s*nb-figure\s*:\s*.\+'
+enddef
+
+def FigurePathFromLine(line_str: string): string
+    return StripNullBytes(substitute(line_str, '^\s*#\s*nb-figure\s*:\s*', '', ''))
+enddef
+
 def IsGeneratedStart(line_str: string): bool
     return IsOutputStart(line_str) || IsErrorStart(line_str)
 enddef
@@ -211,6 +249,23 @@ def FindGeneratedEnd(start_lnum: number): number
     endwhile
 
     return 0
+enddef
+
+def FindFigureAreaEnd(figure_lnum: number): number
+    var lnum: number = figure_lnum + 1
+    var max_lnum: number = line('$')
+
+    while lnum <= max_lnum
+        var line_str: string = getline(lnum)
+
+        if IsOutputEnd(line_str) || IsFigureLine(line_str) || IsErrorStart(line_str)
+            return lnum - 1
+        endif
+
+        lnum += 1
+    endwhile
+
+    return max_lnum
 enddef
 
 def OutputHeaderHasKind(line_str: string, kind: string): bool
@@ -238,6 +293,30 @@ def JsonValueToStringList(value: any): list<string>
     var result: list<string> = []
     for item in value
         add(result, JsonValueToString(item))
+    endfor
+
+    return result
+enddef
+
+def JsonFigurePaths(value: any): list<string>
+    if type(value) != v:t_list
+        return []
+    endif
+
+    var result: list<string> = []
+
+    for item in value
+        if type(item) == v:t_dict
+            var path: string = JsonValueToString(get(item, 'path', ''))
+            if !empty(path)
+                add(result, path)
+            endif
+        else
+            var path: string = JsonValueToString(item)
+            if !empty(path)
+                add(result, path)
+            endif
+        endif
     endfor
 
     return result
@@ -304,6 +383,7 @@ def RefreshNotebookMatches()
             var has_stdout: bool = OutputHeaderHasKind(line_str, 'stdout')
             var has_stderr: bool = OutputHeaderHasKind(line_str, 'stderr')
             var has_result: bool = OutputHeaderHasKind(line_str, 'result')
+            var has_figure: bool = OutputHeaderHasKind(line_str, 'figure')
 
             if has_stdout
                 AddNotebookHeaderWordMatch('MdNotebookStdout', lnum, 'stdout')
@@ -317,8 +397,25 @@ def RefreshNotebookMatches()
                 AddNotebookHeaderWordMatch('MdNotebookResult', lnum, 'result')
             endif
 
+            if has_figure
+                AddNotebookHeaderWordMatch('MdNotebookFigure', lnum, 'figure')
+            endif
+
+            var first_figure_lnum: number = 0
+            var scan_lnum: number = lnum + 1
+            while scan_lnum < output_end
+                if IsFigureLine(getline(scan_lnum))
+                    first_figure_lnum = scan_lnum
+                    break
+                endif
+                scan_lnum += 1
+            endwhile
+
             var body_start: number = lnum + 1
             var body_end: number = output_end - 1
+            if first_figure_lnum > 0
+                body_end = first_figure_lnum - 1
+            endif
 
             if body_start <= body_end
                 if has_result && !has_stdout && !has_stderr
@@ -340,6 +437,21 @@ def RefreshNotebookMatches()
                 endif
             endif
 
+            if first_figure_lnum > 0
+                var figure_lnum: number = first_figure_lnum
+                while figure_lnum < output_end
+                    if IsFigureLine(getline(figure_lnum))
+                        var figure_area_end: number = FindFigureAreaEnd(figure_lnum)
+                        for row in range(figure_lnum, min([figure_area_end, output_end - 1]))
+                            AddNotebookLineMatch('MdNotebookFigure', row)
+                        endfor
+                        figure_lnum = figure_area_end + 1
+                    else
+                        figure_lnum += 1
+                    endif
+                endwhile
+            endif
+
             lnum = output_end + 1
             continue
         endif
@@ -354,7 +466,7 @@ def JumpToFirstNotebookError(): bool
 
     while lnum <= max_lnum
         if IsErrorStart(getline(lnum))
-            call cursor(lnum, 1)
+            cursor(lnum, 1)
             silent! normal! zz
             return true
         endif
@@ -481,7 +593,7 @@ def ExtendCommented(lines: list<string>, source_lines: list<string>)
     endfor
 enddef
 
-def BuildOutputHeader(has_stdout: bool, has_stderr: bool, has_result: bool): string
+def BuildOutputHeader(has_stdout: bool, has_stderr: bool, has_result: bool, has_figure: bool): string
     var parts: list<string> = []
 
     if has_stdout
@@ -494,6 +606,10 @@ def BuildOutputHeader(has_stdout: bool, has_stderr: bool, has_result: bool): str
 
     if has_result
         add(parts, 'result')
+    endif
+
+    if has_figure
+        add(parts, 'figure')
     endif
 
     if empty(parts)
@@ -509,16 +625,18 @@ def BuildOutputBlock(result: dict<any>): list<string>
     var stdout_lines: list<string> = JsonValueToStringList(get(result, 'stdout', []))
     var stderr_lines: list<string> = JsonValueToStringList(get(result, 'stderr', []))
     var result_text: string = JsonValueToString(get(result, 'result', ''))
+    var figure_paths: list<string> = JsonFigurePaths(get(result, 'figures', []))
 
     var has_stdout: bool = !empty(stdout_lines)
     var has_stderr: bool = !empty(stderr_lines)
     var has_result: bool = !empty(result_text)
+    var has_figure: bool = !empty(figure_paths)
 
-    if !has_stdout && !has_stderr && !has_result
+    if !has_stdout && !has_stderr && !has_result && !has_figure
         return block
     endif
 
-    add(block, BuildOutputHeader(has_stdout, has_stderr, has_result))
+    add(block, BuildOutputHeader(has_stdout, has_stderr, has_result, has_figure))
 
     if has_stdout
         ExtendCommented(block, stdout_lines)
@@ -530,6 +648,17 @@ def BuildOutputBlock(result: dict<any>): list<string>
 
     if has_result
         add(block, CommentLine(result_text))
+    endif
+
+    if has_figure
+        var figure_lines: number = NotebookFigureLines()
+
+        for figure_path in figure_paths
+            add(block, figure_marker_prefix .. figure_path)
+            for _ in range(1, figure_lines)
+                add(block, '#')
+            endfor
+        endfor
     endif
 
     add(block, output_end_marker)
@@ -547,6 +676,192 @@ def BuildErrorBlock(result: dict<any>): list<string>
     add(block, error_end_marker)
 
     return block
+enddef
+
+def SixelCacheKey(path: string, available_cols: number, available_lines: number): string
+    var file_size: number = getfsize(path)
+    var file_mtime: number = getftime(path)
+
+    return path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. available_cols .. 'x' .. available_lines
+enddef
+
+def GenerateFigureSixel(path: string, available_cols: number, available_lines: number): string
+    if !filereadable(path)
+        return ''
+    endif
+
+    var cache_key: string = SixelCacheKey(path, available_cols, available_lines)
+    if has_key(figure_sixel_cache, cache_key)
+        return figure_sixel_cache[cache_key]
+    endif
+
+    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var sixel_data: string = ''
+
+    if engine ==# 'chafa'
+        if !executable('chafa')
+            return ''
+        endif
+
+        var cmd: string = 'chafa -f sixel -s ' .. available_cols .. 'x' .. available_lines .. ' ' .. shellescape(path)
+        sixel_data = system(cmd)
+    else
+        return ''
+    endif
+
+    if v:shell_error != 0
+        return ''
+    endif
+
+    sixel_data = substitute(sixel_data, '\n\+$', '', '')
+    figure_sixel_cache[cache_key] = sixel_data
+    return sixel_data
+enddef
+
+def DrawGapText(visible_start: number, visible_lines: number, available_cols: number, screen_col: number, message: string)
+    var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
+    if absolute_row <= 0
+        return
+    endif
+
+    var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
+    var clear_spaces: string = repeat(' ', available_cols)
+
+    var clipped_message: string = message
+    if strdisplaywidth(clipped_message) > available_cols
+        clipped_message = strpart(clipped_message, 0, max([0, available_cols - 1]))
+    endif
+
+    var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
+
+    for i in range(visible_lines)
+        seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+    endfor
+
+    seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. "\<Esc>[31m" .. clipped_message .. "\<Esc>[0m"
+    seq ..= "\<Esc>[?80h" .. "\<Esc>8"
+
+    if exists('*echoraw')
+        echoraw(seq)
+    else
+        writefile([seq], '/dev/tty', 'b')
+    endif
+enddef
+
+def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col: number, available_cols: number)
+    var window_start: number = line('w0')
+    var window_end: number = line('w$')
+
+    var visible_start: number = max([start_lnum, window_start])
+    var visible_end: number = min([end_lnum, window_end])
+
+    if visible_start > visible_end
+        return
+    endif
+
+    # Avoid distorted redraws while only part of the reserved figure area is visible.
+    if visible_start != start_lnum
+        return
+    endif
+
+    var visible_lines: number = visible_end - visible_start + 1
+    if visible_lines <= 0
+        return
+    endif
+
+    if !filereadable(path)
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[figure not found: ' .. path .. ']')
+        return
+    endif
+
+    var sixel_data: string = GenerateFigureSixel(path, available_cols, visible_lines)
+    if empty(sixel_data)
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[could not render figure as sixel]')
+        return
+    endif
+
+    var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
+    if absolute_row <= 0
+        return
+    endif
+
+    var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
+    var clear_spaces: string = repeat(' ', available_cols)
+
+    var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
+
+    for i in range(visible_lines)
+        seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+    endfor
+
+    seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. sixel_data
+    seq ..= "\<Esc>[?80h" .. "\<Esc>8"
+
+    if exists('*echoraw')
+        echoraw(seq)
+    else
+        writefile([seq], '/dev/tty', 'b')
+    endif
+enddef
+
+def DrawNotebookFigures()
+    if !exists('b:python_notebook_active')
+        return
+    endif
+
+    var screen_col: number = 1
+    var text_width: number = winwidth(0)
+
+    if exists('*getwininfo')
+        var wininfo: dict<any> = getwininfo(win_getid())[0]
+        screen_col = wininfo.wincol
+        text_width = wininfo.width
+
+        if has_key(wininfo, 'textoff')
+            screen_col += wininfo.textoff
+            text_width -= wininfo.textoff
+        endif
+    endif
+
+    var available_cols: number = max([1, text_width])
+    var lnum: number = line('w0')
+    var max_lnum: number = line('w$')
+
+    while lnum <= max_lnum
+        var line_str: string = getline(lnum)
+
+        if IsFigureLine(line_str)
+            var path: string = FigurePathFromLine(line_str)
+            var start_lnum: number = lnum + 1
+            var end_lnum: number = FindFigureAreaEnd(lnum)
+
+            if start_lnum <= end_lnum
+                DrawFigureAt(path, start_lnum, end_lnum, screen_col, available_cols)
+            endif
+
+            lnum = end_lnum + 1
+            continue
+        endif
+
+        lnum += 1
+    endwhile
+enddef
+
+def DrawNotebookFiguresTimer(timer_id: number)
+    DrawNotebookFigures()
+enddef
+
+def ScheduleNotebookFigureDraw()
+    if figure_draw_timer != -1
+        timer_stop(figure_draw_timer)
+    endif
+
+    figure_draw_timer = timer_start(50, DrawNotebookFiguresTimer)
+enddef
+
+def NotebookRedraw()
+    redraw!
+    ScheduleNotebookFigureDraw()
 enddef
 
 def RunPythonNotebookFromScratch()
@@ -578,9 +893,11 @@ def RunPythonNotebookFromScratch()
         var cells: list<dict<any>> = ParseNotebookCells()
         var input_path: string = tempname()
         var output_path: string = tempname()
+        var figure_dir: string = NotebookCacheDir() .. '/figures/buf_' .. bufnr('%')
 
         var payload: dict<any> = {
             'buffer_path': StripNullBytes(expand('%:p')),
+            'figure_dir': StripNullBytes(figure_dir),
             'stop_on_error': get(g:, 'python_notebook_stop_on_error', 1) != 0,
             'cells': cells,
         }
@@ -651,6 +968,7 @@ def RunPythonNotebookFromScratch()
         endfor
 
         RefreshNotebookMatches()
+        NotebookRedraw()
         JumpToFirstNotebookError()
 
         delete(input_path)
@@ -667,6 +985,7 @@ def SetupNotebookSyntax()
     silent! syntax clear MdNotebookError
     silent! syntax clear MdNotebookStdout
     silent! syntax clear MdNotebookResult
+    silent! syntax clear MdNotebookFigure
 
     execute 'syntax region MdNotebookOutput start=/^\s*#\s*nb-output\s*:\s*start.*$/ end=/^\s*#\s*nb-output\s*:\s*end\s*$/ keepend containedin=ALL'
     execute 'syntax region MdNotebookError start=/^\s*#\s*nb-error\s*:\s*start.*$/ end=/^\s*#\s*nb-error\s*:\s*end\s*$/ keepend containedin=ALL'
@@ -687,13 +1006,17 @@ def EnablePythonNotebookForBuffer(): bool
 
     execute 'command! -buffer PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookFromScratch()'
     execute 'command! -buffer PythonNotebookClearOutputs call ' .. script_sid .. 'ClearNotebookOutputs()'
+    execute 'command! -buffer PythonNotebookDrawFigures call ' .. script_sid .. 'DrawNotebookFigures()'
 
     nnoremap <buffer> <silent> <C-L> <Cmd>PythonNotebookRunAll<CR>
     nnoremap <buffer> <silent> <Leader>b <Cmd>PythonNotebookClearOutputs<CR>
 
     execute 'augroup PythonNotebookBuffer_' .. bufnr('%')
     autocmd! * <buffer>
-    execute 'autocmd BufWinEnter,WinEnter,TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
+    execute 'autocmd BufWinEnter,WinEnter <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
+    execute 'autocmd WinScrolled,VimResized <buffer> call ' .. script_sid .. 'NotebookRedraw()'
+    execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
+    execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
     execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'
     augroup END
 
@@ -749,6 +1072,7 @@ def ClearPythonNotebookCommand()
     endif
 
     ClearNotebookOutputs()
+    NotebookRedraw()
 enddef
 
 def PythonNotebookStatus()
@@ -765,6 +1089,9 @@ def PythonNotebookStatus()
     echomsg '  python executable found: ' .. string(executable(python_cmd))
     echomsg '  helper script: ' .. helper_path
     echomsg '  helper script found: ' .. string(filereadable(helper_path))
+    echomsg '  figure lines: ' .. string(NotebookFigureLines())
+    echomsg '  sixel engine: ' .. GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    echomsg '  chafa found: ' .. string(executable('chafa'))
 enddef
 
 execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'

@@ -4,9 +4,13 @@ import ast
 import contextlib
 import io
 import json
+import os
 import reprlib
+import shutil
 import sys
 import traceback
+
+os.environ.setdefault("MPLBACKEND", "Agg")
 
 
 def _strip_null_bytes(text):
@@ -86,12 +90,78 @@ def _compile_exec_and_last_expr(code, filename):
     return exec_code, expr_code
 
 
+def _prepare_figure_dir(figure_dir):
+    figure_dir = _strip_null_bytes(figure_dir)
+
+    if not figure_dir:
+        return ""
+
+    try:
+        if os.path.isdir(figure_dir):
+            shutil.rmtree(figure_dir)
+        os.makedirs(figure_dir, exist_ok=True)
+    except Exception:
+        return ""
+
+    return figure_dir
+
+
+def _save_figures(cell_index, figure_dir):
+    saved = []
+
+    if not figure_dir:
+        return saved
+
+    if "matplotlib.pyplot" not in sys.modules:
+        return saved
+
+    try:
+        import matplotlib.pyplot as plt
+    except Exception:
+        return saved
+
+    try:
+        fig_nums = list(plt.get_fignums())
+    except Exception:
+        return saved
+
+    for local_index, fig_num in enumerate(fig_nums):
+        try:
+            fig = plt.figure(fig_num)
+            path = os.path.join(
+                figure_dir,
+                "cell_{:04d}_fig_{:04d}.png".format(cell_index, local_index),
+            )
+
+            fig.savefig(
+                path,
+                format="png",
+                bbox_inches="tight",
+                facecolor=fig.get_facecolor(),
+                edgecolor=fig.get_edgecolor(),
+            )
+
+            saved.append({
+                "path": _strip_null_bytes(path),
+            })
+        except Exception:
+            continue
+
+    if saved:
+        try:
+            plt.close("all")
+        except Exception:
+            pass
+
+    return saved
+
+
 class NotebookInput(io.TextIOBase):
     def readline(self, size=-1):
         raise EOFError("input() is not supported by notebook-python.vim run-all")
 
 
-def _run_cell(cell, namespace):
+def _run_cell(cell, namespace, figure_dir):
     cell_index = int(cell["index"])
     code = _cell_code(cell)
     filename = "<notebook-python-cell-{}>".format(cell_index)
@@ -101,6 +171,7 @@ def _run_cell(cell, namespace):
         "stdout": [],
         "stderr": [],
         "result": None,
+        "figures": [],
         "error": [],
         "error_line": 0,
         "ok": True,
@@ -135,6 +206,7 @@ def _run_cell(cell, namespace):
         sys.stdin = old_stdin
         result["stdout"] = _split_lines(stdout_buf.getvalue())
         result["stderr"] = _split_lines(stderr_buf.getvalue())
+        result["figures"] = _save_figures(cell_index, figure_dir)
 
     return result
 
@@ -152,6 +224,7 @@ def main():
 
     cells = payload.get("cells", [])
     stop_on_error = bool(payload.get("stop_on_error", True))
+    figure_dir = _prepare_figure_dir(payload.get("figure_dir", ""))
 
     namespace = {
         "__name__": "__main__",
@@ -161,7 +234,7 @@ def main():
     results = []
 
     for cell in cells:
-        cell_result = _run_cell(cell, namespace)
+        cell_result = _run_cell(cell, namespace, figure_dir)
         results.append(cell_result)
 
         if stop_on_error and not cell_result["ok"]:
