@@ -9,8 +9,8 @@ vim9script
 #
 # Activation:
 #
-#   The plugin is globally loaded by Vim, but it only activates for Python
-#   buffers containing one of these comments near the top:
+#   The plugin is globally loaded by Vim, but notebook behavior only activates
+#   for Python buffers containing one of these comments near the top:
 #
 #       # python-notebook: enable
 #       # mdnb: enable
@@ -21,20 +21,22 @@ vim9script
 #   x = 10
 #   x + 5
 #
-# Generated output uses Python comments:
+# Commands:
 #
-#   # mdnb-output:start
-#   # result:
-#   # 15
-#   # mdnb-output:end
+#   :PythonNotebookStatus
+#   :PythonNotebookTryEnable
+#   :PythonNotebookRunAll
+#   :PythonNotebookClearOutputs
 #
-# Press <C-l> to clear generated output, restart Python state from scratch,
-# and run every cell from the top.
+# Press <C-l> in an active notebook buffer to clear generated output, restart
+# Python state from scratch, and run every cell from the top.
 
 if exists('g:loaded_python_notebook_vim')
     finish
 endif
 g:loaded_python_notebook_vim = 1
+
+var script_sid: string = expand('<SID>')
 
 if !exists('g:python_notebook_python')
     g:python_notebook_python = 'python3'
@@ -68,10 +70,6 @@ def EnsureBufferMatchList()
 enddef
 
 def HasNotebookAnnotation(): bool
-    if &filetype !=# 'python'
-        return false
-    endif
-
     var max_lnum: number = min([line('$'), str2nr(string(g:python_notebook_annotation_scan_lines))])
     if max_lnum <= 0
         return false
@@ -90,6 +88,14 @@ def HasNotebookAnnotation(): bool
     endfor
 
     return false
+enddef
+
+def IsPythonBuffer(): bool
+    if &filetype ==# 'python'
+        return true
+    endif
+
+    return expand('%:e') ==# 'py'
 enddef
 
 def IsCellMarker(line_str: string): bool
@@ -519,10 +525,6 @@ def BuildErrorBlock(result: dict<any>): list<string>
 enddef
 
 def RunPythonNotebookFromScratch()
-    if !exists('b:python_notebook_active')
-        return
-    endif
-
     var python_cmd: string = g:python_notebook_python
 
     if empty(python_cmd) || !executable(python_cmd)
@@ -643,16 +645,14 @@ def SetupNotebookSyntax()
     execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend containedin=ALL'
 
     highlight default link MdNotebookOutput Comment
-
-    # Intentionally not "default": this should override pythonComment.
     highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE
 
     RefreshNotebookMatches()
 enddef
 
-def EnablePythonNotebookForBuffer()
+def EnablePythonNotebookForBuffer(): bool
     if exists('b:python_notebook_active')
-        return
+        return true
     endif
 
     b:python_notebook_active = 1
@@ -660,40 +660,90 @@ def EnablePythonNotebookForBuffer()
 
     SetupNotebookSyntax()
 
-    var sid: string = expand('<SID>')
+    execute 'command! -buffer PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookFromScratch()'
+    execute 'command! -buffer PythonNotebookClearOutputs call ' .. script_sid .. 'ClearNotebookOutputs()'
 
-    execute 'command! -buffer PythonNotebookRunAll call ' .. sid .. 'RunPythonNotebookFromScratch()'
-    execute 'command! -buffer PythonNotebookClearOutputs call ' .. sid .. 'ClearNotebookOutputs()'
+    execute 'nnoremap <buffer> <silent> <C-L> <ScriptCmd>RunPythonNotebookFromScratch()<CR>'
 
-    nnoremap <buffer> <silent> <C-L> <ScriptCmd>RunPythonNotebookFromScratch()<CR>
-
-    augroup PythonNotebookBuffer
-        autocmd! * <buffer>
-        autocmd BufWinEnter,WinEnter,TextChanged,TextChangedI <buffer> call <SID>RefreshNotebookMatches()
-        autocmd BufWinLeave,BufUnload <buffer> call <SID>ClearNotebookMatches()
+    execute 'augroup PythonNotebookBuffer_' .. bufnr('%')
+    autocmd! * <buffer>
+    execute 'autocmd BufWinEnter,WinEnter,TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
+    execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'
     augroup END
 
     echomsg 'python-notebook.vim: enabled for this buffer'
+    return true
 enddef
 
-def TryEnablePythonNotebook()
-    if &filetype !=# 'python'
-        return
+def TryEnablePythonNotebook(noisy: bool = false): bool
+    if exists('b:python_notebook_active')
+        if noisy
+            echomsg 'python-notebook.vim: already enabled for this buffer'
+        endif
+        return true
     endif
 
-    if exists('b:python_notebook_active')
-        return
+    if !IsPythonBuffer()
+        if noisy
+            echohl WarningMsg
+            echomsg 'python-notebook.vim: current buffer is not a Python buffer'
+            echohl None
+        endif
+        return false
     endif
 
     if !HasNotebookAnnotation()
-        return
+        if noisy
+            echohl WarningMsg
+            echomsg 'python-notebook.vim: annotation not found near top of file'
+            echomsg 'python-notebook.vim: add: # python-notebook: enable'
+            echohl None
+        endif
+        return false
     endif
 
-    EnablePythonNotebookForBuffer()
+    return EnablePythonNotebookForBuffer()
 enddef
+
+def RunPythonNotebookCommand()
+    if !exists('b:python_notebook_active')
+        if !TryEnablePythonNotebook(true)
+            return
+        endif
+    endif
+
+    RunPythonNotebookFromScratch()
+enddef
+
+def ClearPythonNotebookCommand()
+    if !exists('b:python_notebook_active')
+        if !TryEnablePythonNotebook(true)
+            return
+        endif
+    endif
+
+    ClearNotebookOutputs()
+enddef
+
+def PythonNotebookStatus()
+    echomsg 'python-notebook.vim status:'
+    echomsg '  filetype: ' .. &filetype
+    echomsg '  extension: ' .. expand('%:e')
+    echomsg '  is python buffer: ' .. string(IsPythonBuffer())
+    echomsg '  annotation found: ' .. string(HasNotebookAnnotation())
+    echomsg '  active: ' .. string(exists('b:python_notebook_active'))
+    echomsg '  python executable: ' .. string(g:python_notebook_python)
+    echomsg '  python executable found: ' .. string(executable(string(g:python_notebook_python)))
+enddef
+
+execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'
+execute 'command! PythonNotebookTryEnable call ' .. script_sid .. 'TryEnablePythonNotebook(1)'
+execute 'command! PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookCommand()'
+execute 'command! PythonNotebookClearOutputs call ' .. script_sid .. 'ClearPythonNotebookCommand()'
 
 augroup PythonNotebookAutoEnable
     autocmd!
-    autocmd FileType python call <SID>TryEnablePythonNotebook()
-    autocmd BufEnter *.py call <SID>TryEnablePythonNotebook()
+    execute 'autocmd FileType python call ' .. script_sid .. 'TryEnablePythonNotebook(0)'
+    execute 'autocmd BufEnter *.py call ' .. script_sid .. 'TryEnablePythonNotebook(0)'
+    execute 'autocmd BufReadPost *.py call ' .. script_sid .. 'TryEnablePythonNotebook(0)'
 augroup END
