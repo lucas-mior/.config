@@ -432,6 +432,7 @@ set autoread
 set conceallevel=2
 # set termwinsize=10x0
 set noautochdir
+set mouse=
 autocmd CursorHold * checktime
 filetype plugin on
 
