@@ -336,7 +336,7 @@ map yX yank_xmacros
 
 cmd yank_file %{{
     {
-        printf "\n$(basename "$f"):\n\n"
+        printf "\n$(basename "$f"):\n"
                 # awk '
                 #     BEGIN { skipping = 1 }
                 #     skipping && /^[[:space:]]*\/\*/ { in_block = 1; next }
