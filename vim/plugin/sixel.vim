@@ -13,8 +13,13 @@ if !exists('g:sixel_markdown_line_height')
     g:sixel_markdown_line_height = 16
 endif
 
+# Default character width in pixels
+if !exists('g:sixel_markdown_char_width')
+    g:sixel_markdown_char_width = 8
+endif
+
 # Cache to prevent freezing Vim with system() calls on every scroll.
-# Key: "filepath:px_height", Value: "sixel_string"
+# Key: "filepath:px_widthxpx_height", Value: "sixel_string"
 var sixel_cache: dict<string> = {}
 
 def DrawVisibleImages()
@@ -23,10 +28,14 @@ def DrawVisibleImages()
     var max_line: number = line('$')
     
     var screen_col: number = 1
+    var text_width: number = winwidth(0)
     if exists('*getwininfo')
         var wininfo: dict<any> = getwininfo(win_getid())[0]
+        screen_col = wininfo.wincol
+        text_width = wininfo.width
         if has_key(wininfo, 'textoff')
-            screen_col = wininfo.textoff + 1
+            screen_col += wininfo.textoff
+            text_width -= wininfo.textoff
         endif
     endif
 
@@ -73,8 +82,10 @@ def DrawVisibleImages()
             continue
         endif
 
+        var available_cols: number = max([1, text_width])
+        var px_width: number = available_cols * g:sixel_markdown_char_width
         var px_height: number = visible_gap * g:sixel_markdown_line_height
-        var cache_key: string = full_path .. ':' .. px_height
+        var cache_key: string = full_path .. ':' .. px_width .. 'x' .. px_height
         var sixel_data: string = ''
 
         if has_key(sixel_cache, cache_key)
@@ -82,9 +93,9 @@ def DrawVisibleImages()
         else
             var cmd: string = ''
             if executable('magick')
-                cmd = 'magick ' .. shellescape(full_path) .. ' -geometry x' .. px_height .. ' sixel:-'
+                cmd = 'magick ' .. shellescape(full_path) .. ' -geometry ' .. px_width .. 'x' .. px_height .. ' sixel:-'
             elseif executable('convert')
-                cmd = 'convert ' .. shellescape(full_path) .. ' -geometry x' .. px_height .. ' sixel:-'
+                cmd = 'convert ' .. shellescape(full_path) .. ' -geometry ' .. px_width .. 'x' .. px_height .. ' sixel:-'
             else
                 echoerr "ImageMagick ('magick' or 'convert') is required but not found."
                 return
