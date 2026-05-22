@@ -56,11 +56,18 @@ enddef
 FetchCellSize()
 
 # Cache to prevent freezing Vim with system() calls on every scroll.
-# Key: "filepath:px_widthxpx_height", Value: "sixel_string"
+# Key: "filepath:W_HxCropH_CropY", Value: "sixel_string"
 var sixel_cache: dict<string> = {}
 
 def DrawVisibleImages()
     var start_line: number = line('w0')
+    
+    # Check if an image tag exists just above the viewport whose empty lines bleed into the screen
+    var prev_text_line: number = prevnonblank(start_line - 1)
+    if prev_text_line > 0
+        start_line = prev_text_line
+    endif
+    
     var end_line: number = line('w$')
     var max_line: number = line('$')
     
@@ -109,30 +116,42 @@ def DrawVisibleImages()
             continue
         endif
 
-        # Calculate visible gap so we don't draw off the bottom of the window
-        var absolute_row: number = screenpos(win_getid(), lnum, 1).row
-        var window_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
-        var visible_gap: number = min([gap, winheight(0) - window_row])
-        
-        if visible_gap <= 0
+        # Calculate exact intersection of the image's physical lines and the window's visible lines
+        var start_img_line: number = lnum + 1
+        var end_img_line: number = lnum + gap
+        var visible_start: number = max([start_img_line, line('w0')])
+        var visible_end: number = min([end_img_line, end_line])
+
+        # If the intersection is inverted, the image is entirely off-screen
+        if visible_start > visible_end
             lnum += 1
             continue
         endif
 
+        var visible_lines: number = visible_end - visible_start + 1
+        var crop_lines_top: number = visible_start - start_img_line
+
         var available_cols: number = max([1, text_width])
         var px_width: number = available_cols * g:sixel_markdown_char_width
-        var px_height: number = visible_gap * g:sixel_markdown_line_height
-        var cache_key: string = full_path .. ':' .. px_width .. 'x' .. px_height
+        var total_px_height: number = gap * g:sixel_markdown_line_height
+        
+        var px_crop_y: number = crop_lines_top * g:sixel_markdown_line_height
+        var px_crop_h: number = visible_lines * g:sixel_markdown_line_height
+
+        var cache_key: string = full_path .. ':' .. px_width .. 'x' .. total_px_height .. '-crop' .. px_crop_h .. '+' .. px_crop_y
         var sixel_data: string = ''
 
         if has_key(sixel_cache, cache_key)
             sixel_data = sixel_cache[cache_key]
         else
+            # 1. -resize scales the image down to exactly fit the gap boundaries preserving aspect ratio.
+            # 2. -crop takes the exact visible slice based on what scrolled off the top/bottom (+repage resets the virtual canvas).
+            var magick_args: string = shellescape(full_path) .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
             var cmd: string = ''
             if executable('magick')
-                cmd = 'magick ' .. shellescape(full_path) .. ' -geometry ' .. px_width .. 'x' .. px_height .. ' sixel:-'
+                cmd = 'magick ' .. magick_args
             elseif executable('convert')
-                cmd = 'convert ' .. shellescape(full_path) .. ' -geometry ' .. px_width .. 'x' .. px_height .. ' sixel:-'
+                cmd = 'convert ' .. magick_args
             else
                 echoerr "ImageMagick ('magick' or 'convert') is required but not found."
                 return
@@ -150,19 +169,19 @@ def DrawVisibleImages()
             endif
         endif
 
-        # Draw just below the image annotation line
-        var target_row: number = absolute_row + 1
+        # Calculate exact row coordinate for the first VISIBLE line of the image
+        var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
+        var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
         
-        # Build clear sequence to erase any old Sixel remnants in this region.
-        # Added \<Esc>[0m to reset text attributes so spaces don't pick up Vim's background colors.
+        # Build clear sequence to erase any old Sixel remnants strictly in the visible region
         var clear_seq: string = "\<Esc>[0m"
         var clear_spaces: string = repeat(' ', available_cols)
-        for i in range(visible_gap)
+        for i in range(visible_lines)
             clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
         endfor
         
         # 1. Save cursor (\e7)
-        # 2. Disable Sixel scrolling (\e[?80l) to prevent terminal viewport desync
+        # 2. Disable Sixel scrolling (\e[?80l)
         # 3. Clear the area using default-background spaces
         # 4. Move cursor to target row/col
         # 5. Draw Sixel data

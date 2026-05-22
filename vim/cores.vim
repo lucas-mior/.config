@@ -17,9 +17,9 @@ hi lCursor          cterm=NONE   ctermbg=000   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi CursorIM         cterm=NONE   ctermbg=000   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
-hi CursorColumn     cterm=NONE   ctermbg=000   ctermfg=NONE
+hi CursorColumn     cterm=NONE   ctermbg=NONE   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
-hi CursorLine       cterm=NONE   ctermbg=000   ctermfg=NONE
+hi CursorLine       cterm=NONE   ctermbg=NONE   ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
 hi Directory        cterm=NONE   ctermbg=NONE  ctermfg=NONE
                   \ gui=NONE     guibg=NONE    guifg=NONE
