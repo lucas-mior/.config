@@ -793,7 +793,7 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var cmd: string = 'chafa -f sixel -s ' .. available_cols .. 'x' .. available_lines .. ' ' .. shellescape(path)
+        var cmd: string = 'chafa -f sixel --dither diffusion -s ' .. available_cols .. 'x' .. available_lines .. ' ' .. shellescape(path)
         sixel_data = system(cmd)
     else
         return ''
