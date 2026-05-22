@@ -153,8 +153,9 @@ def DrawVisibleImages()
         # Draw just below the image annotation line
         var target_row: number = absolute_row + 1
         
-        # Build clear sequence to erase any old Sixel remnants in this region
-        var clear_seq: string = ''
+        # Build clear sequence to erase any old Sixel remnants in this region.
+        # Added \<Esc>[0m to reset text attributes so spaces don't pick up Vim's background colors.
+        var clear_seq: string = "\<Esc>[0m"
         var clear_spaces: string = repeat(' ', available_cols)
         for i in range(visible_gap)
             clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
@@ -162,7 +163,7 @@ def DrawVisibleImages()
         
         # 1. Save cursor (\e7)
         # 2. Disable Sixel scrolling (\e[?80l) to prevent terminal viewport desync
-        # 3. Clear the area using spaces
+        # 3. Clear the area using default-background spaces
         # 4. Move cursor to target row/col
         # 5. Draw Sixel data
         # 6. Restore Sixel scrolling (\e[?80h)
@@ -179,25 +180,39 @@ def DrawVisibleImages()
     endwhile
 enddef
 
+var draw_timer: number = -1
+
+def DelayedDraw(timer_id: number)
+    DrawVisibleImages()
+enddef
+
+def ScheduleDraw()
+    if draw_timer != -1
+        timer_stop(draw_timer)
+    endif
+    # Delay drawing by 50ms to ensure Vim has finished native redrawing
+    draw_timer = timer_start(50, DelayedDraw)
+enddef
+
 # Clear the screen when redrawing so ghost images don't get left behind
 # Note: Ctrl+L triggers Sigonal to redraw Vim entirely
 def RedrawAndClear()
     FetchCellSize()
     redraw!
-    DrawVisibleImages()
+    ScheduleDraw()
 enddef
 
 # Autocommands for triggers
 augroup SixelMarkdownAutoDraw
     autocmd! * <buffer>
-    autocmd BufWinEnter <buffer> DrawVisibleImages()
+    autocmd BufWinEnter <buffer> ScheduleDraw()
     autocmd WinScrolled <buffer> RedrawAndClear()
-    autocmd TextChanged,TextChangedI <buffer> DrawVisibleImages()
+    autocmd TextChanged,TextChangedI <buffer> ScheduleDraw()
     autocmd VimResized <buffer> RedrawAndClear()
 augroup END
 
 # Keep the manual command just in case
-command! -buffer DrawMarkdownImage DrawVisibleImages()
+command! -buffer DrawMarkdownImage ScheduleDraw()
 
 # Map Ctrl+L to trigger a full Vim redraw followed by drawing the images
 nnoremap <buffer> <silent> <C-L> <ScriptCmd>RedrawAndClear()<CR>
