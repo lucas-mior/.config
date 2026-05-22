@@ -24,6 +24,20 @@ if !exists('g:sixel_markdown_engine')
     g:sixel_markdown_engine = 'chafa'
 endif
 
+# Default disk cache location for rendered animations
+if !exists('g:sixel_markdown_cache_dir')
+    if exists('$XDG_CACHE_HOME') && !empty($XDG_CACHE_HOME)
+        g:sixel_markdown_cache_dir = $XDG_CACHE_HOME .. '/md-sixel'
+    else
+        g:sixel_markdown_cache_dir = expand('~/.cache/md-sixel')
+    endif
+endif
+
+# Enable/disable animation disk cache
+if !exists('g:sixel_markdown_animation_cache_enabled')
+    g:sixel_markdown_animation_cache_enabled = 1
+endif
+
 def FetchCellSize()
     while getchar(0) != 0
     endwhile
@@ -75,6 +89,7 @@ var anim_pending_frames: dict<list<string>> = {}
 var anim_loading_done: dict<number> = {}
 var anim_delay_ready: dict<number> = {}
 var anim_delay_raw: dict<string> = {}
+var anim_disk_cache_id: dict<string> = {}
 
 var anim_timer: number = -1
 
@@ -123,6 +138,173 @@ def GenerateStaticSixel(full_path: string, is_animated: bool, px_width: number, 
     return ''
 enddef
 
+def DiskCacheHash(text: string): string
+    if exists('*sha256')
+        return sha256(text)
+    endif
+
+    return substitute(text, '[^A-Za-z0-9_.-]', '_', 'g')
+enddef
+
+def AnimationDiskCacheId(full_path: string, px_width: number, total_px_height: number, px_crop_h: number, px_crop_y: number): string
+    var file_size: number = getfsize(full_path)
+    var file_mtime: number = getftime(full_path)
+
+    if file_size < 0 || file_mtime < 0
+        return ''
+    endif
+
+    # The source invalidation part of the key is the image's size + mtime.
+    # Render geometry is included because a different crop/scale produces
+    # different sixel frames. The path is included only to avoid collisions
+    # between different files that happen to have identical size + mtime.
+    var source_key: string = fnamemodify(full_path, ':p') .. ':' .. file_size .. ':' .. file_mtime
+    var render_key: string = px_width .. 'x' .. total_px_height .. ':crop:' .. px_crop_h .. '+' .. px_crop_y
+
+    return DiskCacheHash(source_key .. ':' .. render_key)
+enddef
+
+def AnimationDiskCacheDir(cache_id: string): string
+    return g:sixel_markdown_cache_dir .. '/animations/' .. cache_id
+enddef
+
+def DeleteAnimationDiskCache(cache_id: string)
+    if empty(cache_id)
+        return
+    endif
+
+    var cache_dir: string = AnimationDiskCacheDir(cache_id)
+    if isdirectory(cache_dir)
+        delete(cache_dir, 'rf')
+    endif
+enddef
+
+def ReadBinaryFile(path: string): string
+    if !filereadable(path)
+        return ''
+    endif
+
+    var data: string = join(readfile(path, 'b'), "\n")
+    return substitute(data, '[\r\n]\+$', '', '')
+enddef
+
+def WriteBinaryFile(path: string, data: string): bool
+    var result: number = writefile([data], path, 'b')
+    return result == 0
+enddef
+
+def StartAnimationTimerIfNeeded()
+    if anim_timer == -1
+        anim_timer = timer_start(50, AnimationTick, {'repeat': -1})
+    endif
+enddef
+
+def LoadAnimationFromDisk(cache_key: string, full_path: string, px_width: number, total_px_height: number, px_crop_h: number, px_crop_y: number): bool
+    if get(g:, 'sixel_markdown_animation_cache_enabled', 1) == 0
+        return false
+    endif
+
+    var cache_id: string = AnimationDiskCacheId(full_path, px_width, total_px_height, px_crop_h, px_crop_y)
+    if empty(cache_id)
+        return false
+    endif
+
+    var cache_dir: string = AnimationDiskCacheDir(cache_id)
+    var manifest_file: string = cache_dir .. '/manifest.txt'
+    if !filereadable(manifest_file)
+        return false
+    endif
+
+    var manifest: list<string> = readfile(manifest_file)
+    if len(manifest) < 3 || manifest[0] != 'md-sixel-animation-cache-v1'
+        DeleteAnimationDiskCache(cache_id)
+        return false
+    endif
+
+    var delay_ms: number = str2nr(manifest[1])
+    var frame_count: number = str2nr(manifest[2])
+    if delay_ms <= 0 || frame_count <= 0
+        DeleteAnimationDiskCache(cache_id)
+        return false
+    endif
+
+    var frames: list<string> = []
+    for i in range(0, frame_count - 1)
+        var frame_file: string = printf('%s/frame_%06d.sixel', cache_dir, i)
+        var frame: string = ReadBinaryFile(frame_file)
+        if empty(frame)
+            DeleteAnimationDiskCache(cache_id)
+            return false
+        endif
+        add(frames, frame)
+    endfor
+
+    anim_animations[cache_key] = frames
+    anim_delays[cache_key] = delay_ms
+    anim_current_frame[cache_key] = -1
+    anim_started_ms[cache_key] = reltimefloat(reltime()) * 1000.0
+
+    StartAnimationTimerIfNeeded()
+    return true
+enddef
+
+def SaveAnimationToDisk(cache_key: string)
+    if get(g:, 'sixel_markdown_animation_cache_enabled', 1) == 0
+        return
+    endif
+
+    if !has_key(anim_disk_cache_id, cache_key)
+        return
+    endif
+    if !has_key(anim_animations, cache_key)
+        return
+    endif
+
+    var cache_id: string = anim_disk_cache_id[cache_key]
+    if empty(cache_id)
+        return
+    endif
+
+    var frames: list<string> = anim_animations[cache_key]
+    if empty(frames)
+        return
+    endif
+
+    var delay_ms: number = get(anim_delays, cache_key, 100)
+    if delay_ms <= 0
+        delay_ms = 100
+    endif
+
+    var cache_dir: string = AnimationDiskCacheDir(cache_id)
+    if mkdir(cache_dir, 'p') == 0 && !isdirectory(cache_dir)
+        return
+    endif
+
+    var old_frames: list<string> = glob(cache_dir .. '/frame_*.sixel', 0, 1)
+    for old_frame in old_frames
+        delete(old_frame)
+    endfor
+
+    for i in range(0, len(frames) - 1)
+        var frame_file: string = printf('%s/frame_%06d.sixel', cache_dir, i)
+        if !WriteBinaryFile(frame_file, frames[i])
+            DeleteAnimationDiskCache(cache_id)
+            return
+        endif
+    endfor
+
+    var manifest_file: string = cache_dir .. '/manifest.txt'
+    var manifest: list<string> = [
+        'md-sixel-animation-cache-v1',
+        string(delay_ms),
+        string(len(frames)),
+    ]
+
+    if writefile(manifest, manifest_file) != 0
+        DeleteAnimationDiskCache(cache_id)
+    endif
+enddef
+
 def CleanupLoadingAnimation(cache_key: string)
     if has_key(anim_loading, cache_key)
         remove(anim_loading, cache_key)
@@ -141,6 +323,9 @@ def CleanupLoadingAnimation(cache_key: string)
     endif
     if has_key(anim_delay_raw, cache_key)
         remove(anim_delay_raw, cache_key)
+    endif
+    if has_key(anim_disk_cache_id, cache_key)
+        remove(anim_disk_cache_id, cache_key)
     endif
 enddef
 
@@ -177,6 +362,8 @@ def TryFinalizeAnimation(cache_key: string)
     anim_current_frame[cache_key] = -1
     anim_started_ms[cache_key] = reltimefloat(reltime()) * 1000.0
 
+    SaveAnimationToDisk(cache_key)
+
     if has_key(anim_loading, cache_key)
         remove(anim_loading, cache_key)
     endif
@@ -192,10 +379,11 @@ def TryFinalizeAnimation(cache_key: string)
     if has_key(anim_delay_raw, cache_key)
         remove(anim_delay_raw, cache_key)
     endif
-
-    if anim_timer == -1
-        anim_timer = timer_start(50, AnimationTick, {'repeat': -1})
+    if has_key(anim_disk_cache_id, cache_key)
+        remove(anim_disk_cache_id, cache_key)
     endif
+
+    StartAnimationTimerIfNeeded()
 
     # First coherent frame is ready. Draw it once immediately.
     timer_start(1, DrawAnimationReady)
@@ -313,6 +501,11 @@ def StartAnimationJob(cache_key: string, full_path: string, px_width: number, to
     anim_loading_done[cache_key] = 0
     anim_delay_ready[cache_key] = 0
     anim_delays[cache_key] = 100
+
+    var disk_cache_id: string = AnimationDiskCacheId(full_path, px_width, total_px_height, px_crop_h, px_crop_y)
+    if !empty(disk_cache_id)
+        anim_disk_cache_id[cache_key] = disk_cache_id
+    endif
 
     # Start metadata probing before rendering, but do not expose animation
     # frames until both this probe and the frame conversion job are complete.
@@ -459,6 +652,10 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         var sixel_data: string = ''
 
         if is_animated
+            if !has_key(anim_animations, cache_key) && !has_key(anim_loading, cache_key)
+                LoadAnimationFromDisk(cache_key, full_path, px_width, total_px_height, px_crop_h, px_crop_y)
+            endif
+
             if has_key(anim_animations, cache_key)
                 var frames: list<string> = anim_animations[cache_key]
                 if empty(frames)
