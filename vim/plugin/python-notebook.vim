@@ -63,6 +63,14 @@ var output_end_marker: string = '# mdnb-output:end'
 var error_start_marker: string = '# mdnb-error:start'
 var error_end_marker: string = '# mdnb-error:end'
 
+def StripNullBytes(text: string): string
+    return substitute(text, '\%x00', '', 'g')
+enddef
+
+def StripNullBytesFromLines(lines: list<string>): list<string>
+    return mapnew(lines, (_, line_str) => StripNullBytes(line_str))
+enddef
+
 def EnsureBufferMatchList()
     if !exists('b:python_notebook_match_ids')
         b:python_notebook_match_ids = []
@@ -136,7 +144,7 @@ enddef
 
 def JsonValueToString(value: any): string
     if type(value) == v:t_string
-        return value
+        return StripNullBytes(value)
     endif
 
     var text: string = string(value)
@@ -144,7 +152,7 @@ def JsonValueToString(value: any): string
         return ''
     endif
 
-    return text
+    return StripNullBytes(text)
 enddef
 
 def JsonValueToStringList(value: any): list<string>
@@ -305,7 +313,7 @@ def ParseNotebookCells(): list<dict<any>>
             'code_start': 1,
             'code_end': max_lnum,
             'insert_after': max_lnum,
-            'code': join(lines, "\n"),
+            'lines': StripNullBytesFromLines(lines),
         })
 
         return cells
@@ -320,7 +328,7 @@ def ParseNotebookCells(): list<dict<any>>
             'code_start': 1,
             'code_end': markers[0] - 1,
             'insert_after': markers[0] - 1,
-            'code': join(pre_lines, "\n"),
+            'lines': StripNullBytesFromLines(pre_lines),
         })
     endif
 
@@ -344,7 +352,7 @@ def ParseNotebookCells(): list<dict<any>>
             'code_start': code_start,
             'code_end': code_end,
             'insert_after': max([marker_lnum, code_end]),
-            'code': join(code_lines, "\n"),
+            'lines': StripNullBytesFromLines(code_lines),
         })
     endfor
 
@@ -361,13 +369,32 @@ def HelperPythonLines(): list<string>
         import sys
         import traceback
 
+        def _strip_null_bytes(text):
+            if text is None:
+                return ""
+            if not isinstance(text, str):
+                text = str(text)
+            return text.replace("\x00", "")
+
+        def _strip_null_bytes_list(lines):
+            return [_strip_null_bytes(line) for line in lines]
+
+        def _cell_code(cell):
+            if "lines" in cell and isinstance(cell["lines"], list):
+                return "\n".join(_strip_null_bytes_list(cell["lines"]))
+
+            return _strip_null_bytes(cell.get("code", ""))
+
         def _safe_repr(value):
             try:
-                return reprlib.Repr().repr(value)
+                text = reprlib.Repr().repr(value)
             except Exception as exc:
-                return "<repr failed: {}>".format(exc)
+                text = "<repr failed: {}>".format(exc)
+
+            return _strip_null_bytes(text)
 
         def _split_lines(text):
+            text = _strip_null_bytes(text)
             if not text:
                 return []
             return text.rstrip("\n").splitlines()
@@ -387,6 +414,7 @@ def HelperPythonLines(): list<string>
             return found
 
         def _compile_exec_and_last_expr(code, filename):
+            code = _strip_null_bytes(code)
             tree = ast.parse(code, filename=filename, mode="exec")
 
             if not tree.body:
@@ -417,7 +445,7 @@ def HelperPythonLines(): list<string>
 
         def _run_cell(cell, namespace):
             cell_index = int(cell["index"])
-            code = cell.get("code", "")
+            code = _cell_code(cell)
             filename = "<python-notebook-cell-{}>".format(cell_index)
 
             result = {
@@ -450,7 +478,9 @@ def HelperPythonLines(): list<string>
 
             except BaseException as exc:
                 result["ok"] = False
-                result["error"] = traceback.format_exception(type(exc), exc, exc.__traceback__)
+                result["error"] = _strip_null_bytes_list(
+                    traceback.format_exception(type(exc), exc, exc.__traceback__)
+                )
                 result["error_line"] = _extract_cell_error_line(exc.__traceback__, filename)
 
             finally:
@@ -476,7 +506,7 @@ def HelperPythonLines(): list<string>
 
             namespace = {
                 "__name__": "__main__",
-                "__file__": payload.get("buffer_path", "<python-notebook-buffer>"),
+                "__file__": _strip_null_bytes(payload.get("buffer_path", "<python-notebook-buffer>")),
             }
 
             results = []
@@ -522,11 +552,13 @@ def EnsureHelperScript(): string
 enddef
 
 def CommentLine(line_str: string): string
-    if empty(line_str)
+    var clean_line: string = StripNullBytes(line_str)
+
+    if empty(clean_line)
         return '#'
     endif
 
-    return '# ' .. line_str
+    return '# ' .. clean_line
 enddef
 
 def ExtendCommented(lines: list<string>, source_lines: list<string>)
@@ -612,7 +644,7 @@ def RunPythonNotebookFromScratch()
         var output_path: string = tempname()
 
         var payload: dict<any> = {
-            'buffer_path': expand('%:p'),
+            'buffer_path': StripNullBytes(expand('%:p')),
             'stop_on_error': get(g:, 'python_notebook_stop_on_error', 1) != 0,
             'cells': cells,
         }
@@ -630,13 +662,13 @@ def RunPythonNotebookFromScratch()
             echohl ErrorMsg
             echomsg 'python-notebook.vim: helper failed'
             for line_str in helper_output
-                echomsg line_str
+                echomsg StripNullBytes(line_str)
             endfor
             echohl None
             return
         endif
 
-        var response_text: string = join(readfile(output_path), "\n")
+        var response_text: string = StripNullBytes(join(readfile(output_path), "\n"))
         var response: dict<any> = json_decode(response_text)
         var results: list<any> = get(response, 'results', [])
 
