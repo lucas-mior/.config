@@ -1,7 +1,19 @@
 vim9script
 
 # python-notebook.vim
-# A small Jupyter-like Python notebook runner inside Vim.
+# Minimal Jupyter-like Python notebook runner for Vim.
+#
+# Install:
+#
+#   ~/.vim/plugin/python-notebook.vim
+#
+# Activation:
+#
+#   The plugin is globally loaded by Vim, but it only activates for Python
+#   buffers containing one of these comments near the top:
+#
+#       # python-notebook: enable
+#       # mdnb: enable
 #
 # Cell syntax:
 #
@@ -9,13 +21,20 @@ vim9script
 #   x = 10
 #   x + 5
 #
+# Generated output uses Python comments:
+#
+#   # mdnb-output:start
+#   # result:
+#   # 15
+#   # mdnb-output:end
+#
 # Press <C-l> to clear generated output, restart Python state from scratch,
 # and run every cell from the top.
 
-if exists('b:loaded_python_notebook')
+if exists('g:loaded_python_notebook_vim')
     finish
 endif
-b:loaded_python_notebook = 1
+g:loaded_python_notebook_vim = 1
 
 if !exists('g:python_notebook_python')
     g:python_notebook_python = 'python3'
@@ -33,10 +52,45 @@ if !exists('g:python_notebook_stop_on_error')
     g:python_notebook_stop_on_error = 1
 endif
 
+if !exists('g:python_notebook_annotation_scan_lines')
+    g:python_notebook_annotation_scan_lines = 40
+endif
+
 var output_start_marker: string = '# mdnb-output:start'
 var output_end_marker: string = '# mdnb-output:end'
 var error_start_marker: string = '# mdnb-error:start'
 var error_end_marker: string = '# mdnb-error:end'
+
+def EnsureBufferMatchList()
+    if !exists('b:python_notebook_match_ids')
+        b:python_notebook_match_ids = []
+    endif
+enddef
+
+def HasNotebookAnnotation(): bool
+    if &filetype !=# 'python'
+        return false
+    endif
+
+    var max_lnum: number = min([line('$'), str2nr(string(g:python_notebook_annotation_scan_lines))])
+    if max_lnum <= 0
+        return false
+    endif
+
+    for lnum in range(1, max_lnum)
+        var line_str: string = getline(lnum)
+
+        if line_str =~# '^\s*#\s*python-notebook:\s*enable\s*$'
+            return true
+        endif
+
+        if line_str =~# '^\s*#\s*mdnb:\s*enable\s*$'
+            return true
+        endif
+    endfor
+
+    return false
+enddef
 
 def IsCellMarker(line_str: string): bool
     return line_str =~# '^\s*#\s*%%'
@@ -90,7 +144,54 @@ def JsonValueToStringList(value: any): list<string>
     return result
 enddef
 
+def ClearNotebookMatches()
+    EnsureBufferMatchList()
+
+    for match_id in b:python_notebook_match_ids
+        try
+            matchdelete(match_id)
+        catch
+        endtry
+    endfor
+
+    b:python_notebook_match_ids = []
+enddef
+
+def RefreshNotebookMatches()
+    if !exists('b:python_notebook_active')
+        return
+    endif
+
+    EnsureBufferMatchList()
+    ClearNotebookMatches()
+
+    var lnum: number = 1
+    var max_lnum: number = line('$')
+
+    while lnum <= max_lnum
+        var line_str: string = getline(lnum)
+
+        if line_str =~# '^\s*#\s*mdnb-error:start\s*$'
+            var end_lnum: number = FindGeneratedEnd(lnum)
+            if end_lnum <= 0
+                end_lnum = lnum
+            endif
+
+            for row in range(lnum, end_lnum)
+                add(b:python_notebook_match_ids, matchadd('MdNotebookError', '\%' .. row .. 'l.*', 100))
+            endfor
+
+            lnum = end_lnum + 1
+            continue
+        endif
+
+        lnum += 1
+    endwhile
+enddef
+
 def ClearNotebookOutputs()
+    ClearNotebookMatches()
+
     var was_modifiable: bool = &l:modifiable
     if !was_modifiable
         setlocal modifiable
@@ -150,6 +251,7 @@ def ParseNotebookCells(): list<dict<any>>
 
     if markers[0] > 1
         var pre_lines: list<string> = getline(1, markers[0] - 1)
+
         add(cells, {
             'index': len(cells),
             'marker_lnum': 0,
@@ -193,12 +295,9 @@ def HelperPythonLines(): list<string>
         import contextlib
         import io
         import json
-        import os
         import reprlib
         import sys
         import traceback
-
-        os.environ.setdefault("MPLBACKEND", "Agg")
 
         def _safe_repr(value):
             try:
@@ -214,11 +313,15 @@ def HelperPythonLines(): list<string>
         def _extract_cell_error_line(exc_tb, filename):
             current = exc_tb
             found = 0
+
             while current is not None:
                 frame = current.tb_frame
+
                 if frame.f_code.co_filename == filename:
                     found = current.tb_lineno
+
                 current = current.tb_next
+
             return found
 
         def _compile_exec_and_last_expr(code, filename):
@@ -228,6 +331,7 @@ def HelperPythonLines(): list<string>
                 return None, None
 
             last = tree.body[-1]
+
             if not isinstance(last, ast.Expr):
                 return compile(tree, filename, "exec"), None
 
@@ -245,41 +349,11 @@ def HelperPythonLines(): list<string>
             expr_code = compile(expr_tree, filename, "eval")
             return exec_code, expr_code
 
-        def _save_figures(cell_index, figure_dir):
-            saved = []
-
-            if "matplotlib.pyplot" not in sys.modules:
-                return saved
-
-            try:
-                import matplotlib.pyplot as plt
-            except Exception:
-                return saved
-
-            try:
-                os.makedirs(figure_dir, exist_ok=True)
-
-                for fig_num in plt.get_fignums():
-                    fig = plt.figure(fig_num)
-                    path = os.path.join(
-                        figure_dir,
-                        "cell_{:04d}_fig_{:04d}.png".format(cell_index, fig_num),
-                    )
-                    fig.savefig(path, format="png", bbox_inches="tight")
-                    saved.append(path)
-
-                if saved:
-                    plt.close("all")
-            except Exception:
-                pass
-
-            return saved
-
         class NotebookInput(io.TextIOBase):
             def readline(self, size=-1):
-                raise EOFError("input() is not supported by python-notebook.vim run-all yet")
+                raise EOFError("input() is not supported by python-notebook.vim run-all")
 
-        def _run_cell(cell, namespace, figure_dir):
+        def _run_cell(cell, namespace):
             cell_index = int(cell["index"])
             code = cell.get("code", "")
             filename = "<python-notebook-cell-{}>".format(cell_index)
@@ -291,7 +365,6 @@ def HelperPythonLines(): list<string>
                 "result": None,
                 "error": [],
                 "error_line": 0,
-                "figures": [],
                 "ok": True,
             }
 
@@ -313,13 +386,10 @@ def HelperPythonLines(): list<string>
                         if value is not None:
                             result["result"] = _safe_repr(value)
 
-                    result["figures"] = _save_figures(cell_index, figure_dir)
-
             except BaseException as exc:
                 result["ok"] = False
                 result["error"] = traceback.format_exception(type(exc), exc, exc.__traceback__)
                 result["error_line"] = _extract_cell_error_line(exc.__traceback__, filename)
-                result["figures"] = _save_figures(cell_index, figure_dir)
 
             finally:
                 sys.stdin = old_stdin
@@ -341,7 +411,6 @@ def HelperPythonLines(): list<string>
 
             cells = payload.get("cells", [])
             stop_on_error = bool(payload.get("stop_on_error", True))
-            figure_dir = payload.get("figure_dir", "")
 
             namespace = {
                 "__name__": "__main__",
@@ -351,7 +420,7 @@ def HelperPythonLines(): list<string>
             results = []
 
             for cell in cells:
-                cell_result = _run_cell(cell, namespace, figure_dir)
+                cell_result = _run_cell(cell, namespace)
                 results.append(cell_result)
 
                 if stop_on_error and not cell_result["ok"]:
@@ -410,9 +479,8 @@ def BuildOutputBlock(result: dict<any>): list<string>
     var stdout_lines: list<string> = JsonValueToStringList(get(result, 'stdout', []))
     var stderr_lines: list<string> = JsonValueToStringList(get(result, 'stderr', []))
     var result_text: string = JsonValueToString(get(result, 'result', ''))
-    var figure_lines: list<string> = JsonValueToStringList(get(result, 'figures', []))
 
-    if empty(stdout_lines) && empty(stderr_lines) && empty(result_text) && empty(figure_lines)
+    if empty(stdout_lines) && empty(stderr_lines) && empty(result_text)
         return block
     endif
 
@@ -433,11 +501,6 @@ def BuildOutputBlock(result: dict<any>): list<string>
         add(block, CommentLine(result_text))
     endif
 
-    if !empty(figure_lines)
-        add(block, '# figures:')
-        ExtendCommented(block, figure_lines)
-    endif
-
     add(block, output_end_marker)
     return block
 enddef
@@ -456,6 +519,10 @@ def BuildErrorBlock(result: dict<any>): list<string>
 enddef
 
 def RunPythonNotebookFromScratch()
+    if !exists('b:python_notebook_active')
+        return
+    endif
+
     var python_cmd: string = g:python_notebook_python
 
     if empty(python_cmd) || !executable(python_cmd)
@@ -475,6 +542,7 @@ def RunPythonNotebookFromScratch()
 
         var cells: list<dict<any>> = ParseNotebookCells()
         var helper_path: string = EnsureHelperScript()
+
         if empty(helper_path)
             echohl ErrorMsg
             echomsg 'python-notebook.vim: could not write helper script'
@@ -484,11 +552,9 @@ def RunPythonNotebookFromScratch()
 
         var input_path: string = tempname()
         var output_path: string = tempname()
-        var figure_dir: string = g:python_notebook_cache_dir .. '/figures'
 
         var payload: dict<any> = {
             'buffer_path': expand('%:p'),
-            'figure_dir': figure_dir,
             'stop_on_error': get(g:, 'python_notebook_stop_on_error', 1) != 0,
             'cells': cells,
         }
@@ -558,6 +624,8 @@ def RunPythonNotebookFromScratch()
             append(get(insert, 'lnum', line('$')), get(insert, 'lines', []))
         endfor
 
+        RefreshNotebookMatches()
+
         delete(input_path)
         delete(output_path)
     finally
@@ -567,17 +635,65 @@ def RunPythonNotebookFromScratch()
     endtry
 enddef
 
-def SetupPythonNotebookSyntax()
-    syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output:start\s*$/ end=/^\s*#\s*mdnb-output:end\s*$/ keepend
-    syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend
+def SetupNotebookSyntax()
+    syntax clear MdNotebookOutput
+    syntax clear MdNotebookError
+
+    execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output:start\s*$/ end=/^\s*#\s*mdnb-output:end\s*$/ keepend containedin=ALL'
+    execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend containedin=ALL'
 
     highlight default link MdNotebookOutput Comment
-    highlight default MdNotebookError ctermfg=Red guifg=#ff5f5f
+
+    # Intentionally not "default": this should override pythonComment.
+    highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE
+
+    RefreshNotebookMatches()
 enddef
 
-SetupPythonNotebookSyntax()
+def EnablePythonNotebookForBuffer()
+    if exists('b:python_notebook_active')
+        return
+    endif
 
-command! -buffer PythonNotebookRunAll RunPythonNotebookFromScratch()
-command! -buffer PythonNotebookClearOutputs ClearNotebookOutputs()
+    b:python_notebook_active = 1
+    b:python_notebook_match_ids = []
 
-nnoremap <buffer> <silent> <C-L> <ScriptCmd>RunPythonNotebookFromScratch()<CR>
+    SetupNotebookSyntax()
+
+    var sid: string = expand('<SID>')
+
+    execute 'command! -buffer PythonNotebookRunAll call ' .. sid .. 'RunPythonNotebookFromScratch()'
+    execute 'command! -buffer PythonNotebookClearOutputs call ' .. sid .. 'ClearNotebookOutputs()'
+
+    nnoremap <buffer> <silent> <C-L> <ScriptCmd>RunPythonNotebookFromScratch()<CR>
+
+    augroup PythonNotebookBuffer
+        autocmd! * <buffer>
+        autocmd BufWinEnter,WinEnter,TextChanged,TextChangedI <buffer> call <SID>RefreshNotebookMatches()
+        autocmd BufWinLeave,BufUnload <buffer> call <SID>ClearNotebookMatches()
+    augroup END
+
+    echomsg 'python-notebook.vim: enabled for this buffer'
+enddef
+
+def TryEnablePythonNotebook()
+    if &filetype !=# 'python'
+        return
+    endif
+
+    if exists('b:python_notebook_active')
+        return
+    endif
+
+    if !HasNotebookAnnotation()
+        return
+    endif
+
+    EnablePythonNotebookForBuffer()
+enddef
+
+augroup PythonNotebookAutoEnable
+    autocmd!
+    autocmd FileType python call <SID>TryEnablePythonNotebook()
+    autocmd BufEnter *.py call <SID>TryEnablePythonNotebook()
+augroup END

@@ -6,13 +6,13 @@ var lspServers = [
     filetype: ['c', 'cpp'],
     path: '/usr/bin/clangd',
     args: ['--background-index']
-},
-{
-    name: 'pylsp',
-    filetype: 'python',
-    path: '/home/lucas/.local/bin/pylsp',
-    args: ['--check-parent-process', '-v']
 },]
+# {
+#     name: 'pylsp',
+#     filetype: 'python',
+#     path: '/home/lucas/.local/bin/pylsp',
+#     args: ['--check-parent-process', '-v']
+# },]
 # {
 #     name: 'texlab',
 #     filetype: ['tex'],
