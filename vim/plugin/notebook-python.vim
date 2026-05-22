@@ -336,6 +336,31 @@ def JsonFigurePaths(value: any): list<string>
     return result
 enddef
 
+def ResultHasFigure(result: dict<any>): bool
+    return !empty(JsonFigurePaths(get(result, 'figures', [])))
+enddef
+
+def CellLineToBufferLine(cell: dict<any>, relative_line: number): number
+    if relative_line <= 0
+        return str2nr(string(get(cell, 'insert_after', line('$'))))
+    endif
+
+    return str2nr(string(get(cell, 'code_start', 1))) + relative_line - 1
+enddef
+
+def OutputInsertLineForResult(cell: dict<any>, result: dict<any>): number
+    var insert_lnum: number = str2nr(string(get(cell, 'insert_after', line('$'))))
+
+    if ResultHasFigure(result)
+        var figure_line: number = str2nr(string(get(result, 'figure_line', 0)))
+        if figure_line > 0
+            insert_lnum = CellLineToBufferLine(cell, figure_line)
+        endif
+    endif
+
+    return insert_lnum
+enddef
+
 def ClearNotebookMatches()
     EnsureBufferMatchList()
 
@@ -781,7 +806,6 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
         return
     endif
 
-    # Avoid distorted redraws while only part of the reserved figure area is visible.
     if visible_start != start_lnum
         return
     endif
@@ -962,7 +986,7 @@ def RunPythonNotebookFromScratch()
             var output_block: list<string> = BuildOutputBlock(result)
             if !empty(output_block)
                 add(inserts, {
-                    'lnum': get(cell, 'insert_after', line('$')),
+                    'lnum': OutputInsertLineForResult(cell, result),
                     'lines': output_block,
                 })
             endif
@@ -973,7 +997,7 @@ def RunPythonNotebookFromScratch()
                 var error_lnum: number = get(cell, 'insert_after', line('$'))
 
                 if error_line > 0
-                    error_lnum = get(cell, 'code_start', 1) + error_line - 1
+                    error_lnum = CellLineToBufferLine(cell, error_line)
                 endif
 
                 add(inserts, {

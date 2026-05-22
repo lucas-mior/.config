@@ -63,6 +63,90 @@ def _extract_cell_error_line(exc_tb, filename):
     return found
 
 
+def _call_leaf_name(func):
+    if isinstance(func, ast.Name):
+        return func.id
+
+    if isinstance(func, ast.Attribute):
+        return func.attr
+
+    return ""
+
+
+def _call_root_name(func):
+    current = func
+
+    while isinstance(current, ast.Attribute):
+        current = current.value
+
+    if isinstance(current, ast.Name):
+        return current.id
+
+    return ""
+
+
+def _infer_figure_line(code):
+    try:
+        tree = ast.parse(_strip_null_bytes(code), filename="<notebook-figure-line>", mode="exec")
+    except Exception:
+        return 0
+
+    figure_call_names = {
+        "figure",
+        "subplots",
+        "subplot",
+        "axes",
+        "plot",
+        "scatter",
+        "bar",
+        "barh",
+        "hist",
+        "imshow",
+        "matshow",
+        "pcolormesh",
+        "contour",
+        "contourf",
+        "pie",
+        "errorbar",
+        "fill",
+        "fill_between",
+        "stem",
+        "step",
+        "boxplot",
+        "violinplot",
+        "plot_surface",
+        "plot_wireframe",
+        "title",
+        "suptitle",
+        "xlabel",
+        "ylabel",
+        "xlim",
+        "ylim",
+        "legend",
+        "grid",
+        "tight_layout",
+        "show",
+    }
+
+    best_line = 0
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+
+        leaf = _call_leaf_name(node.func)
+        root = _call_root_name(node.func)
+
+        if leaf in figure_call_names:
+            best_line = max(best_line, getattr(node, "lineno", 0))
+            continue
+
+        if root in {"plt", "pyplot"}:
+            best_line = max(best_line, getattr(node, "lineno", 0))
+
+    return best_line
+
+
 def _compile_exec_and_last_expr(code, filename):
     code = _strip_null_bytes(code)
     tree = ast.parse(code, filename=filename, mode="exec")
@@ -165,6 +249,7 @@ def _run_cell(cell, namespace, figure_dir):
     cell_index = int(cell["index"])
     code = _cell_code(cell)
     filename = "<notebook-python-cell-{}>".format(cell_index)
+    figure_line = _infer_figure_line(code)
 
     result = {
         "index": cell_index,
@@ -172,6 +257,7 @@ def _run_cell(cell, namespace, figure_dir):
         "stderr": [],
         "result": None,
         "figures": [],
+        "figure_line": figure_line,
         "error": [],
         "error_line": 0,
         "ok": True,
