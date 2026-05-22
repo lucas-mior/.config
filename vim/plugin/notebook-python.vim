@@ -849,10 +849,6 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
         return
     endif
 
-    if visible_start != start_lnum
-        return
-    endif
-
     var visible_lines: number = visible_end - visible_start + 1
     if visible_lines <= 0
         return
@@ -893,6 +889,26 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
     endif
 enddef
 
+def FindFigureScanStart(window_start: number): number
+    var lnum: number = window_start
+
+    while lnum >= 1
+        var line_str: string = getline(lnum)
+
+        if IsFigureLine(line_str)
+            return lnum
+        endif
+
+        if IsGeneratedStart(line_str)
+            return lnum
+        endif
+
+        lnum -= 1
+    endwhile
+
+    return 1
+enddef
+
 def DrawNotebookFigures()
     if !exists('b:python_notebook_active')
         return
@@ -913,10 +929,11 @@ def DrawNotebookFigures()
     endif
 
     var available_cols: number = max([1, text_width])
-    var lnum: number = line('w0')
-    var max_lnum: number = line('w$')
+    var window_start: number = line('w0')
+    var window_end: number = line('w$')
+    var lnum: number = FindFigureScanStart(window_start)
 
-    while lnum <= max_lnum
+    while lnum <= window_end
         var line_str: string = getline(lnum)
 
         if IsFigureLine(line_str)
