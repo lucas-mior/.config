@@ -18,6 +18,11 @@ if !exists('g:sixel_markdown_char_width')
     g:sixel_markdown_char_width = 8
 endif
 
+# Default engine ('auto', 'magick', 'convert', or 'chafa')
+if !exists('g:sixel_markdown_engine')
+    g:sixel_markdown_engine = 'chafa'
+endif
+
 def FetchCellSize()
     # Flush any pending typeahead to ensure clean read
     while getchar(0) != 0
@@ -144,21 +149,33 @@ def DrawVisibleImages()
         if has_key(sixel_cache, cache_key)
             sixel_data = sixel_cache[cache_key]
         else
-            # 1. -resize scales the image down to exactly fit the gap boundaries preserving aspect ratio.
-            # 2. -crop takes the exact visible slice based on what scrolled off the top/bottom (+repage resets the virtual canvas).
-            var magick_args: string = shellescape(full_path) .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
+            var engine: string = g:sixel_markdown_engine
+            if engine == 'auto'
+                if executable('magick')
+                    engine = 'magick'
+                elseif executable('convert')
+                    engine = 'convert'
+                elseif executable('chafa')
+                    engine = 'chafa'
+                else
+                    echoerr "ImageMagick or Chafa is required but not found."
+                    return
+                endif
+            endif
+
             var cmd: string = ''
-            if executable('magick')
-                cmd = 'magick ' .. magick_args
-            elseif executable('convert')
-                cmd = 'convert ' .. magick_args
+            if engine == 'chafa'
+                cmd = 'chafa -f sixel --exact-size ' .. px_width .. 'x' .. px_crop_h .. ' ' .. shellescape(full_path)
+            elseif engine == 'magick' || engine == 'convert'
+                var magick_args: string = shellescape(full_path) .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
+                cmd = engine .. ' ' .. magick_args
             else
-                echoerr "ImageMagick ('magick' or 'convert') is required but not found."
+                echoerr "Invalid g:sixel_markdown_engine."
                 return
             endif
 
             sixel_data = system(cmd)
-            # Remove trailing newlines output by ImageMagick to prevent terminal scrolling
+            # Remove trailing newlines output by ImageMagick/Chafa to prevent terminal scrolling
             sixel_data = substitute(sixel_data, '\n\+$', '', '')
             
             if v:shell_error == 0
