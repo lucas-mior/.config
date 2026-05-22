@@ -230,8 +230,66 @@ def SixelCellHeight(): number
     return cell_height
 enddef
 
+def WindowTextWidth(): number
+    var text_width: number = winwidth(0)
+
+    if exists('*getwininfo')
+        var wininfo: dict<any> = getwininfo(win_getid())[0]
+        text_width = str2nr(string(get(wininfo, 'width', text_width)))
+
+        if has_key(wininfo, 'textoff')
+            text_width -= str2nr(string(get(wininfo, 'textoff', 0)))
+        endif
+    endif
+
+    return max([1, text_width])
+enddef
+
 def IsImageMagickEngine(engine: string): bool
     return engine ==# 'imagemagick' || engine ==# 'magick' || engine ==# 'convert'
+enddef
+
+def FigureDisplayLines(path: string, available_cols: number): number
+    var fallback_lines: number = NotebookFigureLines()
+
+    if !filereadable(path)
+        return fallback_lines
+    endif
+
+    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var python_cmd: string = PythonCommand()
+    var helper_path: string = NotebookHelperPath()
+
+    if empty(python_cmd) || !executable(python_cmd)
+        return fallback_lines
+    endif
+
+    if empty(helper_path) || !filereadable(helper_path)
+        return fallback_lines
+    endif
+
+    var max_pixel_width: number = max([1, available_cols * SixelCellWidth()])
+    var cell_height: number = SixelCellHeight()
+
+    if IsImageMagickEngine(engine)
+        max_pixel_width = max([1, available_cols * ImageMagickCellWidth()])
+        cell_height = ImageMagickCellHeight()
+    elseif engine !=# 'chafa'
+        return fallback_lines
+    endif
+
+    var output: list<string> = systemlist([python_cmd, helper_path, '--sixel-display-lines', path, string(max_pixel_width), string(cell_height)])
+
+    if v:shell_error != 0 || empty(output)
+        return fallback_lines
+    endif
+
+    var display_lines: number = str2nr(output[0])
+    if display_lines <= 0
+        return fallback_lines
+    endif
+
+    return display_lines
 enddef
 
 def StripNullBytes(text: string): string
@@ -826,10 +884,13 @@ def BuildOutputBlock(result: dict<any>): list<string>
     endif
 
     if has_figure
-        var figure_lines: number = NotebookFigureLines()
+        var available_cols: number = WindowTextWidth()
 
         for figure_ref in figure_refs
             add(block, figure_marker_prefix .. figure_ref)
+
+            var figure_path: string = ResolveFigureRef(figure_ref)
+            var figure_lines: number = FigureDisplayLines(figure_path, available_cols)
             for _ in range(1, figure_lines)
                 add(block, '#')
             endfor
@@ -929,8 +990,10 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
 
         # ImageMagick's SIXEL coder works in pixels, not terminal cells. Resize
         # to the approximate pixel box represented by the Vim placeholder area,
-        # then ask ImageMagick to write sixel to stdout.
-        var cmd: string = shellescape(magick_cmd) .. ' ' .. shellescape(path) .. ' -resize ' .. pixel_width .. 'x' .. pixel_height .. ' sixel:-'
+        # without upscaling smaller figures, then ask ImageMagick to write sixel
+        # to stdout.
+        var resize_arg: string = pixel_width .. 'x' .. pixel_height .. '>'
+        var cmd: string = shellescape(magick_cmd) .. ' ' .. shellescape(path) .. ' -resize ' .. shellescape(resize_arg) .. ' sixel:-'
         sixel_data = system(cmd)
     else
         return ''
@@ -1053,20 +1116,17 @@ def DrawNotebookFigures()
     endif
 
     var screen_col: number = 1
-    var text_width: number = winwidth(0)
 
     if exists('*getwininfo')
         var wininfo: dict<any> = getwininfo(win_getid())[0]
         screen_col = wininfo.wincol
-        text_width = wininfo.width
 
         if has_key(wininfo, 'textoff')
             screen_col += wininfo.textoff
-            text_width -= wininfo.textoff
         endif
     endif
 
-    var available_cols: number = max([1, text_width])
+    var available_cols: number = WindowTextWidth()
     var window_start: number = line('w0')
     var window_end: number = line('w$')
     var lnum: number = FindFigureScanStart(window_start)
@@ -1095,12 +1155,20 @@ def DrawNotebookFiguresTimer(timer_id: number)
     DrawNotebookFigures()
 enddef
 
-def ScheduleNotebookFigureDraw()
+def ScheduleNotebookFigureDraw(delay_ms: number = 50)
     if figure_draw_timer != -1
         timer_stop(figure_draw_timer)
     endif
 
-    figure_draw_timer = timer_start(50, DrawNotebookFiguresTimer)
+    figure_draw_timer = timer_start(max([0, delay_ms]), DrawNotebookFiguresTimer)
+enddef
+
+def NotebookScrollRedraw()
+    # Do not call redraw! while scrolling. Vim's own terminal scroll can move
+    # the existing sixel pixels smoothly; a forced redraw clears them first and
+    # causes the visible disappear/reappear flicker. We only repaint the figures
+    # after Vim has settled the new viewport.
+    ScheduleNotebookFigureDraw(25)
 enddef
 
 def NotebookRedraw()
@@ -1260,7 +1328,8 @@ def EnablePythonNotebookForBuffer(): bool
     execute 'augroup PythonNotebookBuffer_' .. bufnr('%')
     autocmd! * <buffer>
     execute 'autocmd BufWinEnter,WinEnter <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
-    execute 'autocmd WinScrolled,VimResized <buffer> call ' .. script_sid .. 'NotebookRedraw()'
+    execute 'autocmd WinScrolled <buffer> call ' .. script_sid .. 'NotebookScrollRedraw()'
+    execute 'autocmd VimResized <buffer> call ' .. script_sid .. 'NotebookRedraw()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
     execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'

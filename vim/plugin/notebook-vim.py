@@ -276,6 +276,25 @@ def _crop_vertical(image, crop_top, crop_height):
     return image.crop((0, crop_top, image.width, crop_bottom))
 
 
+def _ceil_div(numerator, denominator):
+    numerator = max(1, int(numerator))
+    denominator = max(1, int(denominator))
+    return (numerator + denominator - 1) // denominator
+
+
+def _sixel_display_lines(input_path, max_pixel_width, cell_height):
+    max_pixel_width = max(1, int(max_pixel_width))
+    cell_height = max(1, int(cell_height))
+
+    from PIL import Image
+
+    with Image.open(input_path) as image:
+        width, height = image.size
+
+    _, fitted_height = _width_constrained_size(width, height, max_pixel_width)
+    return max(1, _ceil_div(fitted_height, cell_height))
+
+
 def _prepare_sixel_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels):
     max_pixel_width = max(1, int(max_pixel_width))
     crop_top_pixels = max(0, int(crop_top_pixels))
@@ -315,6 +334,32 @@ def _prepare_sixel_png_cli(argv):
         _prepare_sixel_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels)
     except Exception as exc:
         print("could not prepare sixel PNG: {}".format(exc), file=sys.stderr)
+        return 1
+
+    return 0
+
+
+def _sixel_display_lines_cli(argv):
+    if len(argv) != 5:
+        print(
+            "usage: notebook-vim.py --sixel-display-lines INPUT_PNG MAX_WIDTH CELL_HEIGHT",
+            file=sys.stderr,
+        )
+        return 2
+
+    input_path = argv[2]
+
+    try:
+        max_pixel_width = int(argv[3])
+        cell_height = int(argv[4])
+    except ValueError:
+        print("MAX_WIDTH and CELL_HEIGHT must be integers", file=sys.stderr)
+        return 2
+
+    try:
+        print(_sixel_display_lines(input_path, max_pixel_width, cell_height))
+    except Exception as exc:
+        print("could not compute sixel display lines: {}".format(exc), file=sys.stderr)
         return 1
 
     return 0
@@ -423,6 +468,9 @@ def _run_cell(cell, namespace, figure_dir):
 def main():
     if len(sys.argv) >= 2 and sys.argv[1] == "--prepare-sixel-png":
         return _prepare_sixel_png_cli(sys.argv)
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "--sixel-display-lines":
+        return _sixel_display_lines_cli(sys.argv)
 
     if len(sys.argv) != 3:
         print("usage: notebook-vim.py INPUT_JSON OUTPUT_JSON", file=sys.stderr)
