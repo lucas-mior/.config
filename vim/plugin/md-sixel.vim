@@ -99,6 +99,7 @@ FetchCellSize()
 # Caches
 var sixel_cache: dict<string> = {}
 var csv_failed_cache: dict<number> = {}
+var csv_error_cache: dict<string> = {}
 
 # Animation State Caches
 var anim_animations: dict<list<string>> = {}
@@ -191,6 +192,24 @@ def CsvSourceCacheKey(full_path: string): string
     return 'csv:' .. full_path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. CsvPlotWidth() .. 'x' .. CsvPlotHeight()
 enddef
 
+def SetCsvError(cache_id: string, message: string)
+    if empty(cache_id)
+        return
+    endif
+
+    csv_failed_cache[cache_id] = 1
+    csv_error_cache[cache_id] = message
+enddef
+
+def GetCsvError(full_path: string): string
+    var cache_id: string = CsvDiskCacheId(full_path)
+    if empty(cache_id)
+        return 'CSV plot error: could not create cache key'
+    endif
+
+    return get(csv_error_cache, cache_id, 'CSV plot error')
+enddef
+
 def GenerateCsvPlot(full_path: string): string
     var cache_id: string = CsvDiskCacheId(full_path)
     if empty(cache_id)
@@ -210,18 +229,18 @@ def GenerateCsvPlot(full_path: string): string
     var plotter_path: string = g:sixel_markdown_csv_plotter
 
     if empty(python_cmd) || !executable(python_cmd)
-        csv_failed_cache[cache_id] = 1
+        SetCsvError(cache_id, 'CSV plot error: Python executable not found: ' .. python_cmd)
         return ''
     endif
 
     if empty(plotter_path) || !filereadable(plotter_path)
-        csv_failed_cache[cache_id] = 1
+        SetCsvError(cache_id, 'CSV plot error: Python plotter script not found: ' .. plotter_path)
         return ''
     endif
 
     var cache_dir: string = fnamemodify(output_path, ':h')
     if mkdir(cache_dir, 'p') == 0 && !isdirectory(cache_dir)
-        csv_failed_cache[cache_id] = 1
+        SetCsvError(cache_id, 'CSV plot error: could not create cache directory: ' .. cache_dir)
         return ''
     endif
 
@@ -242,11 +261,41 @@ def GenerateCsvPlot(full_path: string): string
 
     if v:shell_error != 0 || !filereadable(output_path)
         delete(output_path)
-        csv_failed_cache[cache_id] = 1
+        SetCsvError(cache_id, 'CSV plot error: failed to render CSV with Python plotter')
         return ''
     endif
 
     return output_path
+enddef
+
+def DrawGapMessage(visible_start: number, start_img_line: number, visible_lines: number, available_cols: number, screen_col: number, message: string, color: string)
+    var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
+    var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
+    var clear_seq: string = "\<Esc>[0m"
+    var clear_spaces: string = repeat(' ', available_cols)
+
+    for i in range(visible_lines)
+        clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+    endfor
+
+    var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. clear_seq
+
+    if visible_start == start_img_line
+        var clipped_message: string = message
+        if strdisplaywidth(clipped_message) > available_cols
+            clipped_message = strpart(clipped_message, 0, available_cols - 1)
+        endif
+
+        seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. color .. clipped_message .. "\<Esc>[0m"
+    endif
+
+    seq ..= "\<Esc>[?80h" .. "\<Esc>8"
+
+    if exists('*echoraw')
+        echoraw(seq)
+    else
+        writefile([seq], '/dev/tty', 'b')
+    endif
 enddef
 
 # Helper to generate a single static frame
@@ -748,30 +797,15 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         var available_cols: number = max([1, text_width])
 
         if !filereadable(full_path)
-            var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
-            var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
-            var clear_seq: string = "\<Esc>[0m"
-            var clear_spaces: string = repeat(' ', available_cols)
-
-            for i in range(visible_lines)
-                clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
-            endfor
-
-            var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. clear_seq
-
-            # Only print the error if the very first line of the image gap is visible on screen
-            if visible_start == start_img_line
-                var err_msg: string = "[Image not found: " .. img_path .. "]"
-                seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. "\<Esc>[31m" .. err_msg .. "\<Esc>[0m"
-            endif
-
-            seq ..= "\<Esc>[?80h" .. "\<Esc>8"
-
-            if exists('*echoraw')
-                echoraw(seq)
-            else
-                writefile([seq], '/dev/tty', 'b')
-            endif
+            DrawGapMessage(
+                visible_start,
+                start_img_line,
+                visible_lines,
+                available_cols,
+                screen_col,
+                '[Image not found: ' .. img_path .. ']',
+                "\<Esc>[31m"
+            )
 
             lnum += 1
             continue
@@ -789,6 +823,16 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         if is_csv
             render_path = GenerateCsvPlot(full_path)
             if empty(render_path)
+                DrawGapMessage(
+                    visible_start,
+                    start_img_line,
+                    visible_lines,
+                    available_cols,
+                    screen_col,
+                    GetCsvError(full_path),
+                    "\<Esc>[31m"
+                )
+
                 lnum += 1
                 continue
             endif
