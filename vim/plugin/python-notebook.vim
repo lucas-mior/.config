@@ -69,6 +69,11 @@ def EnsureBufferMatchList()
     endif
 enddef
 
+def EnsureNotebookHighlightGroups()
+    execute 'highlight default link MdNotebookOutput Comment'
+    execute 'highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE'
+enddef
+
 def HasNotebookAnnotation(): bool
     var max_lnum: number = min([line('$'), str2nr(string(g:python_notebook_annotation_scan_lines))])
     if max_lnum <= 0
@@ -168,6 +173,7 @@ def RefreshNotebookMatches()
         return
     endif
 
+    EnsureNotebookHighlightGroups()
     EnsureBufferMatchList()
     ClearNotebookMatches()
 
@@ -644,9 +650,7 @@ def SetupNotebookSyntax()
     execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output:start\s*$/ end=/^\s*#\s*mdnb-output:end\s*$/ keepend containedin=ALL'
     execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend containedin=ALL'
 
-    highlight default link MdNotebookOutput Comment
-    highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE
-
+    EnsureNotebookHighlightGroups()
     RefreshNotebookMatches()
 enddef
 
@@ -663,7 +667,7 @@ def EnablePythonNotebookForBuffer(): bool
     execute 'command! -buffer PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookFromScratch()'
     execute 'command! -buffer PythonNotebookClearOutputs call ' .. script_sid .. 'ClearNotebookOutputs()'
 
-    execute 'nnoremap <buffer> <silent> <C-L> <ScriptCmd>RunPythonNotebookFromScratch()<CR>'
+    nnoremap <buffer> <silent> <C-L> <Cmd>PythonNotebookRunAll<CR>
 
     execute 'augroup PythonNotebookBuffer_' .. bufnr('%')
     autocmd! * <buffer>
