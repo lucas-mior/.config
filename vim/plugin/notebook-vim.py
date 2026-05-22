@@ -269,9 +269,7 @@ def _save_figure_png(fig, path):
         with Image.open(png_buf) as image:
             sixel_friendly = _image_to_sixel_friendly_palette(Image, image)
             sixel_friendly.save(path, format="PNG", optimize=False)
-        os.system(f"dunstify not_shit")
     except Exception:
-        os.system(f"dunstify shit")
         _save_buffer_to_file(png_buf, path)
 
 
