@@ -897,16 +897,20 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var pixel_width: number = max([1, available_cols * SixelCellWidth()])
-        var pixel_height: number = max([1, available_lines * SixelCellHeight()])
+        var max_pixel_width: number = max([1, available_cols * SixelCellWidth()])
+        var max_pixel_height: number = max([1, available_lines * SixelCellHeight()])
         var prepared_path: string = tempname() .. '.png'
 
         try
-            systemlist([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(pixel_width), string(pixel_height)])
+            systemlist([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(max_pixel_height)])
             if v:shell_error != 0 || !filereadable(prepared_path)
                 return ''
             endif
 
+            # The helper already resized the PNG proportionally to fit inside
+            # the available pixel box, then applied the transparent-palette
+            # preparation. Do not pass -s here, because that would resize the
+            # prepared paletted image again.
             sixel_data = system(['chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path])
         finally
             if !empty(prepared_path) && filereadable(prepared_path)

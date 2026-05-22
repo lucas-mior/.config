@@ -249,15 +249,44 @@ def _resample_filter(Image):
     return Image.LANCZOS
 
 
-def _prepare_sixel_png(input_path, output_path, pixel_width, pixel_height):
-    pixel_width = max(1, int(pixel_width))
-    pixel_height = max(1, int(pixel_height))
+def _proportional_fit_size(width, height, max_width, max_height):
+    width = max(1, int(width))
+    height = max(1, int(height))
+    max_width = max(1, int(max_width))
+    max_height = max(1, int(max_height))
+
+    scale = min(max_width / width, max_height / height)
+    fitted_width = max(1, int(round(width * scale)))
+    fitted_height = max(1, int(round(height * scale)))
+
+    # Rounding can push one dimension one pixel past the box; clamp while
+    # preserving the original aspect ratio as closely as possible.
+    if fitted_width > max_width:
+        fitted_width = max_width
+        fitted_height = max(1, int(round(fitted_width * height / width)))
+
+    if fitted_height > max_height:
+        fitted_height = max_height
+        fitted_width = max(1, int(round(fitted_height * width / height)))
+
+    return fitted_width, fitted_height
+
+
+def _prepare_sixel_png(input_path, output_path, max_pixel_width, max_pixel_height):
+    max_pixel_width = max(1, int(max_pixel_width))
+    max_pixel_height = max(1, int(max_pixel_height))
 
     from PIL import Image
 
     with Image.open(input_path) as image:
         rgba = image.convert("RGBA")
-        resized = rgba.resize((pixel_width, pixel_height), _resample_filter(Image))
+        fitted_size = _proportional_fit_size(
+            rgba.width,
+            rgba.height,
+            max_pixel_width,
+            max_pixel_height,
+        )
+        resized = rgba.resize(fitted_size, _resample_filter(Image))
         sixel_friendly = _rgba_to_sixel_friendly_palette(Image, resized)
         sixel_friendly.save(output_path, format="PNG", optimize=False)
 
@@ -265,7 +294,7 @@ def _prepare_sixel_png(input_path, output_path, pixel_width, pixel_height):
 def _prepare_sixel_png_cli(argv):
     if len(argv) != 6:
         print(
-            "usage: notebook-vim.py --prepare-sixel-png INPUT_PNG OUTPUT_PNG WIDTH HEIGHT",
+            "usage: notebook-vim.py --prepare-sixel-png INPUT_PNG OUTPUT_PNG MAX_WIDTH MAX_HEIGHT",
             file=sys.stderr,
         )
         return 2
@@ -274,14 +303,14 @@ def _prepare_sixel_png_cli(argv):
     output_path = argv[3]
 
     try:
-        pixel_width = int(argv[4])
-        pixel_height = int(argv[5])
+        max_pixel_width = int(argv[4])
+        max_pixel_height = int(argv[5])
     except ValueError:
-        print("WIDTH and HEIGHT must be integers", file=sys.stderr)
+        print("MAX_WIDTH and MAX_HEIGHT must be integers", file=sys.stderr)
         return 2
 
     try:
-        _prepare_sixel_png(input_path, output_path, pixel_width, pixel_height)
+        _prepare_sixel_png(input_path, output_path, max_pixel_width, max_pixel_height)
     except Exception as exc:
         print("could not prepare sixel PNG: {}".format(exc), file=sys.stderr)
         return 1
