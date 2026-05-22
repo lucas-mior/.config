@@ -4,6 +4,7 @@ vim9script
 # Draws markdown image tags as sixel graphics for md-sixel files automatically
 # Experimental Feature: Asynchronous GIF/WebP Animation support
 # Experimental Feature: CSV plotting support through Python/matplotlib
+# Experimental Feature: Shell command execution support
 
 if exists('b:loaded_sixel_markdown')
     finish
@@ -61,6 +62,14 @@ if !exists('g:sixel_markdown_animation_cache_enabled')
     g:sixel_markdown_animation_cache_enabled = 1
 endif
 
+# Enable/disable shell command execution through <C-l>
+if !exists('g:sixel_markdown_shell_commands_enabled')
+    g:sixel_markdown_shell_commands_enabled = 1
+endif
+
+var shell_command_output_start_marker: string = '<!-- md-sixel-command-output:start -->'
+var shell_command_output_end_marker: string = '<!-- md-sixel-command-output:end -->'
+
 def FetchCellSize()
     while getchar(0) != 0
     endwhile
@@ -117,6 +126,122 @@ var anim_delay_raw: dict<string> = {}
 var anim_disk_cache_id: dict<string> = {}
 
 var anim_timer: number = -1
+
+def IsShellCommandLine(line_str: string): bool
+    if line_str =~# '^!\['
+        return false
+    endif
+
+    return line_str =~# '^!\s*\S'
+enddef
+
+def ShellCommandFromLine(line_str: string): string
+    return substitute(line_str, '^!\s*', '', '')
+enddef
+
+def IsShellCommandOutputStart(line_str: string): bool
+    return line_str ==# shell_command_output_start_marker
+enddef
+
+def IsShellCommandOutputEnd(line_str: string): bool
+    return line_str ==# shell_command_output_end_marker
+enddef
+
+def FindShellCommandOutputEnd(start_lnum: number): number
+    var lnum: number = start_lnum
+    var max_lnum: number = line('$')
+
+    while lnum <= max_lnum
+        if IsShellCommandOutputEnd(getline(lnum))
+            return lnum
+        endif
+        lnum += 1
+    endwhile
+
+    return 0
+enddef
+
+def BuildShellCommandOutputBlock(command: string, output_lines: list<string>, exit_status: number): list<string>
+    var block: list<string> = [
+        shell_command_output_start_marker,
+        '$ ' .. command,
+    ]
+
+    if empty(output_lines)
+        add(block, '[no output]')
+    else
+        extend(block, output_lines)
+    endif
+
+    if exit_status != 0
+        add(block, '[exit status: ' .. string(exit_status) .. ']')
+    endif
+
+    add(block, shell_command_output_end_marker)
+    return block
+enddef
+
+def ReplaceShellCommandOutput(command_lnum: number, block: list<string>)
+    var block_start: number = command_lnum + 1
+
+    if block_start <= line('$') && IsShellCommandOutputStart(getline(block_start))
+        var block_end: number = FindShellCommandOutputEnd(block_start)
+        if block_end >= block_start
+            deletebufline(bufnr('%'), block_start, block_end)
+        else
+            deletebufline(bufnr('%'), block_start)
+        endif
+    endif
+
+    append(command_lnum, block)
+enddef
+
+def RunShellCommandsInBuffer()
+    if get(g:, 'sixel_markdown_shell_commands_enabled', 1) == 0
+        return
+    endif
+
+    var was_modifiable: bool = &l:modifiable
+    if !was_modifiable
+        setlocal modifiable
+    endif
+
+    try
+        var lnum: number = 1
+
+        while lnum <= line('$')
+            var line_str: string = getline(lnum)
+
+            if IsShellCommandOutputStart(line_str)
+                var output_end: number = FindShellCommandOutputEnd(lnum)
+                if output_end > 0
+                    lnum = output_end + 1
+                else
+                    lnum += 1
+                endif
+                continue
+            endif
+
+            if !IsShellCommandLine(line_str)
+                lnum += 1
+                continue
+            endif
+
+            var command: string = ShellCommandFromLine(line_str)
+            var output_lines: list<string> = systemlist(command)
+            var exit_status: number = v:shell_error
+            var block: list<string> = BuildShellCommandOutputBlock(command, output_lines, exit_status)
+
+            ReplaceShellCommandOutput(lnum, block)
+
+            lnum += len(block) + 1
+        endwhile
+    finally
+        if !was_modifiable
+            setlocal nomodifiable
+        endif
+    endtry
+enddef
 
 def DiskCacheHash(text: string): string
     if exists('*sha256')
@@ -748,6 +873,17 @@ def DrawVisibleImages(is_anim_tick: bool = false)
     var lnum: number = start_line
     while lnum <= end_line
         var line_str: string = getline(lnum)
+
+        if IsShellCommandOutputStart(line_str)
+            var output_end: number = FindShellCommandOutputEnd(lnum)
+            if output_end > 0
+                lnum = output_end + 1
+            else
+                lnum += 1
+            endif
+            continue
+        endif
+
         var img_path: string = matchstr(line_str, '!\[.\{-}\](\zs.\{-}\ze)')
 
         if empty(img_path)
@@ -947,6 +1083,11 @@ def RedrawAndClear()
     ScheduleDraw()
 enddef
 
+def ExecuteCommandsAndRedraw()
+    RunShellCommandsInBuffer()
+    RedrawAndClear()
+enddef
+
 augroup SixelMarkdownAutoDraw
     autocmd! * <buffer>
     autocmd BufWinEnter <buffer> ScheduleDraw()
@@ -956,6 +1097,7 @@ augroup SixelMarkdownAutoDraw
 augroup END
 
 command! -buffer DrawMarkdownImage ScheduleDraw()
+command! -buffer RunMarkdownCommands ExecuteCommandsAndRedraw()
 
-nnoremap <buffer> <silent> <C-L> <ScriptCmd>RedrawAndClear()<CR>
+nnoremap <buffer> <silent> <C-L> <ScriptCmd>ExecuteCommandsAndRedraw()<CR>
 setlocal nocursorline nocursorcolumn
