@@ -123,6 +123,31 @@ def GenerateStaticSixel(full_path: string, is_animated: bool, px_width: number, 
     return ''
 enddef
 
+def CleanupLoadingAnimation(cache_key: string)
+    if has_key(anim_loading, cache_key)
+        remove(anim_loading, cache_key)
+    endif
+    if has_key(anim_stream_buf, cache_key)
+        remove(anim_stream_buf, cache_key)
+    endif
+    if has_key(anim_pending_frames, cache_key)
+        remove(anim_pending_frames, cache_key)
+    endif
+    if has_key(anim_loading_done, cache_key)
+        remove(anim_loading_done, cache_key)
+    endif
+    if has_key(anim_delay_ready, cache_key)
+        remove(anim_delay_ready, cache_key)
+    endif
+    if has_key(anim_delay_raw, cache_key)
+        remove(anim_delay_raw, cache_key)
+    endif
+enddef
+
+def DrawAnimationReady(timer_id: number)
+    DrawVisibleImages(true)
+enddef
+
 def TryFinalizeAnimation(cache_key: string)
     if get(anim_loading_done, cache_key, 0) == 0
         return
@@ -132,22 +157,13 @@ def TryFinalizeAnimation(cache_key: string)
         return
     endif
 
-    if !has_key(anim_pending_frames, cache_key) || empty(anim_pending_frames[cache_key])
-        if has_key(anim_pending_frames, cache_key)
-            remove(anim_pending_frames, cache_key)
-        endif
-        if has_key(anim_loading, cache_key)
-            remove(anim_loading, cache_key)
-        endif
-        if has_key(anim_stream_buf, cache_key)
-            remove(anim_stream_buf, cache_key)
-        endif
-        if has_key(anim_loading_done, cache_key)
-            remove(anim_loading_done, cache_key)
-        endif
-        if has_key(anim_delay_ready, cache_key)
-            remove(anim_delay_ready, cache_key)
-        endif
+    if !has_key(anim_pending_frames, cache_key)
+        CleanupLoadingAnimation(cache_key)
+        return
+    endif
+
+    if empty(anim_pending_frames[cache_key])
+        CleanupLoadingAnimation(cache_key)
         return
     endif
 
@@ -155,7 +171,7 @@ def TryFinalizeAnimation(cache_key: string)
     # renderer from seeing a partially populated frame list, which caused
     # startup flicker, out-of-order frames, and too-fast playback while the
     # ImageMagick job was still streaming output.
-    anim_animations[cache_key] = copy(anim_pending_frames[cache_key])
+    anim_animations[cache_key] = anim_pending_frames[cache_key]
     remove(anim_pending_frames, cache_key)
 
     anim_current_frame[cache_key] = -1
@@ -173,26 +189,30 @@ def TryFinalizeAnimation(cache_key: string)
     if has_key(anim_delay_ready, cache_key)
         remove(anim_delay_ready, cache_key)
     endif
+    if has_key(anim_delay_raw, cache_key)
+        remove(anim_delay_raw, cache_key)
+    endif
 
     if anim_timer == -1
         anim_timer = timer_start(50, AnimationTick, {'repeat': -1})
     endif
 
     # First coherent frame is ready. Draw it once immediately.
-    timer_start(1, (t) => DrawVisibleImages(true))
+    timer_start(1, DrawAnimationReady)
 enddef
 
 def MarkAnimationDelayReady(cache_key: string, delay_ms: number)
-    if delay_ms <= 0
-        delay_ms = 100
+    var final_delay_ms: number = delay_ms
+    if final_delay_ms <= 0
+        final_delay_ms = 100
     endif
 
     # Clamp insanely fast/0-delay animations to a reasonable default.
-    if delay_ms < 20
-        delay_ms = 100
+    if final_delay_ms < 20
+        final_delay_ms = 100
     endif
 
-    anim_delays[cache_key] = delay_ms
+    anim_delays[cache_key] = final_delay_ms
     anim_delay_ready[cache_key] = 1
     TryFinalizeAnimation(cache_key)
 enddef
@@ -225,9 +245,10 @@ def StartAnimationDelayJob(cache_key: string, full_path: string)
                 return
             endif
 
-            var delay_cs: number = str2nr(matchstr(anim_delay_raw[cache_key], '\d\+'))
+            var delay_text: string = anim_delay_raw[cache_key]
             remove(anim_delay_raw, cache_key)
 
+            var delay_cs: number = str2nr(matchstr(delay_text, '\d\+'))
             if delay_cs <= 0
                 MarkAnimationDelayReady(cache_key, 100)
                 return
@@ -303,11 +324,7 @@ def StartAnimationJob(cache_key: string, full_path: string, px_width: number, to
     elseif executable('convert')
         cmd = ['convert', full_path, '-coalesce', '-resize', px_width .. 'x' .. total_px_height, '-crop', px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y, '+repage', 'sixel:-']
     else
-        remove(anim_loading, cache_key)
-        remove(anim_stream_buf, cache_key)
-        remove(anim_pending_frames, cache_key)
-        remove(anim_loading_done, cache_key)
-        remove(anim_delay_ready, cache_key)
+        CleanupLoadingAnimation(cache_key)
         return
     endif
 
@@ -458,7 +475,12 @@ def DrawVisibleImages(is_anim_tick: bool = false)
                 # coherent frame list is ready. This avoids frame index jumps
                 # caused by changing frame counts during initial streaming.
                 var now_ms: float = reltimefloat(reltime()) * 1000.0
-                var elapsed_ms: float = now_ms - get(anim_started_ms, cache_key, now_ms)
+                var started_ms: float = now_ms
+                if has_key(anim_started_ms, cache_key)
+                    started_ms = anim_started_ms[cache_key]
+                endif
+
+                var elapsed_ms: float = now_ms - started_ms
                 if elapsed_ms < 0.0
                     elapsed_ms = 0.0
                 endif
