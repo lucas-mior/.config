@@ -66,9 +66,16 @@ var sixel_cache: dict<string> = {}
 var anim_animations: dict<list<string>> = {}
 var anim_delays: dict<number> = {}
 var anim_current_frame: dict<number> = {}
+var anim_started_ms: dict<float> = {}
+
+# Animation Loading State
 var anim_loading: dict<number> = {}
 var anim_stream_buf: dict<string> = {}
+var anim_pending_frames: dict<list<string>> = {}
+var anim_loading_done: dict<number> = {}
+var anim_delay_ready: dict<number> = {}
 var anim_delay_raw: dict<string> = {}
+
 var anim_timer: number = -1
 
 # Helper to generate a single static frame
@@ -116,8 +123,81 @@ def GenerateStaticSixel(full_path: string, is_animated: bool, px_width: number, 
     return ''
 enddef
 
+def TryFinalizeAnimation(cache_key: string)
+    if get(anim_loading_done, cache_key, 0) == 0
+        return
+    endif
+
+    if get(anim_delay_ready, cache_key, 0) == 0
+        return
+    endif
+
+    if !has_key(anim_pending_frames, cache_key) || empty(anim_pending_frames[cache_key])
+        if has_key(anim_pending_frames, cache_key)
+            remove(anim_pending_frames, cache_key)
+        endif
+        if has_key(anim_loading, cache_key)
+            remove(anim_loading, cache_key)
+        endif
+        if has_key(anim_stream_buf, cache_key)
+            remove(anim_stream_buf, cache_key)
+        endif
+        if has_key(anim_loading_done, cache_key)
+            remove(anim_loading_done, cache_key)
+        endif
+        if has_key(anim_delay_ready, cache_key)
+            remove(anim_delay_ready, cache_key)
+        endif
+        return
+    endif
+
+    # Only now expose the animation to the draw path. This prevents the
+    # renderer from seeing a partially populated frame list, which caused
+    # startup flicker, out-of-order frames, and too-fast playback while the
+    # ImageMagick job was still streaming output.
+    anim_animations[cache_key] = copy(anim_pending_frames[cache_key])
+    remove(anim_pending_frames, cache_key)
+
+    anim_current_frame[cache_key] = -1
+    anim_started_ms[cache_key] = reltimefloat(reltime()) * 1000.0
+
+    if has_key(anim_loading, cache_key)
+        remove(anim_loading, cache_key)
+    endif
+    if has_key(anim_stream_buf, cache_key)
+        remove(anim_stream_buf, cache_key)
+    endif
+    if has_key(anim_loading_done, cache_key)
+        remove(anim_loading_done, cache_key)
+    endif
+    if has_key(anim_delay_ready, cache_key)
+        remove(anim_delay_ready, cache_key)
+    endif
+
+    if anim_timer == -1
+        anim_timer = timer_start(50, AnimationTick, {'repeat': -1})
+    endif
+
+    # First coherent frame is ready. Draw it once immediately.
+    timer_start(1, (t) => DrawVisibleImages(true))
+enddef
+
+def MarkAnimationDelayReady(cache_key: string, delay_ms: number)
+    if delay_ms <= 0
+        delay_ms = 100
+    endif
+
+    # Clamp insanely fast/0-delay animations to a reasonable default.
+    if delay_ms < 20
+        delay_ms = 100
+    endif
+
+    anim_delays[cache_key] = delay_ms
+    anim_delay_ready[cache_key] = 1
+    TryFinalizeAnimation(cache_key)
+enddef
+
 def StartAnimationDelayJob(cache_key: string, full_path: string)
-    # Default immediately. Do not block animation startup on identify.
     anim_delays[cache_key] = 100
 
     var cmd: list<string> = []
@@ -126,6 +206,7 @@ def StartAnimationDelayJob(cache_key: string, full_path: string)
     elseif executable('identify')
         cmd = ['identify', '-format', '%T', full_path .. '[0]']
     else
+        MarkAnimationDelayReady(cache_key, 100)
         return
     endif
 
@@ -140,6 +221,7 @@ def StartAnimationDelayJob(cache_key: string, full_path: string)
         },
         'close_cb': (ch) => {
             if !has_key(anim_delay_raw, cache_key)
+                MarkAnimationDelayReady(cache_key, 100)
                 return
             endif
 
@@ -147,42 +229,21 @@ def StartAnimationDelayJob(cache_key: string, full_path: string)
             remove(anim_delay_raw, cache_key)
 
             if delay_cs <= 0
+                MarkAnimationDelayReady(cache_key, 100)
                 return
             endif
 
-            var delay_ms: number = delay_cs * 10
-
-            # Clamp insanely fast/0-delay animations to a reasonable default.
-            if delay_ms < 20
-                delay_ms = 100
-            endif
-
-            anim_delays[cache_key] = delay_ms
+            MarkAnimationDelayReady(cache_key, delay_cs * 10)
         }
     })
 enddef
 
 def AddAnimationFrame(cache_key: string, frame: string)
-    if !has_key(anim_animations, cache_key)
-        anim_animations[cache_key] = []
+    if !has_key(anim_pending_frames, cache_key)
+        anim_pending_frames[cache_key] = []
     endif
 
-    var first_frame: bool = len(anim_animations[cache_key]) == 0
-    add(anim_animations[cache_key], frame)
-
-    if first_frame
-        anim_current_frame[cache_key] = -1
-    endif
-
-    if anim_timer == -1
-        anim_timer = timer_start(50, AnimationTick, {'repeat': -1})
-    endif
-
-    # First complete frame is ready. Draw immediately instead of waiting for
-    # the whole magick command to finish.
-    if first_frame
-        timer_start(1, (t) => DrawVisibleImages(true))
-    endif
+    add(anim_pending_frames[cache_key], frame)
 enddef
 
 def ConsumeAnimationOutput(cache_key: string, chunk: string)
@@ -227,9 +288,13 @@ enddef
 def StartAnimationJob(cache_key: string, full_path: string, px_width: number, total_px_height: number, px_crop_h: number, px_crop_y: number)
     anim_loading[cache_key] = 1
     anim_stream_buf[cache_key] = ''
+    anim_pending_frames[cache_key] = []
+    anim_loading_done[cache_key] = 0
+    anim_delay_ready[cache_key] = 0
     anim_delays[cache_key] = 100
 
-    # Async metadata probe. This replaces the old blocking identify system().
+    # Start metadata probing before rendering, but do not expose animation
+    # frames until both this probe and the frame conversion job are complete.
     StartAnimationDelayJob(cache_key, full_path)
 
     var cmd: list<string> = []
@@ -240,6 +305,9 @@ def StartAnimationJob(cache_key: string, full_path: string, px_width: number, to
     else
         remove(anim_loading, cache_key)
         remove(anim_stream_buf, cache_key)
+        remove(anim_pending_frames, cache_key)
+        remove(anim_loading_done, cache_key)
+        remove(anim_delay_ready, cache_key)
         return
     endif
 
@@ -249,13 +317,8 @@ def StartAnimationJob(cache_key: string, full_path: string, px_width: number, to
             ConsumeAnimationOutput(cache_key, msg)
         },
         'close_cb': (ch) => {
-            if has_key(anim_stream_buf, cache_key)
-                remove(anim_stream_buf, cache_key)
-            endif
-
-            if has_key(anim_loading, cache_key)
-                remove(anim_loading, cache_key)
-            endif
+            anim_loading_done[cache_key] = 1
+            TryFinalizeAnimation(cache_key)
         }
     })
 enddef
@@ -344,27 +407,27 @@ def DrawVisibleImages(is_anim_tick: bool = false)
             var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
             var clear_seq: string = "\<Esc>[0m"
             var clear_spaces: string = repeat(' ', available_cols)
-            
+
             for i in range(visible_lines)
                 clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
             endfor
-            
+
             var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. clear_seq
-            
+
             # Only print the error if the very first line of the image gap is visible on screen
             if visible_start == start_img_line
                 var err_msg: string = "[Image not found: " .. img_path .. "]"
                 seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. "\<Esc>[31m" .. err_msg .. "\<Esc>[0m"
             endif
-            
+
             seq ..= "\<Esc>[?80h" .. "\<Esc>8"
-            
+
             if exists('*echoraw')
                 echoraw(seq)
             else
                 writefile([seq], '/dev/tty', 'b')
             endif
-            
+
             lnum += 1
             continue
         endif
@@ -381,10 +444,25 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         if is_animated
             if has_key(anim_animations, cache_key)
                 var frames: list<string> = anim_animations[cache_key]
-                var delay_ms: number = get(anim_delays, cache_key, 100)
+                if empty(frames)
+                    lnum += 1
+                    continue
+                endif
 
-                # Use real time to determine the correct frame based on native frame delay
-                var elapsed_ms: float = reltimefloat(reltime()) * 1000.0
+                var delay_ms: number = get(anim_delays, cache_key, 100)
+                if delay_ms <= 0
+                    delay_ms = 100
+                endif
+
+                # Use an animation-local clock that starts only after the full,
+                # coherent frame list is ready. This avoids frame index jumps
+                # caused by changing frame counts during initial streaming.
+                var now_ms: float = reltimefloat(reltime()) * 1000.0
+                var elapsed_ms: float = now_ms - get(anim_started_ms, cache_key, now_ms)
+                if elapsed_ms < 0.0
+                    elapsed_ms = 0.0
+                endif
+
                 var frame_idx: number = float2nr(elapsed_ms / delay_ms) % len(frames)
 
                 if is_anim_tick && get(anim_current_frame, cache_key, -1) == frame_idx
@@ -400,8 +478,8 @@ def DrawVisibleImages(is_anim_tick: bool = false)
                     StartAnimationJob(cache_key, full_path, px_width, total_px_height, px_crop_h, px_crop_y)
                 endif
 
-                # Do not synchronously generate frame 0 here. That was the old
-                # startup stall. The first streamed frame will trigger redraw.
+                # Do not render partially loaded animations. The first frame is
+                # drawn only after all frames and delay metadata are coherent.
                 lnum += 1
                 continue
             endif
