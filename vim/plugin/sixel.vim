@@ -308,11 +308,6 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         endif
 
         var full_path: string = fnamemodify(expand('%:p:h') .. '/' .. img_path, ':p')
-        if !filereadable(full_path)
-            lnum += 1
-            continue
-        endif
-
         var gap: number = 0
         var curr: number = lnum + 1
 
@@ -342,8 +337,38 @@ def DrawVisibleImages(is_anim_tick: bool = false)
 
         var visible_lines: number = visible_end - visible_start + 1
         var crop_lines_top: number = visible_start - start_img_line
-
         var available_cols: number = max([1, text_width])
+
+        if !filereadable(full_path)
+            var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
+            var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
+            var clear_seq: string = "\<Esc>[0m"
+            var clear_spaces: string = repeat(' ', available_cols)
+            
+            for i in range(visible_lines)
+                clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+            endfor
+            
+            var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. clear_seq
+            
+            # Only print the error if the very first line of the image gap is visible on screen
+            if visible_start == start_img_line
+                var err_msg: string = "[Image not found: " .. img_path .. "]"
+                seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. "\<Esc>[31m" .. err_msg .. "\<Esc>[0m"
+            endif
+            
+            seq ..= "\<Esc>[?80h" .. "\<Esc>8"
+            
+            if exists('*echoraw')
+                echoraw(seq)
+            else
+                writefile([seq], '/dev/tty', 'b')
+            endif
+            
+            lnum += 1
+            continue
+        endif
+
         var px_width: number = available_cols * g:sixel_markdown_char_width
         var total_px_height: number = gap * g:sixel_markdown_line_height
 
