@@ -141,3 +141,7 @@ augroup END
 
 # Keep the manual command just in case
 command! -buffer DrawMarkdownImage DrawVisibleImages()
+
+# Map Ctrl+L to trigger a full Vim redraw followed by drawing the images
+nnoremap <buffer> <silent> <C-L> <ScriptCmd>RedrawAndClear()<CR>
+setlocal nocursorline nocursorcolumn
