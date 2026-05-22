@@ -18,6 +18,43 @@ if !exists('g:sixel_markdown_char_width')
     g:sixel_markdown_char_width = 8
 endif
 
+def FetchCellSize()
+    # Flush any pending typeahead to ensure clean read
+    while getchar(0) != 0
+    endwhile
+
+    var seq: string = "\<Esc>[16t"
+    if exists('*echoraw')
+        echoraw(seq)
+    else
+        writefile([seq], '/dev/tty', 'b')
+    endif
+
+    var resp: string = ''
+    var retries: number = 0
+    while retries < 20
+        var c: string = getcharstr(0)
+        if c != ''
+            resp ..= c
+            if c == 't'
+                break
+            endif
+        else
+            sleep 5m
+            retries += 1
+        endif
+    endwhile
+
+    var m: list<string> = matchlist(resp, '\e\[6;\(\d\+\);\(\d\+\)t')
+    if !empty(m) && str2nr(m[1]) > 0 && str2nr(m[2]) > 0
+        g:sixel_markdown_line_height = str2nr(m[1])
+        g:sixel_markdown_char_width = str2nr(m[2])
+    endif
+enddef
+
+# Try to fetch actual sizes from terminal immediately on load
+FetchCellSize()
+
 # Cache to prevent freezing Vim with system() calls on every scroll.
 # Key: "filepath:px_widthxpx_height", Value: "sixel_string"
 var sixel_cache: dict<string> = {}
@@ -145,6 +182,7 @@ enddef
 # Clear the screen when redrawing so ghost images don't get left behind
 # Note: Ctrl+L triggers Sigonal to redraw Vim entirely
 def RedrawAndClear()
+    FetchCellSize()
     redraw!
     DrawVisibleImages()
 enddef
