@@ -116,13 +116,21 @@ def DrawVisibleImages()
         # Draw just below the image annotation line
         var target_row: number = absolute_row + 1
         
+        # Build clear sequence to erase any old Sixel remnants in this region
+        var clear_seq: string = ''
+        var clear_spaces: string = repeat(' ', available_cols)
+        for i in range(visible_gap)
+            clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+        endfor
+        
         # 1. Save cursor (\e7)
         # 2. Disable Sixel scrolling (\e[?80l) to prevent terminal viewport desync
-        # 3. Move cursor to target row/col
-        # 4. Draw Sixel data
-        # 5. Restore Sixel scrolling (\e[?80h)
-        # 6. Restore cursor (\e8)
-        var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. sixel_data .. "\<Esc>[?80h" .. "\<Esc>8"
+        # 3. Clear the area using spaces
+        # 4. Move cursor to target row/col
+        # 5. Draw Sixel data
+        # 6. Restore Sixel scrolling (\e[?80h)
+        # 7. Restore cursor (\e8)
+        var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. clear_seq .. "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. sixel_data .. "\<Esc>[?80h" .. "\<Esc>8"
 
         if exists('*echoraw')
             echoraw(seq)
