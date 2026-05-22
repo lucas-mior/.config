@@ -2,6 +2,7 @@ vim9script
 
 # ftplugin/md-sixel.vim
 # Draws markdown image tags as sixel graphics for md-sixel files automatically
+# Experimental Feature: Asynchronous GIF Animation support
 
 if exists('b:loaded_sixel_markdown')
     finish
@@ -24,7 +25,6 @@ if !exists('g:sixel_markdown_engine')
 endif
 
 def FetchCellSize()
-    # Flush any pending typeahead to ensure clean read
     while getchar(0) != 0
     endwhile
 
@@ -57,17 +57,141 @@ def FetchCellSize()
     endif
 enddef
 
-# Try to fetch actual sizes from terminal immediately on load
 FetchCellSize()
 
-# Cache to prevent freezing Vim with system() calls on every scroll.
-# Key: "filepath:W_HxCropH_CropY", Value: "sixel_string"
+# Caches
 var sixel_cache: dict<string> = {}
 
-def DrawVisibleImages()
+# Animation State Caches
+var gif_animations: dict<list<string>> = {}
+var gif_delays: dict<number> = {}
+var gif_current_frame: dict<number> = {}
+var gif_loading: dict<number> = {}
+var gif_raw_data: dict<string> = {}
+var anim_timer: number = -1
+
+# Helper to generate a single static frame
+def GenerateStaticSixel(full_path: string, is_gif: bool, px_width: number, total_px_height: number, px_crop_h: number, px_crop_y: number, available_cols: number, visible_lines: number): string
+    var engine: string = g:sixel_markdown_engine
+    if engine == 'auto'
+        if executable('magick')
+            engine = 'magick'
+        elseif executable('convert')
+            engine = 'convert'
+        elseif executable('chafa')
+            engine = 'chafa'
+        else
+            return ''
+        endif
+    endif
+
+    var cmd: string = ''
+    if is_gif
+        # Always force Magick/Convert for GIF placeholders since Chafa cannot cleanly extract a single frame
+        if executable('magick')
+            cmd = 'magick ' .. shellescape(full_path .. '[0]') .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
+        elseif executable('convert')
+            cmd = 'convert ' .. shellescape(full_path .. '[0]') .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
+        else
+            return ''
+        endif
+    else
+        # Standard static image handling
+        if engine == 'chafa'
+            cmd = 'chafa -f sixel -s ' .. available_cols .. 'x' .. visible_lines .. ' ' .. shellescape(full_path)
+        elseif engine == 'magick' || engine == 'convert'
+            cmd = engine .. ' ' .. shellescape(full_path) .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
+        else
+            return ''
+        endif
+    endif
+
+    var sixel_data: string = system(cmd)
+    if v:shell_error == 0
+        return substitute(sixel_data, '\n\+$', '', '')
+    endif
+    
+    return ''
+enddef
+
+# Async Job to explode a GIF into frames
+def StartGifJob(cache_key: string, full_path: string, px_width: number, total_px_height: number, px_crop_h: number, px_crop_y: number)
+    gif_loading[cache_key] = 1
+    gif_raw_data[cache_key] = ''
+
+    # Extract the native delay of the GIF's first frame
+    var id_cmd: string = ''
+    if executable('magick')
+        id_cmd = 'magick identify'
+    elseif executable('identify')
+        id_cmd = 'identify'
+    endif
+
+    if id_cmd != ''
+        var delay_cs_str: string = system(id_cmd .. ' -format "%T" ' .. shellescape(full_path .. '[0]'))
+        var delay_cs: number = str2nr(matchstr(delay_cs_str, '\d\+'))
+        var delay_ms: number = delay_cs * 10
+        # Clamp insanely fast/0-delay gifs to a reasonable 100ms (10fps) default
+        if delay_ms < 20
+            delay_ms = 100
+        endif
+        gif_delays[cache_key] = delay_ms
+    else
+        gif_delays[cache_key] = 100
+    endif
+
+    var cmd: list<string> = []
+    if executable('magick')
+        cmd = ['magick', full_path, '-coalesce', '-resize', px_width .. 'x' .. total_px_height, '-crop', px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y, '+repage', 'sixel:-']
+    elseif executable('convert')
+        cmd = ['convert', full_path, '-coalesce', '-resize', px_width .. 'x' .. total_px_height, '-crop', px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y, '+repage', 'sixel:-']
+    else
+        return
+    endif
+
+    job_start(cmd, {
+        'out_mode': 'raw',
+        'out_cb': (ch, msg) => {
+            if has_key(gif_raw_data, cache_key)
+                gif_raw_data[cache_key] ..= msg
+            endif
+        },
+        'close_cb': (ch) => {
+            if has_key(gif_raw_data, cache_key)
+                var raw: string = gif_raw_data[cache_key]
+                remove(gif_raw_data, cache_key)
+                
+                var parts: list<string> = split(raw, "\<Esc>P")
+                var frames: list<string> = []
+                
+                for p in parts
+                    if len(trim(p)) > 0
+                        var clean_frame: string = substitute("\<Esc>P" .. p, '[\r\n]\+$', '', '')
+                        add(frames, clean_frame)
+                    endif
+                endfor
+                
+                if len(frames) > 0
+                    gif_animations[cache_key] = frames
+                    if anim_timer == -1
+                        anim_timer = timer_start(50, AnimationTick, {'repeat': -1})
+                    endif
+                endif
+            endif
+        }
+    })
+enddef
+
+def AnimationTick(id: number)
+    if !exists('b:loaded_sixel_markdown')
+        return
+    endif
+    DrawVisibleImages(true)
+enddef
+
+def DrawVisibleImages(is_anim_tick: bool = false)
     var start_line: number = line('w0')
     
-    # Check if an image tag exists just above the viewport whose empty lines bleed into the screen
     var prev_text_line: number = prevnonblank(start_line - 1)
     if prev_text_line > 0
         start_line = prev_text_line
@@ -98,6 +222,13 @@ def DrawVisibleImages()
             continue
         endif
 
+        var is_gif: bool = img_path =~? '\.gif$'
+        if is_anim_tick && !is_gif
+            # During an animation tick, skip static images to save CPU and prevent flickering
+            lnum += 1
+            continue
+        endif
+
         var full_path: string = fnamemodify(expand('%:p:h') .. '/' .. img_path, ':p')
         if !filereadable(full_path)
             lnum += 1
@@ -121,13 +252,11 @@ def DrawVisibleImages()
             continue
         endif
 
-        # Calculate exact intersection of the image's physical lines and the window's visible lines
         var start_img_line: number = lnum + 1
         var end_img_line: number = lnum + gap
         var visible_start: number = max([start_img_line, line('w0')])
         var visible_end: number = min([end_img_line, end_line])
 
-        # If the intersection is inverted, the image is entirely off-screen
         if visible_start > visible_end
             lnum += 1
             continue
@@ -146,69 +275,59 @@ def DrawVisibleImages()
         var cache_key: string = full_path .. ':' .. px_width .. 'x' .. total_px_height .. '-crop' .. px_crop_h .. '+' .. px_crop_y
         var sixel_data: string = ''
 
-        if has_key(sixel_cache, cache_key)
-            sixel_data = sixel_cache[cache_key]
-        else
-            var engine: string = g:sixel_markdown_engine
-            if engine == 'auto'
-                if executable('magick')
-                    engine = 'magick'
-                elseif executable('convert')
-                    engine = 'convert'
-                elseif executable('chafa')
-                    engine = 'chafa'
+        if is_gif
+            if has_key(gif_animations, cache_key)
+                var frames: list<string> = gif_animations[cache_key]
+                var delay_ms: number = get(gif_delays, cache_key, 100)
+                
+                # Use real time to determine the correct frame based on native GIF delay
+                var elapsed_ms: float = reltimefloat(reltime()) * 1000.0
+                var frame_idx: number = float2nr(elapsed_ms / delay_ms) % len(frames)
+                
+                if is_anim_tick && get(gif_current_frame, cache_key, -1) == frame_idx
+                    # The frame hasn't advanced yet. Skip I/O to save massive CPU/Terminal rendering cost.
+                    lnum += 1
+                    continue
+                endif
+                
+                gif_current_frame[cache_key] = frame_idx
+                sixel_data = frames[frame_idx]
+            else
+                if !has_key(gif_loading, cache_key)
+                    StartGifJob(cache_key, full_path, px_width, total_px_height, px_crop_h, px_crop_y)
+                endif
+                
+                # Fetch static frame 0 while loading so the screen isn't blank
+                if has_key(sixel_cache, cache_key)
+                    sixel_data = sixel_cache[cache_key]
                 else
-                    echoerr "ImageMagick or Chafa is required but not found."
-                    return
+                    sixel_data = GenerateStaticSixel(full_path, is_gif, px_width, total_px_height, px_crop_h, px_crop_y, available_cols, visible_lines)
+                    sixel_cache[cache_key] = sixel_data
                 endif
             endif
-
-            var cmd: string = ''
-            if engine == 'chafa'
-                cmd = 'chafa -f sixel --animate off -s ' .. available_cols .. 'x' .. visible_lines .. ' ' .. shellescape(full_path)
-            elseif engine == 'magick' || engine == 'convert'
-                var magick_args: string = shellescape(full_path .. '[0]') .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
-                cmd = engine .. ' ' .. magick_args
+        else
+            if has_key(sixel_cache, cache_key)
+                sixel_data = sixel_cache[cache_key]
             else
-                echoerr "Invalid g:sixel_markdown_engine."
-                return
-            endif
-
-            sixel_data = system(cmd)
-            
-            if v:shell_error == 0
-                # Remove trailing newlines output by ImageMagick/Chafa to prevent terminal scrolling
-                sixel_data = substitute(sixel_data, '\n\+$', '', '')
+                sixel_data = GenerateStaticSixel(full_path, is_gif, px_width, total_px_height, px_crop_h, px_crop_y, available_cols, visible_lines)
                 sixel_cache[cache_key] = sixel_data
-            else
-                # PRINT THE ERROR TO VIM'S MESSAGE HISTORY
-                echom "Sixel generation failed for: " .. full_path
-                echom "Command run: " .. cmd
-                echom "Error output: " .. substitute(sixel_data, '\n', ' ', 'g')
-                
-                lnum += 1
-                continue
             endif
         endif
 
-        # Calculate exact row coordinate for the first VISIBLE line of the image
+        if empty(sixel_data)
+            lnum += 1
+            continue
+        endif
+
         var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
         var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
         
-        # Build clear sequence to erase any old Sixel remnants strictly in the visible region
         var clear_seq: string = "\<Esc>[0m"
         var clear_spaces: string = repeat(' ', available_cols)
         for i in range(visible_lines)
             clear_seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
         endfor
         
-        # 1. Save cursor (\e7)
-        # 2. Disable Sixel scrolling (\e[?80l)
-        # 3. Clear the area using default-background spaces
-        # 4. Move cursor to target row/col
-        # 5. Draw Sixel data
-        # 6. Restore Sixel scrolling (\e[?80h)
-        # 7. Restore cursor (\e8)
         var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. clear_seq .. "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. sixel_data .. "\<Esc>[?80h" .. "\<Esc>8"
 
         if exists('*echoraw')
@@ -231,19 +350,15 @@ def ScheduleDraw()
     if draw_timer != -1
         timer_stop(draw_timer)
     endif
-    # Delay drawing by 50ms to ensure Vim has finished native redrawing
     draw_timer = timer_start(50, DelayedDraw)
 enddef
 
-# Clear the screen when redrawing so ghost images don't get left behind
-# Note: Ctrl+L triggers Sigonal to redraw Vim entirely
 def RedrawAndClear()
     FetchCellSize()
     redraw!
     ScheduleDraw()
 enddef
 
-# Autocommands for triggers
 augroup SixelMarkdownAutoDraw
     autocmd! * <buffer>
     autocmd BufWinEnter <buffer> ScheduleDraw()
@@ -252,9 +367,7 @@ augroup SixelMarkdownAutoDraw
     autocmd VimResized <buffer> RedrawAndClear()
 augroup END
 
-# Keep the manual command just in case
 command! -buffer DrawMarkdownImage ScheduleDraw()
 
-# Map Ctrl+L to trigger a full Vim redraw followed by drawing the images
 nnoremap <buffer> <silent> <C-L> <ScriptCmd>RedrawAndClear()<CR>
 setlocal nocursorline nocursorcolumn
