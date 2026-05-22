@@ -3,11 +3,14 @@ vim9script
 # ftplugin/md-sixel.vim
 # Draws markdown image tags as sixel graphics for md-sixel files automatically
 # Experimental Feature: Asynchronous GIF/WebP Animation support
+# Experimental Feature: CSV plotting support through Python/matplotlib
 
 if exists('b:loaded_sixel_markdown')
     finish
 endif
 b:loaded_sixel_markdown = 1
+
+var script_dir: string = expand('<sfile>:p:h')
 
 # Default line height in pixels
 if !exists('g:sixel_markdown_line_height')
@@ -24,13 +27,23 @@ if !exists('g:sixel_markdown_engine')
     g:sixel_markdown_engine = 'chafa'
 endif
 
-# Default disk cache location for rendered animations
+# Default disk cache location
 if !exists('g:sixel_markdown_cache_dir')
     if exists('$XDG_CACHE_HOME') && !empty($XDG_CACHE_HOME)
         g:sixel_markdown_cache_dir = $XDG_CACHE_HOME .. '/md-sixel'
     else
         g:sixel_markdown_cache_dir = expand('~/.cache/md-sixel')
     endif
+endif
+
+# Python executable used for CSV plotting
+if !exists('g:sixel_markdown_python')
+    g:sixel_markdown_python = 'python3'
+endif
+
+# Python CSV plotter script
+if !exists('g:sixel_markdown_csv_plotter')
+    g:sixel_markdown_csv_plotter = script_dir .. '/md-sixel-csv.py'
 endif
 
 # Enable/disable animation disk cache
@@ -75,6 +88,7 @@ FetchCellSize()
 
 # Caches
 var sixel_cache: dict<string> = {}
+var csv_failed_cache: dict<number> = {}
 
 # Animation State Caches
 var anim_animations: dict<list<string>> = {}
@@ -92,6 +106,122 @@ var anim_delay_raw: dict<string> = {}
 var anim_disk_cache_id: dict<string> = {}
 
 var anim_timer: number = -1
+
+def DiskCacheHash(text: string): string
+    if exists('*sha256')
+        return sha256(text)
+    endif
+
+    return substitute(text, '[^A-Za-z0-9_.-]', '_', 'g')
+enddef
+
+def ReadBinaryFile(path: string): string
+    if !filereadable(path)
+        return ''
+    endif
+
+    var data: string = join(readfile(path, 'b'), "\n")
+    return substitute(data, '[\r\n]\+$', '', '')
+enddef
+
+def WriteBinaryFile(path: string, data: string): bool
+    var result: number = writefile([data], path, 'b')
+    return result == 0
+enddef
+
+def CacheRoot(): string
+    return g:sixel_markdown_cache_dir
+enddef
+
+def CsvDiskCacheId(full_path: string, px_width: number, total_px_height: number): string
+    var file_size: number = getfsize(full_path)
+    var file_mtime: number = getftime(full_path)
+
+    if file_size < 0 || file_mtime < 0
+        return ''
+    endif
+
+    # CSV invalidation is based on file size + mtime.
+    # The path avoids collisions, and the plot geometry is included because
+    # different target sizes produce different PNG plots.
+    var source_key: string = fnamemodify(full_path, ':p') .. ':' .. file_size .. ':' .. file_mtime
+    var render_key: string = px_width .. 'x' .. total_px_height
+
+    return DiskCacheHash(source_key .. ':' .. render_key)
+enddef
+
+def CsvDiskCachePath(cache_id: string): string
+    return CacheRoot() .. '/csv/' .. cache_id .. '.png'
+enddef
+
+def CsvSourceCacheKey(full_path: string, px_width: number, total_px_height: number): string
+    var file_size: number = getfsize(full_path)
+    var file_mtime: number = getftime(full_path)
+
+    if file_size < 0 || file_mtime < 0
+        return full_path
+    endif
+
+    return 'csv:' .. full_path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. px_width .. 'x' .. total_px_height
+enddef
+
+def GenerateCsvPlot(full_path: string, px_width: number, total_px_height: number): string
+    var cache_id: string = CsvDiskCacheId(full_path, px_width, total_px_height)
+    if empty(cache_id)
+        return ''
+    endif
+
+    if has_key(csv_failed_cache, cache_id)
+        return ''
+    endif
+
+    var output_path: string = CsvDiskCachePath(cache_id)
+    if filereadable(output_path)
+        return output_path
+    endif
+
+    var python_cmd: string = g:sixel_markdown_python
+    var plotter_path: string = g:sixel_markdown_csv_plotter
+
+    if empty(python_cmd) || !executable(python_cmd)
+        csv_failed_cache[cache_id] = 1
+        return ''
+    endif
+
+    if empty(plotter_path) || !filereadable(plotter_path)
+        csv_failed_cache[cache_id] = 1
+        return ''
+    endif
+
+    var cache_dir: string = fnamemodify(output_path, ':h')
+    if mkdir(cache_dir, 'p') == 0 && !isdirectory(cache_dir)
+        csv_failed_cache[cache_id] = 1
+        return ''
+    endif
+
+    var cmd: list<string> = [
+        python_cmd,
+        plotter_path,
+        '--input',
+        full_path,
+        '--output',
+        output_path,
+        '--width',
+        string(px_width),
+        '--height',
+        string(total_px_height),
+    ]
+
+    system(cmd)
+
+    if v:shell_error != 0 || !filereadable(output_path)
+        delete(output_path)
+        csv_failed_cache[cache_id] = 1
+        return ''
+    endif
+
+    return output_path
+enddef
 
 # Helper to generate a single static frame
 def GenerateStaticSixel(full_path: string, is_animated: bool, px_width: number, total_px_height: number, px_crop_h: number, px_crop_y: number, available_cols: number, visible_lines: number): string
@@ -138,14 +268,6 @@ def GenerateStaticSixel(full_path: string, is_animated: bool, px_width: number, 
     return ''
 enddef
 
-def DiskCacheHash(text: string): string
-    if exists('*sha256')
-        return sha256(text)
-    endif
-
-    return substitute(text, '[^A-Za-z0-9_.-]', '_', 'g')
-enddef
-
 def AnimationDiskCacheId(full_path: string, px_width: number, total_px_height: number, px_crop_h: number, px_crop_y: number): string
     var file_size: number = getfsize(full_path)
     var file_mtime: number = getftime(full_path)
@@ -154,10 +276,9 @@ def AnimationDiskCacheId(full_path: string, px_width: number, total_px_height: n
         return ''
     endif
 
-    # The source invalidation part of the key is the image's size + mtime.
+    # Animation invalidation is based on file size + mtime.
     # Render geometry is included because a different crop/scale produces
-    # different sixel frames. The path is included only to avoid collisions
-    # between different files that happen to have identical size + mtime.
+    # different sixel frames. The path avoids collisions between distinct files.
     var source_key: string = fnamemodify(full_path, ':p') .. ':' .. file_size .. ':' .. file_mtime
     var render_key: string = px_width .. 'x' .. total_px_height .. ':crop:' .. px_crop_h .. '+' .. px_crop_y
 
@@ -165,7 +286,7 @@ def AnimationDiskCacheId(full_path: string, px_width: number, total_px_height: n
 enddef
 
 def AnimationDiskCacheDir(cache_id: string): string
-    return g:sixel_markdown_cache_dir .. '/animations/' .. cache_id
+    return CacheRoot() .. '/animations/' .. cache_id
 enddef
 
 def DeleteAnimationDiskCache(cache_id: string)
@@ -177,20 +298,6 @@ def DeleteAnimationDiskCache(cache_id: string)
     if isdirectory(cache_dir)
         delete(cache_dir, 'rf')
     endif
-enddef
-
-def ReadBinaryFile(path: string): string
-    if !filereadable(path)
-        return ''
-    endif
-
-    var data: string = join(readfile(path, 'b'), "\n")
-    return substitute(data, '[\r\n]\+$', '', '')
-enddef
-
-def WriteBinaryFile(path: string, data: string): bool
-    var result: number = writefile([data], path, 'b')
-    return result == 0
 enddef
 
 def StartAnimationTimerIfNeeded()
@@ -574,8 +681,10 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         endif
 
         var is_animated: bool = img_path =~? '\.\(gif\|webp\)$'
+        var is_csv: bool = img_path =~? '\.csv$'
+
         if is_anim_tick && !is_animated
-            # During an animation tick, skip static images to save CPU and prevent flickering
+            # During an animation tick, skip static images and CSV plots to save CPU and prevent flickering
             lnum += 1
             continue
         endif
@@ -648,7 +757,19 @@ def DrawVisibleImages(is_anim_tick: bool = false)
         var px_crop_y: number = crop_lines_top * g:sixel_markdown_line_height
         var px_crop_h: number = visible_lines * g:sixel_markdown_line_height
 
-        var cache_key: string = full_path .. ':' .. px_width .. 'x' .. total_px_height .. '-crop' .. px_crop_h .. '+' .. px_crop_y
+        var render_path: string = full_path
+        var source_cache_key: string = full_path
+
+        if is_csv
+            render_path = GenerateCsvPlot(full_path, px_width, total_px_height)
+            if empty(render_path)
+                lnum += 1
+                continue
+            endif
+            source_cache_key = CsvSourceCacheKey(full_path, px_width, total_px_height)
+        endif
+
+        var cache_key: string = source_cache_key .. ':' .. px_width .. 'x' .. total_px_height .. '-crop' .. px_crop_h .. '+' .. px_crop_y
         var sixel_data: string = ''
 
         if is_animated
@@ -706,7 +827,7 @@ def DrawVisibleImages(is_anim_tick: bool = false)
             if has_key(sixel_cache, cache_key)
                 sixel_data = sixel_cache[cache_key]
             else
-                sixel_data = GenerateStaticSixel(full_path, is_animated, px_width, total_px_height, px_crop_h, px_crop_y, available_cols, visible_lines)
+                sixel_data = GenerateStaticSixel(render_path, false, px_width, total_px_height, px_crop_h, px_crop_y, available_cols, visible_lines)
                 sixel_cache[cache_key] = sixel_data
             endif
         endif
