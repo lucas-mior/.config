@@ -190,6 +190,91 @@ def _prepare_figure_dir(figure_dir):
     return figure_dir
 
 
+def _save_buffer_to_file(buffer, path):
+    buffer.seek(0)
+    with open(path, "wb") as f:
+        shutil.copyfileobj(buffer, f)
+
+
+def _pad_palette(palette, color_count=256):
+    if palette is None:
+        palette = []
+    else:
+        palette = list(palette)
+
+    wanted_len = color_count * 3
+    if len(palette) < wanted_len:
+        palette.extend([0] * (wanted_len - len(palette)))
+
+    return palette[:wanted_len]
+
+
+def _rgba_to_sixel_friendly_palette(Image, image):
+    # This follows the useful part of pyplotsixel's custom backend:
+    # anti-aliased RGBA edges are composited against black, while pixels that
+    # were fully transparent stay transparent through a reserved palette index.
+    rgba = image.convert("RGBA")
+    alpha = rgba.getchannel("A")
+
+    bg = Image.new("RGB", rgba.size, (0, 0, 0))
+    bg.paste(rgba, mask=alpha)
+
+    paletted_255 = bg.quantize(colors=255)
+    transparent_idx = 255
+
+    paletted_bytes = bytearray(paletted_255.tobytes())
+    alpha_bytes = alpha.tobytes()
+
+    for idx, alpha_value in enumerate(alpha_bytes):
+        if alpha_value == 0:
+            paletted_bytes[idx] = transparent_idx
+
+    paletted = Image.frombytes("P", rgba.size, bytes(paletted_bytes))
+    paletted.putpalette(_pad_palette(paletted_255.getpalette()))
+    paletted.info["transparency"] = transparent_idx
+
+    return paletted
+
+
+def _image_to_sixel_friendly_palette(Image, image):
+    has_alpha = image.mode in {"RGBA", "LA"} or (
+        image.mode == "P" and "transparency" in image.info
+    )
+
+    if has_alpha:
+        return _rgba_to_sixel_friendly_palette(Image, image)
+
+    return image.convert("RGB").quantize(colors=256)
+
+
+def _save_figure_png(fig, path):
+    png_buf = io.BytesIO()
+
+    fig.savefig(
+        png_buf,
+        format="png",
+        bbox_inches="tight",
+        facecolor=fig.get_facecolor(),
+        edgecolor=fig.get_edgecolor(),
+    )
+
+    try:
+        from PIL import Image
+    except Exception:
+        _save_buffer_to_file(png_buf, path)
+        return
+
+    try:
+        png_buf.seek(0)
+        with Image.open(png_buf) as image:
+            sixel_friendly = _image_to_sixel_friendly_palette(Image, image)
+            sixel_friendly.save(path, format="PNG", optimize=False)
+        os.system(f"dunstify not_shit")
+    except Exception:
+        os.system(f"dunstify shit")
+        _save_buffer_to_file(png_buf, path)
+
+
 def _save_figures(cell_index, figure_dir):
     saved = []
 
@@ -215,13 +300,7 @@ def _save_figures(cell_index, figure_dir):
             name = "cell_{:04d}_fig_{:04d}.png".format(cell_index, local_index)
             path = os.path.join(figure_dir, name)
 
-            fig.savefig(
-                path,
-                format="png",
-                bbox_inches="tight",
-                facecolor=fig.get_facecolor(),
-                edgecolor=fig.get_edgecolor(),
-            )
+            _save_figure_png(fig, path)
 
             saved.append({
                 "name": _strip_null_bytes(name),
