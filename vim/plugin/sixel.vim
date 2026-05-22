@@ -165,7 +165,7 @@ def DrawVisibleImages()
 
             var cmd: string = ''
             if engine == 'chafa'
-                cmd = 'chafa -f sixel --exact-size ' .. px_width .. 'x' .. px_crop_h .. ' ' .. shellescape(full_path)
+                cmd = 'chafa -f sixel -s ' .. available_cols .. 'x' .. visible_lines .. ' ' .. shellescape(full_path)
             elseif engine == 'magick' || engine == 'convert'
                 var magick_args: string = shellescape(full_path) .. ' -resize ' .. px_width .. 'x' .. total_px_height .. ' -crop ' .. px_width .. 'x' .. px_crop_h .. '+0+' .. px_crop_y .. ' +repage sixel:-'
                 cmd = engine .. ' ' .. magick_args
@@ -175,12 +175,17 @@ def DrawVisibleImages()
             endif
 
             sixel_data = system(cmd)
-            # Remove trailing newlines output by ImageMagick/Chafa to prevent terminal scrolling
-            sixel_data = substitute(sixel_data, '\n\+$', '', '')
             
             if v:shell_error == 0
+                # Remove trailing newlines output by ImageMagick/Chafa to prevent terminal scrolling
+                sixel_data = substitute(sixel_data, '\n\+$', '', '')
                 sixel_cache[cache_key] = sixel_data
             else
+                # PRINT THE ERROR TO VIM'S MESSAGE HISTORY
+                echom "Sixel generation failed for: " .. full_path
+                echom "Command run: " .. cmd
+                echom "Error output: " .. substitute(sixel_data, '\n', ' ', 'g')
+                
                 lnum += 1
                 continue
             endif
