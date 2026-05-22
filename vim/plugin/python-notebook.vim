@@ -72,6 +72,7 @@ enddef
 def EnsureNotebookHighlightGroups()
     execute 'highlight default link MdNotebookOutput Comment'
     execute 'highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE'
+    execute 'highlight MdNotebookStdout ctermfg=White ctermbg=NONE guifg=#ffffff guibg=NONE'
 enddef
 
 def HasNotebookAnnotation(): bool
@@ -129,6 +130,10 @@ def FindGeneratedEnd(start_lnum: number): number
     return 0
 enddef
 
+def IsOutputSectionHeader(line_str: string): bool
+    return line_str =~# '^\s*#\s*\(stdout\|stderr\|result\):\s*$'
+enddef
+
 def JsonValueToString(value: any): string
     if type(value) == v:t_string
         return value
@@ -168,6 +173,11 @@ def ClearNotebookMatches()
     b:python_notebook_match_ids = []
 enddef
 
+def AddNotebookLineMatch(group_name: string, row: number)
+    EnsureBufferMatchList()
+    add(b:python_notebook_match_ids, matchadd(group_name, '\%' .. row .. 'l.*', 100))
+enddef
+
 def RefreshNotebookMatches()
     if !exists('b:python_notebook_active')
         return
@@ -190,10 +200,50 @@ def RefreshNotebookMatches()
             endif
 
             for row in range(lnum, end_lnum)
-                add(b:python_notebook_match_ids, matchadd('MdNotebookError', '\%' .. row .. 'l.*', 100))
+                AddNotebookLineMatch('MdNotebookError', row)
             endfor
 
             lnum = end_lnum + 1
+            continue
+        endif
+
+        if line_str =~# '^\s*#\s*mdnb-output:start\s*$'
+            var output_end: number = FindGeneratedEnd(lnum)
+            if output_end <= 0
+                output_end = lnum
+            endif
+
+            var row: number = lnum + 1
+            while row <= output_end
+                var row_text: string = getline(row)
+
+                if row_text =~# '^\s*#\s*stdout:\s*$'
+                    AddNotebookLineMatch('MdNotebookStdout', row)
+
+                    var stdout_row: number = row + 1
+                    while stdout_row <= output_end
+                        var stdout_text: string = getline(stdout_row)
+
+                        if stdout_text =~# '^\s*#\s*mdnb-output:end\s*$'
+                            break
+                        endif
+
+                        if IsOutputSectionHeader(stdout_text)
+                            break
+                        endif
+
+                        AddNotebookLineMatch('MdNotebookStdout', stdout_row)
+                        stdout_row += 1
+                    endwhile
+
+                    row = stdout_row
+                    continue
+                endif
+
+                row += 1
+            endwhile
+
+            lnum = output_end + 1
             continue
         endif
 
@@ -646,6 +696,7 @@ enddef
 def SetupNotebookSyntax()
     syntax clear MdNotebookOutput
     syntax clear MdNotebookError
+    syntax clear MdNotebookStdout
 
     execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output:start\s*$/ end=/^\s*#\s*mdnb-output:end\s*$/ keepend containedin=ALL'
     execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error:start\s*$/ end=/^\s*#\s*mdnb-error:end\s*$/ keepend containedin=ALL'
