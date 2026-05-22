@@ -119,6 +119,15 @@ if !exists('g:python_notebook_sixel_cell_height')
     g:python_notebook_sixel_cell_height = g:python_notebook_imagemagick_cell_height
 endif
 
+# Sixel images are painted directly by the terminal, outside Vim's normal
+# screen model. If terminal cell metrics are inaccurate, a sixel can slightly
+# overpaint the status line. By default we use all text rows and repair Vim's
+# status line after scroll/draw events; raise this only if your terminal still
+# needs a physical bottom margin.
+if !exists('g:python_notebook_sixel_bottom_guard_lines')
+    g:python_notebook_sixel_bottom_guard_lines = 0
+endif
+
 var output_start_marker_prefix: string = '# nb-output: start'
 var output_end_marker: string = '# nb-output: end'
 var error_start_marker: string = '# nb-error: start'
@@ -228,6 +237,15 @@ def SixelCellHeight(): number
     endif
 
     return cell_height
+enddef
+
+def SixelBottomGuardLines(): number
+    var guard_lines: number = GetNumberSetting('python_notebook_sixel_bottom_guard_lines', 1)
+    if guard_lines < 0
+        guard_lines = 0
+    endif
+
+    return guard_lines
 enddef
 
 def WindowTextWidth(): number
@@ -1045,6 +1063,13 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
     var visible_start: number = max([start_lnum, window_start])
     var visible_end: number = min([end_lnum, window_end])
 
+    # Terminals do not clip sixel graphics to Vim's text area. If a figure is
+    # visible through the bottom edge of the window, keep a configurable guard
+    # row so a slightly over-tall sixel does not paint over the status line.
+    if visible_end >= window_end
+        visible_end -= SixelBottomGuardLines()
+    endif
+
     if visible_start > visible_end
         return
     endif
@@ -1151,8 +1176,18 @@ def DrawNotebookFigures()
     endwhile
 enddef
 
+def RedrawNotebookChrome()
+    # Sixel pixels are not part of Vim's screen grid. During a terminal scroll,
+    # old sixel pixels can be copied into the status line before Vim repaints
+    # that UI area. Redraw only Vim's chrome instead of doing a full redraw!, so
+    # the figure area can keep scrolling smoothly without flicker.
+    silent! redrawstatus
+    silent! redrawtabline
+enddef
+
 def DrawNotebookFiguresTimer(timer_id: number)
     DrawNotebookFigures()
+    RedrawNotebookChrome()
 enddef
 
 def ScheduleNotebookFigureDraw(delay_ms: number = 50)
@@ -1166,8 +1201,12 @@ enddef
 def NotebookScrollRedraw()
     # Do not call redraw! while scrolling. Vim's own terminal scroll can move
     # the existing sixel pixels smoothly; a forced redraw clears them first and
-    # causes the visible disappear/reappear flicker. We only repaint the figures
-    # after Vim has settled the new viewport.
+    # causes the visible disappear/reappear flicker.
+    #
+    # However, terminal scrolling can temporarily copy sixel pixels into Vim's
+    # status line. Repair the status/tab line immediately, then repaint the
+    # visible figure slices after Vim has settled the new viewport.
+    RedrawNotebookChrome()
     ScheduleNotebookFigureDraw(25)
 enddef
 
@@ -1412,6 +1451,7 @@ def PythonNotebookStatus()
     echomsg '  imagemagick command found: ' .. string(!empty(ImageMagickCommand()) && executable(ImageMagickCommand()))
     echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth()) .. 'x' .. string(ImageMagickCellHeight())
     echomsg '  sixel cell size: ' .. string(SixelCellWidth()) .. 'x' .. string(SixelCellHeight())
+    echomsg '  sixel bottom guard lines: ' .. string(SixelBottomGuardLines())
 enddef
 
 execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'
