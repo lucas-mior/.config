@@ -54,7 +54,7 @@ if !exists('g:sixel_markdown_csv_plot_width')
 endif
 
 if !exists('g:sixel_markdown_csv_plot_height')
-    g:sixel_markdown_csv_plot_height = 400
+    g:sixel_markdown_csv_plot_height = 300
 endif
 
 # Enable/disable animation disk cache
