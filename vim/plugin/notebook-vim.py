@@ -190,10 +190,17 @@ def _prepare_figure_dir(figure_dir):
     return figure_dir
 
 
-def _save_buffer_to_file(buffer, path):
-    buffer.seek(0)
-    with open(path, "wb") as f:
-        shutil.copyfileobj(buffer, f)
+def _save_figure_png(fig, path):
+    # Save the full-quality Matplotlib PNG. The terminal render path resizes
+    # the RGBA image first and only then applies the palette/transparency
+    # preparation needed for clean sixel output.
+    fig.savefig(
+        path,
+        format="png",
+        bbox_inches="tight",
+        facecolor=fig.get_facecolor(),
+        edgecolor=fig.get_edgecolor(),
+    )
 
 
 def _pad_palette(palette, color_count=256):
@@ -236,41 +243,50 @@ def _rgba_to_sixel_friendly_palette(Image, image):
     return paletted
 
 
-def _image_to_sixel_friendly_palette(Image, image):
-    has_alpha = image.mode in {"RGBA", "LA"} or (
-        image.mode == "P" and "transparency" in image.info
-    )
-
-    if has_alpha:
-        return _rgba_to_sixel_friendly_palette(Image, image)
-
-    return image.convert("RGB").quantize(colors=256)
+def _resample_filter(Image):
+    if hasattr(Image, "Resampling"):
+        return Image.Resampling.LANCZOS
+    return Image.LANCZOS
 
 
-def _save_figure_png(fig, path):
-    png_buf = io.BytesIO()
+def _prepare_sixel_png(input_path, output_path, pixel_width, pixel_height):
+    pixel_width = max(1, int(pixel_width))
+    pixel_height = max(1, int(pixel_height))
 
-    fig.savefig(
-        png_buf,
-        format="png",
-        bbox_inches="tight",
-        facecolor=fig.get_facecolor(),
-        edgecolor=fig.get_edgecolor(),
-    )
+    from PIL import Image
+
+    with Image.open(input_path) as image:
+        rgba = image.convert("RGBA")
+        resized = rgba.resize((pixel_width, pixel_height), _resample_filter(Image))
+        sixel_friendly = _rgba_to_sixel_friendly_palette(Image, resized)
+        sixel_friendly.save(output_path, format="PNG", optimize=False)
+
+
+def _prepare_sixel_png_cli(argv):
+    if len(argv) != 6:
+        print(
+            "usage: notebook-vim.py --prepare-sixel-png INPUT_PNG OUTPUT_PNG WIDTH HEIGHT",
+            file=sys.stderr,
+        )
+        return 2
+
+    input_path = argv[2]
+    output_path = argv[3]
 
     try:
-        from PIL import Image
-    except Exception:
-        _save_buffer_to_file(png_buf, path)
-        return
+        pixel_width = int(argv[4])
+        pixel_height = int(argv[5])
+    except ValueError:
+        print("WIDTH and HEIGHT must be integers", file=sys.stderr)
+        return 2
 
     try:
-        png_buf.seek(0)
-        with Image.open(png_buf) as image:
-            sixel_friendly = _image_to_sixel_friendly_palette(Image, image)
-            sixel_friendly.save(path, format="PNG", optimize=False)
-    except Exception:
-        _save_buffer_to_file(png_buf, path)
+        _prepare_sixel_png(input_path, output_path, pixel_width, pixel_height)
+    except Exception as exc:
+        print("could not prepare sixel PNG: {}".format(exc), file=sys.stderr)
+        return 1
+
+    return 0
 
 
 def _save_figures(cell_index, figure_dir):
@@ -374,6 +390,9 @@ def _run_cell(cell, namespace, figure_dir):
 
 
 def main():
+    if len(sys.argv) >= 2 and sys.argv[1] == "--prepare-sixel-png":
+        return _prepare_sixel_png_cli(sys.argv)
+
     if len(sys.argv) != 3:
         print("usage: notebook-vim.py INPUT_JSON OUTPUT_JSON", file=sys.stderr)
         return 2

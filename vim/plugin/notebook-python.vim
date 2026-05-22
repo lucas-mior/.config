@@ -96,10 +96,9 @@ endif
 #   let g:python_notebook_sixel_engine = 'chafa'
 #   let g:python_notebook_sixel_engine = 'imagemagick'
 #
-# ImageMagick writes sixel in pixel units, while chafa's -s option uses
-# terminal cell units. These defaults are only an approximation of one
-# terminal cell in pixels; tune them if the ImageMagick backend is too large
-# or too small for your terminal/font.
+# Sixel renderers ultimately need pixel dimensions. These defaults approximate
+# one terminal cell in pixels; tune them if rendered figures are too large, too
+# small, or distorted for your terminal/font.
 if !exists('g:python_notebook_imagemagick_command')
     g:python_notebook_imagemagick_command = ''
 endif
@@ -110,6 +109,14 @@ endif
 
 if !exists('g:python_notebook_imagemagick_cell_height')
     g:python_notebook_imagemagick_cell_height = 20
+endif
+
+if !exists('g:python_notebook_sixel_cell_width')
+    g:python_notebook_sixel_cell_width = g:python_notebook_imagemagick_cell_width
+endif
+
+if !exists('g:python_notebook_sixel_cell_height')
+    g:python_notebook_sixel_cell_height = g:python_notebook_imagemagick_cell_height
 endif
 
 var output_start_marker_prefix: string = '# nb-output: start'
@@ -200,6 +207,24 @@ def ImageMagickCellHeight(): number
     var cell_height: number = GetNumberSetting('python_notebook_imagemagick_cell_height', 20)
     if cell_height <= 0
         cell_height = 20
+    endif
+
+    return cell_height
+enddef
+
+def SixelCellWidth(): number
+    var cell_width: number = GetNumberSetting('python_notebook_sixel_cell_width', ImageMagickCellWidth())
+    if cell_width <= 0
+        cell_width = ImageMagickCellWidth()
+    endif
+
+    return cell_width
+enddef
+
+def SixelCellHeight(): number
+    var cell_height: number = GetNumberSetting('python_notebook_sixel_cell_height', ImageMagickCellHeight())
+    if cell_height <= 0
+        cell_height = ImageMagickCellHeight()
     endif
 
     return cell_height
@@ -833,7 +858,10 @@ def SixelCacheKey(path: string, available_cols: number, available_lines: number,
     var file_mtime: number = getftime(path)
     var extra_key: string = ''
 
-    if IsImageMagickEngine(engine)
+    if engine ==# 'chafa'
+        var helper_path: string = NotebookHelperPath()
+        extra_key = ':' .. PythonCommand() .. ':' .. helper_path .. ':' .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x' .. SixelCellHeight()
+    elseif IsImageMagickEngine(engine)
         extra_key = ':' .. ImageMagickCommand() .. ':' .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
     endif
 
@@ -858,8 +886,33 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var cmd: string = 'chafa -f sixel --dither diffusion -s ' .. available_cols .. 'x' .. available_lines .. ' ' .. shellescape(path)
-        sixel_data = system(cmd)
+        var python_cmd: string = PythonCommand()
+        var helper_path: string = NotebookHelperPath()
+
+        if empty(python_cmd) || !executable(python_cmd)
+            return ''
+        endif
+
+        if empty(helper_path) || !filereadable(helper_path)
+            return ''
+        endif
+
+        var pixel_width: number = max([1, available_cols * SixelCellWidth()])
+        var pixel_height: number = max([1, available_lines * SixelCellHeight()])
+        var prepared_path: string = tempname() .. '.png'
+
+        try
+            systemlist([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(pixel_width), string(pixel_height)])
+            if v:shell_error != 0 || !filereadable(prepared_path)
+                return ''
+            endif
+
+            sixel_data = system(['chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path])
+        finally
+            if !empty(prepared_path) && filereadable(prepared_path)
+                delete(prepared_path)
+            endif
+        endtry
     elseif IsImageMagickEngine(engine)
         var magick_cmd: string = ImageMagickCommand()
         if empty(magick_cmd) || !executable(magick_cmd)
@@ -1283,6 +1336,7 @@ def PythonNotebookStatus()
     echomsg '  imagemagick command: ' .. ImageMagickCommand()
     echomsg '  imagemagick command found: ' .. string(!empty(ImageMagickCommand()) && executable(ImageMagickCommand()))
     echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth()) .. 'x' .. string(ImageMagickCellHeight())
+    echomsg '  sixel cell size: ' .. string(SixelCellWidth()) .. 'x' .. string(SixelCellHeight())
 enddef
 
 execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'
