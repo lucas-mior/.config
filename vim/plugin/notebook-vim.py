@@ -212,10 +212,8 @@ def _save_figures(cell_index, figure_dir):
     for local_index, fig_num in enumerate(fig_nums):
         try:
             fig = plt.figure(fig_num)
-            path = os.path.join(
-                figure_dir,
-                "cell_{:04d}_fig_{:04d}.png".format(cell_index, local_index),
-            )
+            name = "cell_{:04d}_fig_{:04d}.png".format(cell_index, local_index)
+            path = os.path.join(figure_dir, name)
 
             fig.savefig(
                 path,
@@ -226,6 +224,7 @@ def _save_figures(cell_index, figure_dir):
             )
 
             saved.append({
+                "name": _strip_null_bytes(name),
                 "path": _strip_null_bytes(path),
             })
         except Exception:

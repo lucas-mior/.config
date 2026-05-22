@@ -27,7 +27,7 @@ vim9script
 #   # nb-output: start [stdout, result, figure]
 #   # stdout text
 #   # result text
-#   # nb-figure: /path/to/figure.png
+#   # nb-figure: cell_0007_fig_0001.png
 #   #
 #   #
 #   # nb-output: end
@@ -136,6 +136,10 @@ def NotebookCacheDir(): string
     return expand(GetStringSetting('python_notebook_cache_dir', expand('~/.cache/notebook-python-vim')))
 enddef
 
+def NotebookFigureDir(): string
+    return NotebookCacheDir() .. '/figures/buf_' .. bufnr('%')
+enddef
+
 def NotebookFigureLines(): number
     var figure_lines: number = GetNumberSetting('python_notebook_figure_lines', 18)
     if figure_lines <= 0
@@ -239,8 +243,41 @@ def IsFigureLine(line_str: string): bool
     return line_str =~# '^\s*#\s*nb-figure\s*:\s*.\+'
 enddef
 
+def ResolveFigureRef(figure_ref: string): string
+    var ref: string = StripNullBytes(figure_ref)
+
+    if empty(ref)
+        return ''
+    endif
+
+    if strpart(ref, 0, 1) ==# '/'
+        return ref
+    endif
+
+    if strpart(ref, 0, 1) ==# '~'
+        return expand(ref)
+    endif
+
+    return NotebookFigureDir() .. '/' .. ref
+enddef
+
 def FigurePathFromLine(line_str: string): string
-    return StripNullBytes(substitute(line_str, '^\s*#\s*nb-figure\s*:\s*', '', ''))
+    var figure_ref: string = substitute(line_str, '^\s*#\s*nb-figure\s*:\s*', '', '')
+    return ResolveFigureRef(figure_ref)
+enddef
+
+def DisplayFigureRef(path_or_name: string): string
+    var ref: string = StripNullBytes(path_or_name)
+
+    if empty(ref)
+        return ''
+    endif
+
+    if ref =~# '/'
+        return fnamemodify(ref, ':t')
+    endif
+
+    return ref
 enddef
 
 def IsGeneratedStart(line_str: string): bool
@@ -312,7 +349,7 @@ def JsonValueToStringList(value: any): list<string>
     return result
 enddef
 
-def JsonFigurePaths(value: any): list<string>
+def JsonFigureRefs(value: any): list<string>
     if type(value) != v:t_list
         return []
     endif
@@ -321,14 +358,20 @@ def JsonFigurePaths(value: any): list<string>
 
     for item in value
         if type(item) == v:t_dict
+            var name: string = JsonValueToString(get(item, 'name', ''))
+            if !empty(name)
+                add(result, DisplayFigureRef(name))
+                continue
+            endif
+
             var path: string = JsonValueToString(get(item, 'path', ''))
             if !empty(path)
-                add(result, path)
+                add(result, DisplayFigureRef(path))
             endif
         else
-            var path: string = JsonValueToString(item)
-            if !empty(path)
-                add(result, path)
+            var ref: string = JsonValueToString(item)
+            if !empty(ref)
+                add(result, DisplayFigureRef(ref))
             endif
         endif
     endfor
@@ -337,7 +380,7 @@ def JsonFigurePaths(value: any): list<string>
 enddef
 
 def ResultHasFigure(result: dict<any>): bool
-    return !empty(JsonFigurePaths(get(result, 'figures', [])))
+    return !empty(JsonFigureRefs(get(result, 'figures', [])))
 enddef
 
 def CellLineToBufferLine(cell: dict<any>, relative_line: number): number
@@ -672,12 +715,12 @@ def BuildOutputBlock(result: dict<any>): list<string>
     var stdout_lines: list<string> = JsonValueToStringList(get(result, 'stdout', []))
     var stderr_lines: list<string> = JsonValueToStringList(get(result, 'stderr', []))
     var result_text: string = JsonValueToString(get(result, 'result', ''))
-    var figure_paths: list<string> = JsonFigurePaths(get(result, 'figures', []))
+    var figure_refs: list<string> = JsonFigureRefs(get(result, 'figures', []))
 
     var has_stdout: bool = !empty(stdout_lines)
     var has_stderr: bool = !empty(stderr_lines)
     var has_result: bool = !empty(result_text)
-    var has_figure: bool = !empty(figure_paths)
+    var has_figure: bool = !empty(figure_refs)
 
     if !has_stdout && !has_stderr && !has_result && !has_figure
         return block
@@ -700,8 +743,8 @@ def BuildOutputBlock(result: dict<any>): list<string>
     if has_figure
         var figure_lines: number = NotebookFigureLines()
 
-        for figure_path in figure_paths
-            add(block, figure_marker_prefix .. figure_path)
+        for figure_ref in figure_refs
+            add(block, figure_marker_prefix .. figure_ref)
             for _ in range(1, figure_lines)
                 add(block, '#')
             endfor
@@ -939,7 +982,7 @@ def RunPythonNotebookFromScratch()
         var cells: list<dict<any>> = ParseNotebookCells()
         var input_path: string = tempname()
         var output_path: string = tempname()
-        var figure_dir: string = NotebookCacheDir() .. '/figures/buf_' .. bufnr('%')
+        var figure_dir: string = NotebookFigureDir()
 
         var payload: dict<any> = {
             'buffer_path': StripNullBytes(expand('%:p')),
@@ -1137,6 +1180,7 @@ def PythonNotebookStatus()
     echomsg '  python executable found: ' .. string(executable(python_cmd))
     echomsg '  helper script: ' .. helper_path
     echomsg '  helper script found: ' .. string(filereadable(helper_path))
+    echomsg '  figure dir: ' .. NotebookFigureDir()
     echomsg '  figure lines: ' .. string(NotebookFigureLines())
     echomsg '  sixel engine: ' .. GetStringSetting('python_notebook_sixel_engine', 'chafa')
     echomsg '  chafa found: ' .. string(executable('chafa'))
