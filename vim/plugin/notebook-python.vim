@@ -14,13 +14,26 @@ vim9script
 #   for Python buffers containing one of these comments near the top:
 #
 #       # notebook-python: enable
-#       # mdnb: enable
+#       # nb: enable
 #
 # Cell syntax:
 #
 #   # %%
 #   x = 10
 #   x + 5
+#
+# Generated output:
+#
+#   # nb-output: start [stdout, result]
+#   # stdout text
+#   # result text
+#   # nb-output: end
+#
+# Generated errors:
+#
+#   # nb-error: start
+#   # traceback text
+#   # nb-error: end
 #
 # Commands:
 #
@@ -66,10 +79,10 @@ if !exists('g:python_notebook_annotation_scan_lines')
     g:python_notebook_annotation_scan_lines = 40
 endif
 
-var output_start_marker_prefix: string = '# mdnb-output: start'
-var output_end_marker: string = '# mdnb-output: end'
-var error_start_marker: string = '# mdnb-error: start'
-var error_end_marker: string = '# mdnb-error: end'
+var output_start_marker_prefix: string = '# nb-output: start'
+var output_end_marker: string = '# nb-output: end'
+var error_start_marker: string = '# nb-error: start'
+var error_end_marker: string = '# nb-error: end'
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -142,7 +155,7 @@ def HasNotebookAnnotation(): bool
             return true
         endif
 
-        if line_str =~# '^\s*#\s*mdnb:\s*enable\s*$'
+        if line_str =~# '^\s*#\s*nb:\s*enable\s*$'
             return true
         endif
     endfor
@@ -163,19 +176,19 @@ def IsCellMarker(line_str: string): bool
 enddef
 
 def IsOutputStart(line_str: string): bool
-    return line_str =~# '^\s*#\s*mdnb-output\s*:\s*start\>'
+    return line_str =~# '^\s*#\s*nb-output\s*:\s*start\>'
 enddef
 
 def IsOutputEnd(line_str: string): bool
-    return line_str =~# '^\s*#\s*mdnb-output\s*:\s*end\s*$'
+    return line_str =~# '^\s*#\s*nb-output\s*:\s*end\s*$'
 enddef
 
 def IsErrorStart(line_str: string): bool
-    return line_str =~# '^\s*#\s*mdnb-error\s*:\s*start\>'
+    return line_str =~# '^\s*#\s*nb-error\s*:\s*start\>'
 enddef
 
 def IsErrorEnd(line_str: string): bool
-    return line_str =~# '^\s*#\s*mdnb-error\s*:\s*end\s*$'
+    return line_str =~# '^\s*#\s*nb-error\s*:\s*end\s*$'
 enddef
 
 def IsGeneratedStart(line_str: string): bool
@@ -655,8 +668,8 @@ def SetupNotebookSyntax()
     silent! syntax clear MdNotebookStdout
     silent! syntax clear MdNotebookResult
 
-    execute 'syntax region MdNotebookOutput start=/^\s*#\s*mdnb-output\s*:\s*start.*$/ end=/^\s*#\s*mdnb-output\s*:\s*end\s*$/ keepend containedin=ALL'
-    execute 'syntax region MdNotebookError start=/^\s*#\s*mdnb-error\s*:\s*start.*$/ end=/^\s*#\s*mdnb-error\s*:\s*end\s*$/ keepend containedin=ALL'
+    execute 'syntax region MdNotebookOutput start=/^\s*#\s*nb-output\s*:\s*start.*$/ end=/^\s*#\s*nb-output\s*:\s*end\s*$/ keepend containedin=ALL'
+    execute 'syntax region MdNotebookError start=/^\s*#\s*nb-error\s*:\s*start.*$/ end=/^\s*#\s*nb-error\s*:\s*end\s*$/ keepend containedin=ALL'
 
     EnsureNotebookHighlightGroups()
     RefreshNotebookMatches()
