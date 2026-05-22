@@ -1004,6 +1004,8 @@ def EnablePythonNotebookForBuffer(): bool
 
     SetupNotebookSyntax()
 
+    set nocursorline nocursorcolumn
+
     execute 'command! -buffer PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookFromScratch()'
     execute 'command! -buffer PythonNotebookClearOutputs call ' .. script_sid .. 'ClearNotebookOutputs()'
     execute 'command! -buffer PythonNotebookDrawFigures call ' .. script_sid .. 'DrawNotebookFigures()'
