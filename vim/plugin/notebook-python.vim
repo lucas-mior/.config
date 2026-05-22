@@ -71,16 +71,44 @@ var output_end_marker: string = '# mdnb-output:end'
 var error_start_marker: string = '# mdnb-error:start'
 var error_end_marker: string = '# mdnb-error:end'
 
+def GetStringSetting(name: string, default_value: string): string
+    var value: any = get(g:, name, default_value)
+
+    if type(value) == v:t_string
+        return value
+    endif
+
+    return string(value)
+enddef
+
+def GetNumberSetting(name: string, default_value: number): number
+    var value: any = get(g:, name, default_value)
+
+    if type(value) == v:t_number
+        return value
+    endif
+
+    if type(value) == v:t_string
+        return str2nr(value)
+    endif
+
+    return str2nr(string(value))
+enddef
+
+def PythonCommand(): string
+    return GetStringSetting('python_notebook_python', 'python3')
+enddef
+
+def NotebookHelperPath(): string
+    return expand(GetStringSetting('python_notebook_helper', script_dir .. '/notebook-vim.py'))
+enddef
+
 def StripNullBytes(text: string): string
     return substitute(text, '\%x00', '', 'g')
 enddef
 
 def StripNullBytesFromLines(lines: list<string>): list<string>
     return mapnew(lines, (_, line_str) => StripNullBytes(line_str))
-enddef
-
-def NotebookHelperPath(): string
-    return expand(string(g:python_notebook_helper))
 enddef
 
 def EnsureBufferMatchList()
@@ -97,7 +125,12 @@ def EnsureNotebookHighlightGroups()
 enddef
 
 def HasNotebookAnnotation(): bool
-    var max_lnum: number = min([line('$'), str2nr(string(g:python_notebook_annotation_scan_lines))])
+    var scan_lines: number = GetNumberSetting('python_notebook_annotation_scan_lines', 40)
+    if scan_lines <= 0
+        scan_lines = 40
+    endif
+
+    var max_lnum: number = min([line('$'), scan_lines])
     if max_lnum <= 0
         return false
     endif
@@ -443,7 +476,7 @@ def BuildErrorBlock(result: dict<any>): list<string>
 enddef
 
 def RunPythonNotebookFromScratch()
-    var python_cmd: string = string(g:python_notebook_python)
+    var python_cmd: string = PythonCommand()
     var helper_path: string = NotebookHelperPath()
 
     if empty(python_cmd) || !executable(python_cmd)
@@ -644,7 +677,7 @@ def ClearPythonNotebookCommand()
 enddef
 
 def PythonNotebookStatus()
-    var python_cmd: string = string(g:python_notebook_python)
+    var python_cmd: string = PythonCommand()
     var helper_path: string = NotebookHelperPath()
 
     echomsg 'notebook-python.vim status:'
