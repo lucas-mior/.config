@@ -91,7 +91,7 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_sixel_engine')
-    g:python_notebook_sixel_engine = 'chafa'
+    g:python_notebook_sixel_engine = 'ueberzugpp'
 endif
 
 # Image engine options:
