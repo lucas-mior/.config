@@ -57,7 +57,7 @@ if exists('g:loaded_python_notebook_vim')
 endif
 g:loaded_python_notebook_vim = 1
 
-var notebook_python_vim_build: string = 'layout-redraw-geometry-2026-05-23f'
+var notebook_python_vim_build: string = 'visible-window-cycle-2026-05-23g'
 
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
@@ -91,7 +91,7 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_draw_engine')
-    g:python_notebook_draw_engine = 'ueberzugpp'
+    g:python_notebook_draw_engine = 'chafa'
 endif
 
 # Image engine options:
@@ -2195,7 +2195,7 @@ def DrawGapText(visible_start: number, visible_lines: number, available_cols: nu
         return
     endif
 
-    var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
+    var target_row: number = absolute_row
     var clear_spaces: string = repeat(' ', available_cols)
 
     var clipped_message: string = message
@@ -2265,7 +2265,7 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
         return
     endif
 
-    var target_row: number = absolute_row - win_screenpos(win_getid())[0] + 1
+    var target_row: number = absolute_row
     var clear_spaces: string = repeat(' ', available_cols)
 
     var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
@@ -2304,18 +2304,52 @@ def FindFigureScanStart(window_start: number): number
     return 1
 enddef
 
+def DrawOtherVisibleNotebookWindows(current_winid: number)
+    if !exists('*getwininfo') || !exists('*win_execute')
+        return
+    endif
+
+    for wininfo in getwininfo()
+        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        if tabnr_value != tabpagenr()
+            continue
+        endif
+
+        var winid_value: number = str2nr(string(get(wininfo, 'winid', 0)))
+        var bufnr_value: number = str2nr(string(get(wininfo, 'bufnr', 0)))
+
+        if winid_value <= 0 || winid_value == current_winid || bufnr_value <= 0
+            continue
+        endif
+
+        if getbufvar(bufnr_value, 'python_notebook_active', 0) == 0
+            continue
+        endif
+
+        try
+            win_execute(winid_value, 'call ' .. script_sid .. 'DrawNotebookFigures(false)')
+        catch
+        endtry
+    endfor
+enddef
+
 def DrawNotebookFigures(remove_stale: bool = true)
     if !exists('b:python_notebook_active')
         return
     endif
 
     var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
-    ueberzugpp_current_cycle_ids = {}
+    var should_remove_stale: bool = IsUeberzugppEngine(engine) && remove_stale
 
+    if should_remove_stale
+        ueberzugpp_current_cycle_ids = {}
+    endif
+
+    var current_winid: number = win_getid()
     var screen_col: number = 1
 
     if exists('*getwininfo')
-        var wininfo: dict<any> = getwininfo(win_getid())[0]
+        var wininfo: dict<any> = getwininfo(current_winid)[0]
         screen_col = wininfo.wincol
 
         if has_key(wininfo, 'textoff')
@@ -2347,7 +2381,12 @@ def DrawNotebookFigures(remove_stale: bool = true)
         lnum += 1
     endwhile
 
-    if IsUeberzugppEngine(engine) && remove_stale
+    if should_remove_stale
+        # A single focused-window redraw must not treat images from other
+        # visible notebook splits as stale. Draw the other visible notebook
+        # windows into the same collection cycle first, then prune once.
+        DrawOtherVisibleNotebookWindows(current_winid)
+
         for identifier in keys(ueberzugpp_visible_image_ids)
             if !has_key(ueberzugpp_current_cycle_ids, identifier)
                 UeberzugppRemoveImage(identifier)
