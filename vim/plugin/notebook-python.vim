@@ -57,7 +57,7 @@ if exists('g:loaded_python_notebook_vim')
 endif
 g:loaded_python_notebook_vim = 1
 
-var notebook_python_vim_build: string = 'ueberzugpp-x11-shape-sixel-prep-window-clear-2026-05-23a'
+var notebook_python_vim_build: string = 'layout-redraw-geometry-2026-05-23f'
 
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
@@ -191,6 +191,8 @@ var figure_marker_prefix: string = '# nb-figure: '
 
 var figure_sixel_cache: dict<string> = {}
 var figure_draw_timer: number = -1
+var notebook_layout_redraw_timer: number = -1
+var notebook_layout_signature: string = ''
 
 var ueberzugpp_job: any = v:none
 var ueberzugpp_channel: any = v:none
@@ -1967,6 +1969,38 @@ def ClearExternalImages()
     ClearVisibleFigureTextAreas()
 enddef
 
+def ClearWholeTerminalTextArea()
+    var available_cols: number = max([1, &columns])
+    var available_lines: number = max([1, &lines])
+    var clear_spaces: string = repeat(' ', available_cols)
+    var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
+
+    for row in range(1, available_lines)
+        seq ..= "\<Esc>[" .. row .. ";1H" .. clear_spaces
+    endfor
+
+    seq ..= "\<Esc>[?80h" .. "\<Esc>8"
+
+    if exists('*echoraw')
+        echoraw(seq)
+    else
+        writefile([seq], '/dev/tty', 'b')
+    endif
+enddef
+
+def ClearExternalImagesForLayoutChange()
+    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
+    if IsUeberzugppEngine(engine)
+        ClearUeberzugppImages()
+        return
+    endif
+
+    # During a split/close/resize, the old figure rectangle may no longer
+    # correspond to any current Vim window. Clear the full terminal grid and
+    # let :redraw! repaint Vim's text UI before figures are drawn again.
+    ClearWholeTerminalTextArea()
+enddef
+
 def ClearUeberzugppPreparedImages()
     for prepared_path in values(ueberzugpp_prepared_cache)
         if !empty(prepared_path) && filereadable(prepared_path)
@@ -2270,7 +2304,7 @@ def FindFigureScanStart(window_start: number): number
     return 1
 enddef
 
-def DrawNotebookFigures()
+def DrawNotebookFigures(remove_stale: bool = true)
     if !exists('b:python_notebook_active')
         return
     endif
@@ -2313,7 +2347,7 @@ def DrawNotebookFigures()
         lnum += 1
     endwhile
 
-    if IsUeberzugppEngine(engine)
+    if IsUeberzugppEngine(engine) && remove_stale
         for identifier in keys(ueberzugpp_visible_image_ids)
             if !has_key(ueberzugpp_current_cycle_ids, identifier)
                 UeberzugppRemoveImage(identifier)
@@ -2329,6 +2363,127 @@ def DrawNotebookFiguresTimer(timer_id: number)
     endif
 
     DrawNotebookFigures()
+enddef
+
+def AnyVisibleNotebookBuffer(): bool
+    if !exists('*getwininfo')
+        return exists('b:python_notebook_active')
+    endif
+
+    for wininfo in getwininfo()
+        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        if tabnr_value != tabpagenr()
+            continue
+        endif
+
+        var bufnr_value: number = str2nr(string(get(wininfo, 'bufnr', 0)))
+        if bufnr_value > 0 && getbufvar(bufnr_value, 'python_notebook_active', 0) != 0
+            return true
+        endif
+    endfor
+
+    return false
+enddef
+
+def NotebookWindowLayoutSignature(): string
+    if !exists('*getwininfo')
+        return string(tabpagenr()) .. ':' .. string(winnr('$')) .. ':' .. string(winwidth(0)) .. 'x' .. string(winheight(0))
+    endif
+
+    var parts: list<string> = []
+
+    for wininfo in getwininfo()
+        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        if tabnr_value != tabpagenr()
+            continue
+        endif
+
+        add(parts, join([
+            string(get(wininfo, 'winid', 0)),
+            string(get(wininfo, 'winrow', 0)),
+            string(get(wininfo, 'wincol', 0)),
+            string(get(wininfo, 'width', 0)),
+            string(get(wininfo, 'height', 0)),
+            string(get(wininfo, 'textoff', 0)),
+        ], ','))
+    endfor
+
+    return string(tabpagenr()) .. ':' .. join(parts, ';')
+enddef
+
+def DrawNotebookFiguresInVisibleWindows()
+    if !exists('*getwininfo') || !exists('*win_execute')
+        DrawNotebookFigures(false)
+        return
+    endif
+
+    for wininfo in getwininfo()
+        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        if tabnr_value != tabpagenr()
+            continue
+        endif
+
+        var winid_value: number = str2nr(string(get(wininfo, 'winid', 0)))
+        var bufnr_value: number = str2nr(string(get(wininfo, 'bufnr', 0)))
+
+        if winid_value <= 0 || bufnr_value <= 0
+            continue
+        endif
+
+        if getbufvar(bufnr_value, 'python_notebook_active', 0) == 0
+            continue
+        endif
+
+        try
+            win_execute(winid_value, 'call ' .. script_sid .. 'DrawNotebookFigures(false)')
+        catch
+        endtry
+    endfor
+enddef
+
+def NotebookLayoutRedrawTimer(timer_id: number)
+    if notebook_layout_redraw_timer == timer_id
+        notebook_layout_redraw_timer = -1
+    endif
+
+    notebook_layout_signature = NotebookWindowLayoutSignature()
+
+    if !AnyVisibleNotebookBuffer()
+        return
+    endif
+
+    StopNotebookFigureDrawTimer()
+    ClearExternalImagesForLayoutChange()
+    redraw!
+    DrawNotebookFiguresInVisibleWindows()
+enddef
+
+def StopNotebookLayoutRedrawTimer()
+    if notebook_layout_redraw_timer != -1
+        try
+            timer_stop(notebook_layout_redraw_timer)
+        catch
+        endtry
+
+        notebook_layout_redraw_timer = -1
+    endif
+enddef
+
+def ScheduleNotebookLayoutRedraw(force: bool = false, delay_ms: number = 50)
+    var signature: string = NotebookWindowLayoutSignature()
+
+    if !AnyVisibleNotebookBuffer()
+        notebook_layout_signature = signature
+        return
+    endif
+
+    if !force && !empty(notebook_layout_signature) && signature ==# notebook_layout_signature
+        return
+    endif
+
+    notebook_layout_signature = signature
+    StopNotebookLayoutRedrawTimer()
+    notebook_layout_redraw_timer = timer_start(max([0, delay_ms]), NotebookLayoutRedrawTimer)
 enddef
 
 def StopNotebookFigureDrawTimer()
@@ -2518,10 +2673,9 @@ def EnablePythonNotebookForBuffer(): bool
     autocmd! * <buffer>
     execute 'autocmd BufWinEnter,WinEnter <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
     execute 'autocmd WinScrolled <buffer> call ' .. script_sid .. 'NotebookScrollRedraw()'
-    execute 'autocmd VimResized <buffer> call ' .. script_sid .. 'NotebookRedraw()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
-    execute 'autocmd WinLeave,BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'NotebookWindowLeave()'
+    execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'NotebookWindowLeave()'
     execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'
     augroup END
 
@@ -2661,6 +2815,21 @@ augroup PythonNotebookUeberzugpp
     execute 'autocmd VimEnter * call ' .. script_sid .. 'StartImagePrepWorker()'
     execute 'autocmd VimEnter * call ' .. script_sid .. 'StartUeberzugppLayerDaemon()'
     execute 'autocmd VimLeavePre * call ' .. script_sid .. 'StopUeberzugppLayerDaemon()'
+augroup END
+
+augroup PythonNotebookWindowLayout
+    autocmd!
+    execute 'autocmd VimResized * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+    if exists('##WinResized')
+        execute 'autocmd WinResized * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+    endif
+    if exists('##WinNew')
+        execute 'autocmd WinNew * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+    endif
+    if exists('##WinClosed')
+        execute 'autocmd WinClosed * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+    endif
+    execute 'autocmd TabEnter * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw()'
 augroup END
 
 augroup PythonNotebookAutoEnable
