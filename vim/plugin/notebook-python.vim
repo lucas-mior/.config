@@ -57,7 +57,7 @@ if exists('g:loaded_python_notebook_vim')
 endif
 g:loaded_python_notebook_vim = 1
 
-var notebook_python_vim_build: string = 'ueberzugpp-x11-shape-sixel-prep-2026-05-23e'
+var notebook_python_vim_build: string = 'ueberzugpp-x11-shape-sixel-prep-window-clear-2026-05-23a'
 
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
@@ -1911,11 +1911,60 @@ def ClearUeberzugppImages()
     ueberzugpp_visible_image_ids = {}
 enddef
 
+def ClearVisibleFigureTextAreas()
+    if !exists('b:python_notebook_active')
+        return
+    endif
+
+    var screen_col: number = 1
+
+    if exists('*getwininfo')
+        var wininfo: dict<any> = getwininfo(win_getid())[0]
+        screen_col = wininfo.wincol
+
+        if has_key(wininfo, 'textoff')
+            screen_col += wininfo.textoff
+        endif
+    endif
+
+    var available_cols: number = WindowTextWidth()
+    var window_start: number = line('w0')
+    var window_end: number = line('w$')
+    var lnum: number = FindFigureScanStart(window_start)
+
+    while lnum <= window_end
+        var line_str: string = getline(lnum)
+
+        if IsFigureLine(line_str)
+            var start_lnum: number = lnum + 1
+            var end_lnum: number = FindFigureAreaEnd(lnum)
+            var visible_start: number = max([start_lnum, window_start])
+            var visible_end: number = min([end_lnum, window_end])
+
+            if visible_end >= window_end
+                visible_end -= SixelBottomGuardLines()
+            endif
+
+            if visible_start <= visible_end
+                ClearTerminalTextArea(visible_start, visible_end - visible_start + 1, available_cols, screen_col)
+            endif
+
+            lnum = end_lnum + 1
+            continue
+        endif
+
+        lnum += 1
+    endwhile
+enddef
+
 def ClearExternalImages()
     var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
     if IsUeberzugppEngine(engine)
         ClearUeberzugppImages()
+        return
     endif
+
+    ClearVisibleFigureTextAreas()
 enddef
 
 def ClearUeberzugppPreparedImages()
@@ -2275,25 +2324,45 @@ def DrawNotebookFigures()
 enddef
 
 def DrawNotebookFiguresTimer(timer_id: number)
+    if figure_draw_timer == timer_id
+        figure_draw_timer = -1
+    endif
+
     DrawNotebookFigures()
 enddef
 
-def ScheduleNotebookFigureDraw(delay_ms: number = 50)
+def StopNotebookFigureDrawTimer()
     if figure_draw_timer != -1
-        timer_stop(figure_draw_timer)
-    endif
+        try
+            timer_stop(figure_draw_timer)
+        catch
+        endtry
 
+        figure_draw_timer = -1
+    endif
+enddef
+
+def ScheduleNotebookFigureDraw(delay_ms: number = 50)
+    StopNotebookFigureDrawTimer()
     figure_draw_timer = timer_start(max([0, delay_ms]), DrawNotebookFiguresTimer)
 enddef
 
 def NotebookScrollRedraw()
+    ClearExternalImages()
     redraw!
     DrawNotebookFigures()
 enddef
 
 def NotebookRedraw()
+    ClearExternalImages()
     redraw!
     ScheduleNotebookFigureDraw()
+enddef
+
+def NotebookWindowLeave()
+    StopNotebookFigureDrawTimer()
+    ClearExternalImages()
+    redraw!
 enddef
 
 def RunPythonNotebookFromScratch()
@@ -2452,7 +2521,7 @@ def EnablePythonNotebookForBuffer(): bool
     execute 'autocmd VimResized <buffer> call ' .. script_sid .. 'NotebookRedraw()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
-    execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearExternalImages()'
+    execute 'autocmd WinLeave,BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'NotebookWindowLeave()'
     execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'
     augroup END
 
