@@ -87,7 +87,7 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_draw_engine')
-    g:python_notebook_draw_engine = 'chafa'
+    g:python_notebook_draw_engine = 'ueberzugpp'
 endif
 
 # Image engine options:
@@ -99,9 +99,6 @@ endif
 # Sixel/image renderers ultimately need pixel dimensions. These defaults
 # approximate one terminal cell in pixels; tune them if rendered figures
 # are too large, too small, or distorted for your terminal/font.
-if !exists('g:python_notebook_imagemagick_command')
-    g:python_notebook_imagemagick_command = ''
-endif
 
 if !exists('g:python_notebook_cell_width')
     g:python_notebook_cell_width = 10
@@ -124,9 +121,6 @@ endif
 # g:python_notebook_draw_engine is set to 'ueberzugpp'. Leave output empty to
 # let ueberzugpp choose from its config/environment, or set it to one of its
 # supported outputs such as 'x11', 'wayland', 'sixel', 'kitty', or 'chafa'.
-if !exists('g:python_notebook_ueberzugpp_command')
-    g:python_notebook_ueberzugpp_command = 'ueberzugpp'
-endif
 
 if !exists('g:python_notebook_ueberzugpp_output')
     g:python_notebook_ueberzugpp_output = 'x11'
@@ -246,24 +240,6 @@ def NotebookFigureLines(): number
     return figure_lines
 enddef
 
-def ImageMagickCommand(): string
-    var configured_command: string = GetStringSetting(
-        'python_notebook_imagemagick_command', '')
-    if !empty(configured_command)
-        return expand(configured_command)
-    endif
-
-    if executable('magick')
-        return 'magick'
-    endif
-
-    if executable('convert')
-        return 'convert'
-    endif
-
-    return ''
-enddef
-
 def ImageMagickCellWidth(): number
     var cell_width: number = GetNumberSetting(
         'python_notebook_cell_width', 10)
@@ -304,13 +280,8 @@ def SixelCellHeight(): number
     return cell_height
 enddef
 
-def UeberzugppCommand(): string
-    return expand(GetStringSetting('python_notebook_ueberzugpp_command',
-        'ueberzugpp'))
-enddef
-
 def UeberzugppExecutable(): string
-    var command: string = UeberzugppCommand()
+    var command: string = 'ueberzugpp'
     var resolved: string = exepath(command)
     if !empty(resolved)
         return resolved
@@ -1714,7 +1685,7 @@ def SixelCacheKey(
             .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x'
             .. SixelCellHeight()
     elseif IsImageMagickEngine(engine)
-        extra_key = ':' .. ImageMagickCommand() .. ':'
+        extra_key = ':' .. 'magick' .. ':'
             .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
     endif
 
@@ -1808,7 +1779,7 @@ def GenerateFigureSixel(
             endif
         endtry
     elseif IsImageMagickEngine(engine)
-        var magick_cmd: string = ImageMagickCommand()
+        var magick_cmd: string = 'magick'
         if empty(magick_cmd) || !executable(magick_cmd)
             return ''
         endif
@@ -1910,7 +1881,7 @@ def StartUeberzugppLayerDaemon()
         return
     endif
 
-    var ueberzugpp_cmd: string = UeberzugppCommand()
+    var ueberzugpp_cmd: string = 'ueberzugpp'
     if empty(ueberzugpp_cmd)
         AddUeberzugppLog('g:python_notebook_ueberzugpp_command is empty', true)
         return
@@ -3089,18 +3060,18 @@ def PythonNotebookStatus()
     echomsg '  draw engine: ' .. GetStringSetting(
         'python_notebook_draw_engine', 'chafa')
     echomsg '  chafa found: ' .. string(executable('chafa'))
-    echomsg '  imagemagick command: ' .. ImageMagickCommand()
+    echomsg '  imagemagick command: ' .. 'magick'
     echomsg '  imagemagick command found: '
-        .. string(!empty(ImageMagickCommand()) && executable(ImageMagickCommand()))
+        .. string(!empty('magick') && executable('magick'))
     echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth())
         .. 'x' .. string(ImageMagickCellHeight())
     echomsg '  sixel cell size: ' .. string(SixelCellWidth())
         .. 'x' .. string(SixelCellHeight())
     echomsg '  sixel bottom guard lines: ' .. string(SixelBottomGuardLines())
-    echomsg '  ueberzugpp command: ' .. UeberzugppCommand()
+    echomsg '  ueberzugpp command: ' .. 'ueberzugpp'
     echomsg '  ueberzugpp executable: ' .. UeberzugppExecutable()
     echomsg '  ueberzugpp command found: '
-        .. string(!empty(UeberzugppCommand()) && executable(UeberzugppCommand()))
+        .. string(!empty('ueberzugpp') && executable('ueberzugpp'))
     echomsg '  ueberzugpp output: ' .. UeberzugppOutput()
     echomsg '  ueberzugpp cell size: ' .. string(UeberzugppCellWidth())
         .. 'x' .. string(UeberzugppCellHeight())
