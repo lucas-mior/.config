@@ -57,7 +57,7 @@ if exists('g:loaded_python_notebook_vim')
 endif
 g:loaded_python_notebook_vim = 1
 
-var notebook_python_vim_build: string = 'ueberzugpp-persistent-json-image-prep-worker-2026-05-23c'
+var notebook_python_vim_build: string = 'all-backends-persistent-image-prep-worker-2026-05-23d'
 
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
@@ -91,7 +91,7 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_sixel_engine')
-    g:python_notebook_sixel_engine = 'ueberzugpp'
+    g:python_notebook_sixel_engine = 'chafa'
 endif
 
 # Image engine options:
@@ -489,6 +489,10 @@ def UeberzugppLayerReady(): bool
 enddef
 
 def UseImagePrepWorker(): bool
+    if has_key(g:, 'python_notebook_image_prep_worker')
+        return GetNumberSetting('python_notebook_image_prep_worker', 1) != 0
+    endif
+
     return GetNumberSetting('python_notebook_ueberzugpp_use_image_prep_worker', 1) != 0
 enddef
 
@@ -1616,9 +1620,21 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
         var prepared_path: string = tempname() .. '.png'
 
         try
-            systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
-            if v:shell_error != 0 || !filereadable(prepared_path)
-                return ''
+            if UseImagePrepWorker()
+                var worker_path: string = PrepareImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels, 'sixel', 'chafa image prep')
+                if !empty(worker_path)
+                    prepared_path = worker_path
+                else
+                    systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                    if v:shell_error != 0 || !filereadable(prepared_path)
+                        return ''
+                    endif
+                endif
+            else
+                systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                if v:shell_error != 0 || !filereadable(prepared_path)
+                    return ''
+                endif
             endif
 
             # The helper resizes the PNG proportionally by width, crops the
@@ -1637,16 +1653,45 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var pixel_width: number = max([1, available_cols * ImageMagickCellWidth()])
-        var pixel_height: number = max([1, available_lines * ImageMagickCellHeight()])
+        var python_cmd: string = PythonCommand()
+        var helper_path: string = NotebookHelperPath()
+        if empty(python_cmd) || !executable(python_cmd)
+            return ''
+        endif
 
-        # ImageMagick's SIXEL coder works in pixels, not terminal cells. Resize
-        # to the approximate pixel box represented by the Vim placeholder area,
-        # without upscaling smaller figures, then ask ImageMagick to write sixel
-        # to stdout.
-        var resize_arg: string = pixel_width .. 'x' .. pixel_height .. '>'
-        var cmd: string = shellescape(magick_cmd) .. ' ' .. shellescape(path) .. ' -resize ' .. shellescape(resize_arg) .. ' sixel:-'
-        sixel_data = system(cmd)
+        if empty(helper_path) || !filereadable(helper_path)
+            return ''
+        endif
+
+        var pixel_width: number = max([1, available_cols * ImageMagickCellWidth()])
+        var crop_top_pixels: number = max([0, crop_top_lines * ImageMagickCellHeight()])
+        var crop_height_pixels: number = max([1, available_lines * ImageMagickCellHeight()])
+        var prepared_path: string = tempname() .. '.png'
+
+        try
+            if UseImagePrepWorker()
+                var worker_path: string = PrepareImageWithWorker(path, prepared_path, pixel_width, crop_top_pixels, crop_height_pixels, 'rgba', 'imagemagick image prep')
+                if !empty(worker_path)
+                    prepared_path = worker_path
+                else
+                    systemlist(ShellCommand([python_cmd, helper_path, '--prepare-ueberzugpp-png', path, prepared_path, string(pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                    if v:shell_error != 0 || !filereadable(prepared_path)
+                        return ''
+                    endif
+                endif
+            else
+                systemlist(ShellCommand([python_cmd, helper_path, '--prepare-ueberzugpp-png', path, prepared_path, string(pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                if v:shell_error != 0 || !filereadable(prepared_path)
+                    return ''
+                endif
+            endif
+
+            sixel_data = system(ShellCommand([magick_cmd, prepared_path, 'sixel:-']))
+        finally
+            if !empty(prepared_path) && filereadable(prepared_path)
+                delete(prepared_path)
+            endif
+        endtry
     else
         return ''
     endif
@@ -1880,7 +1925,7 @@ def UeberzugppPreparedCacheKey(path: string, available_cols: number, available_l
     return path .. ':' .. getfsize(path) .. ':' .. getftime(path) .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. ':' .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
 enddef
 
-def PrepareUeberzugppImageWithWorker(path: string, prepared_path: string, max_pixel_width: number, crop_top_pixels: number, crop_height_pixels: number): string
+def PrepareImageWithWorker(path: string, prepared_path: string, max_pixel_width: number, crop_top_pixels: number, crop_height_pixels: number, output_format: string, failure_context: string): string
     var response: dict<any> = ImagePrepWorkerRequest({
         'action': 'prepare',
         'input_path': path,
@@ -1888,6 +1933,7 @@ def PrepareUeberzugppImageWithWorker(path: string, prepared_path: string, max_pi
         'max_pixel_width': max_pixel_width,
         'crop_top_pixels': crop_top_pixels,
         'crop_height_pixels': crop_height_pixels,
+        'output_format': output_format,
     })
 
     if get(response, 'ok', false)
@@ -1896,11 +1942,11 @@ def PrepareUeberzugppImageWithWorker(path: string, prepared_path: string, max_pi
             return response_path
         endif
 
-        AddUeberzugppLog('image prep worker reported success but output is unreadable: ' .. response_path, true)
+        AddUeberzugppLog(failure_context .. ' worker reported success but output is unreadable: ' .. response_path, true)
         return ''
     endif
 
-    AddUeberzugppLog('image prep worker failed; source=' .. path .. '; error=' .. JsonValueToString(get(response, 'error', 'unknown error')), true)
+    AddUeberzugppLog(failure_context .. ' worker failed; source=' .. path .. '; error=' .. JsonValueToString(get(response, 'error', 'unknown error')), true)
     return ''
 enddef
 
@@ -1931,7 +1977,7 @@ def PrepareUeberzugppImage(path: string, available_cols: number, available_lines
     var prepared_path: string = tempname() .. '.png'
 
     if UseImagePrepWorker()
-        var worker_path: string = PrepareUeberzugppImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels)
+        var worker_path: string = PrepareImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels, 'rgba', 'ueberzugpp image prep')
         if !empty(worker_path)
             ueberzugpp_prepared_cache[cache_key] = worker_path
             return worker_path
@@ -2510,6 +2556,7 @@ execute 'command! PythonNotebookUeberzugppLog call ' .. script_sid .. 'PythonNot
 
 augroup PythonNotebookUeberzugpp
     autocmd!
+    execute 'autocmd VimEnter * call ' .. script_sid .. 'StartImagePrepWorker()'
     execute 'autocmd VimEnter * call ' .. script_sid .. 'StartUeberzugppLayerDaemon()'
     execute 'autocmd VimLeavePre * call ' .. script_sid .. 'StopUeberzugppLayerDaemon()'
 augroup END

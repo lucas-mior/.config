@@ -402,6 +402,19 @@ def _image_prep_worker_cli(argv):
 
         return resized
 
+    def save_prepared_image(cropped, output_path, output_format):
+        output_format = _strip_null_bytes(output_format or "rgba")
+
+        if output_format == "sixel":
+            sixel_friendly = _rgba_to_sixel_friendly_palette(Image, cropped)
+            sixel_friendly.save(output_path, format="PNG", optimize=False)
+            return
+
+        if output_format != "rgba":
+            raise ValueError("unknown output_format: {}".format(output_format))
+
+        cropped.save(output_path, format="PNG", optimize=False)
+
     for raw_line in sys.stdin:
         raw_line = raw_line.strip()
         if not raw_line:
@@ -426,6 +439,7 @@ def _image_prep_worker_cli(argv):
             max_pixel_width = int(request.get("max_pixel_width", 1))
             crop_top_pixels = max(0, int(request.get("crop_top_pixels", 0)))
             crop_height_pixels = max(1, int(request.get("crop_height_pixels", 1)))
+            output_format = _strip_null_bytes(request.get("output_format", "rgba"))
 
             if not input_path:
                 raise ValueError("input_path is empty")
@@ -439,7 +453,7 @@ def _image_prep_worker_cli(argv):
 
             resized = cached_resized_image(input_path, max_pixel_width)
             cropped = _crop_vertical(resized, crop_top_pixels, crop_height_pixels)
-            cropped.save(output_path, format="PNG", optimize=False)
+            save_prepared_image(cropped, output_path, output_format)
 
             send_response({
                 "id": request_id,
