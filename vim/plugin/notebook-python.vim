@@ -91,12 +91,13 @@ if !exists('g:python_notebook_sixel_engine')
     g:python_notebook_sixel_engine = 'chafa'
 endif
 
-# Sixel engine options:
+# Image engine options:
 #
 #   let g:python_notebook_sixel_engine = 'chafa'
 #   let g:python_notebook_sixel_engine = 'imagemagick'
+#   let g:python_notebook_sixel_engine = 'ueberzugpp'
 #
-# Sixel renderers ultimately need pixel dimensions. These defaults approximate
+# Sixel/image renderers ultimately need pixel dimensions. These defaults approximate
 # one terminal cell in pixels; tune them if rendered figures are too large, too
 # small, or distorted for your terminal/font.
 if !exists('g:python_notebook_imagemagick_command')
@@ -128,6 +129,26 @@ if !exists('g:python_notebook_sixel_bottom_guard_lines')
     g:python_notebook_sixel_bottom_guard_lines = 0
 endif
 
+# Ueberzug++ runs as a layer daemon. The plugin starts it on VimEnter when
+# g:python_notebook_sixel_engine is set to 'ueberzugpp'. Leave output empty to
+# let ueberzugpp choose from its config/environment, or set it to one of its
+# supported outputs such as 'x11', 'wayland', 'sixel', 'kitty', or 'chafa'.
+if !exists('g:python_notebook_ueberzugpp_command')
+    g:python_notebook_ueberzugpp_command = 'ueberzugpp'
+endif
+
+if !exists('g:python_notebook_ueberzugpp_output')
+    g:python_notebook_ueberzugpp_output = ''
+endif
+
+if !exists('g:python_notebook_ueberzugpp_cell_width')
+    g:python_notebook_ueberzugpp_cell_width = g:python_notebook_sixel_cell_width
+endif
+
+if !exists('g:python_notebook_ueberzugpp_cell_height')
+    g:python_notebook_ueberzugpp_cell_height = g:python_notebook_sixel_cell_height
+endif
+
 var output_start_marker_prefix: string = '# nb-output: start'
 var output_end_marker: string = '# nb-output: end'
 var error_start_marker: string = '# nb-error: start'
@@ -136,6 +157,13 @@ var figure_marker_prefix: string = '# nb-figure: '
 
 var figure_sixel_cache: dict<string> = {}
 var figure_draw_timer: number = -1
+
+var ueberzugpp_pid_file: string = ''
+var ueberzugpp_pid: number = 0
+var ueberzugpp_socket: string = ''
+var ueberzugpp_ready_timer: number = -1
+var ueberzugpp_visible_image_ids: dict<bool> = {}
+var ueberzugpp_prepared_cache: dict<string> = {}
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -239,6 +267,62 @@ def SixelCellHeight(): number
     return cell_height
 enddef
 
+def UeberzugppCommand(): string
+    return expand(GetStringSetting('python_notebook_ueberzugpp_command', 'ueberzugpp'))
+enddef
+
+def UeberzugppExecutable(): string
+    var command: string = UeberzugppCommand()
+    var resolved: string = exepath(command)
+    if !empty(resolved)
+        return resolved
+    endif
+
+    return command
+enddef
+
+def UeberzugppOutput(): string
+    return GetStringSetting('python_notebook_ueberzugpp_output', '')
+enddef
+
+def UeberzugppCellWidth(): number
+    var cell_width: number = GetNumberSetting('python_notebook_ueberzugpp_cell_width', SixelCellWidth())
+    if cell_width <= 0
+        cell_width = SixelCellWidth()
+    endif
+
+    return cell_width
+enddef
+
+def UeberzugppCellHeight(): number
+    var cell_height: number = GetNumberSetting('python_notebook_ueberzugpp_cell_height', SixelCellHeight())
+    if cell_height <= 0
+        cell_height = SixelCellHeight()
+    endif
+
+    return cell_height
+enddef
+
+def IsUeberzugppEngine(engine: string): bool
+    return engine ==# 'ueberzugpp' || engine ==# 'ueberzug++'
+enddef
+
+def UeberzugppTmpDir(): string
+    if exists('$UEBERZUGPP_TMPDIR') && !empty($UEBERZUGPP_TMPDIR)
+        return expand($UEBERZUGPP_TMPDIR)
+    endif
+
+    if has('macunix') && exists('$TMPDIR') && !empty($TMPDIR)
+        return expand($TMPDIR)
+    endif
+
+    return '/tmp'
+enddef
+
+def UeberzugppSocketReady(): bool
+    return !empty(ueberzugpp_socket) && getftype(ueberzugpp_socket) ==# 'socket'
+enddef
+
 def SixelBottomGuardLines(): number
     var guard_lines: number = GetNumberSetting('python_notebook_sixel_bottom_guard_lines', 1)
     if guard_lines < 0
@@ -292,11 +376,14 @@ def FigureDisplayLines(path: string, available_cols: number): number
     if IsImageMagickEngine(engine)
         max_pixel_width = max([1, available_cols * ImageMagickCellWidth()])
         cell_height = ImageMagickCellHeight()
+    elseif IsUeberzugppEngine(engine)
+        max_pixel_width = max([1, available_cols * UeberzugppCellWidth()])
+        cell_height = UeberzugppCellHeight()
     elseif engine !=# 'chafa'
         return fallback_lines
     endif
 
-    var output: list<string> = systemlist([python_cmd, helper_path, '--sixel-display-lines', path, string(max_pixel_width), string(cell_height)])
+    var output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, '--sixel-display-lines', path, string(max_pixel_width), string(cell_height)]))
 
     if v:shell_error != 0 || empty(output)
         return fallback_lines
@@ -316,6 +403,10 @@ enddef
 
 def StripNullBytesFromLines(lines: list<string>): list<string>
     return mapnew(lines, (_, line_str) => StripNullBytes(line_str))
+enddef
+
+def ShellCommand(argv: list<string>): string
+    return join(mapnew(argv, (_, item) => shellescape(item)), ' ')
 enddef
 
 def LastNonBlankLineInRange(start_lnum: number, end_lnum: number, fallback_lnum: number): number
@@ -721,6 +812,7 @@ def JumpToFirstNotebookError(): bool
 enddef
 
 def ClearNotebookOutputs()
+    ClearExternalImages()
     ClearNotebookMatches()
 
     var was_modifiable: bool = &l:modifiable
@@ -982,7 +1074,7 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
         var prepared_path: string = tempname() .. '.png'
 
         try
-            systemlist([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)])
+            systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
             if v:shell_error != 0 || !filereadable(prepared_path)
                 return ''
             endif
@@ -991,7 +1083,7 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             # visible vertical slice, then applies the transparent-palette
             # preparation. Do not pass -s here, because that would resize the
             # prepared paletted image again.
-            sixel_data = system(['chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path])
+            sixel_data = system(ShellCommand(['chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path]))
         finally
             if !empty(prepared_path) && filereadable(prepared_path)
                 delete(prepared_path)
@@ -1024,6 +1116,277 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
     sixel_data = substitute(sixel_data, '\n\+$', '', '')
     figure_sixel_cache[cache_key] = sixel_data
     return sixel_data
+enddef
+
+def StartUeberzugppLayerDaemon()
+    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    if !IsUeberzugppEngine(engine)
+        return
+    endif
+
+    if UeberzugppSocketReady()
+        return
+    endif
+
+    if ueberzugpp_ready_timer != -1
+        return
+    endif
+
+    var ueberzugpp_cmd: string = UeberzugppCommand()
+    if empty(ueberzugpp_cmd) || !executable(ueberzugpp_cmd)
+        return
+    endif
+
+    var tmp_dir: string = UeberzugppTmpDir()
+    if empty(tmp_dir)
+        return
+    endif
+
+    call mkdir(tmp_dir, 'p')
+
+    ueberzugpp_pid_file = tmp_dir .. '/notebook-python-vim-ueberzugpp-' .. getpid() .. '.pid'
+    if filereadable(ueberzugpp_pid_file)
+        delete(ueberzugpp_pid_file)
+    endif
+
+    var argv: list<string> = [UeberzugppExecutable(), 'layer', '--silent', '--no-stdin', '--use-escape-codes', '--pid-file', ueberzugpp_pid_file]
+    var output: string = UeberzugppOutput()
+    if !empty(output)
+        extend(argv, ['-o', output])
+    endif
+
+    try
+        systemlist(ShellCommand(argv))
+    catch
+        return
+    endtry
+
+    if v:shell_error != 0
+        return
+    endif
+
+    for _ in range(1, 50)
+        if RefreshUeberzugppLayerSocket()
+            ScheduleNotebookFigureDraw(0)
+            return
+        endif
+        sleep 10m
+    endfor
+
+    ueberzugpp_ready_timer = timer_start(50, UeberzugppLayerReadyTimer, {'repeat': 100})
+enddef
+
+def RefreshUeberzugppLayerSocket(): bool
+    if UeberzugppSocketReady()
+        return true
+    endif
+
+    if empty(ueberzugpp_pid_file) || !filereadable(ueberzugpp_pid_file)
+        return false
+    endif
+
+    var pid_lines: list<string> = readfile(ueberzugpp_pid_file)
+    if empty(pid_lines)
+        return false
+    endif
+
+    var pid: number = str2nr(pid_lines[0])
+    if pid <= 0
+        return false
+    endif
+
+    var socket_path: string = UeberzugppTmpDir() .. '/ueberzugpp-' .. pid .. '.socket'
+    if getftype(socket_path) !=# 'socket'
+        return false
+    endif
+
+    ueberzugpp_pid = pid
+    ueberzugpp_socket = socket_path
+
+    if filereadable(ueberzugpp_pid_file)
+        delete(ueberzugpp_pid_file)
+    endif
+
+    ueberzugpp_pid_file = ''
+    return true
+enddef
+
+def UeberzugppLayerReadyTimer(timer_id: number)
+    if !RefreshUeberzugppLayerSocket()
+        return
+    endif
+
+    ueberzugpp_ready_timer = -1
+    timer_stop(timer_id)
+    ScheduleNotebookFigureDraw(0)
+enddef
+
+def UeberzugppCmd(args: list<string>): bool
+    if !UeberzugppSocketReady()
+        StartUeberzugppLayerDaemon()
+    endif
+
+    if !UeberzugppSocketReady()
+        return false
+    endif
+
+    var ueberzugpp_cmd: string = UeberzugppCommand()
+    if empty(ueberzugpp_cmd) || !executable(ueberzugpp_cmd)
+        return false
+    endif
+
+    var cmd: string = ShellCommand([UeberzugppExecutable(), 'cmd', '-s', ueberzugpp_socket] + args)
+    systemlist(cmd)
+    return v:shell_error == 0
+enddef
+
+def UeberzugppRemoveImage(identifier: string)
+    if empty(identifier)
+        return
+    endif
+
+    UeberzugppCmd(['-i', identifier, '-a', 'remove'])
+enddef
+
+def ClearUeberzugppImages()
+    if empty(ueberzugpp_visible_image_ids)
+        return
+    endif
+
+    for identifier in keys(ueberzugpp_visible_image_ids)
+        UeberzugppRemoveImage(identifier)
+    endfor
+
+    ueberzugpp_visible_image_ids = {}
+enddef
+
+def ClearExternalImages()
+    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    if IsUeberzugppEngine(engine)
+        ClearUeberzugppImages()
+    endif
+enddef
+
+def ClearUeberzugppPreparedImages()
+    for prepared_path in values(ueberzugpp_prepared_cache)
+        if !empty(prepared_path) && filereadable(prepared_path)
+            delete(prepared_path)
+        endif
+    endfor
+
+    ueberzugpp_prepared_cache = {}
+enddef
+
+def StopUeberzugppLayerDaemon()
+    ClearUeberzugppImages()
+    ClearUeberzugppPreparedImages()
+
+    if ueberzugpp_ready_timer != -1
+        timer_stop(ueberzugpp_ready_timer)
+        ueberzugpp_ready_timer = -1
+    endif
+
+    if UeberzugppSocketReady()
+        UeberzugppCmd(['-a', 'exit'])
+    endif
+
+    if !empty(ueberzugpp_pid_file) && filereadable(ueberzugpp_pid_file)
+        delete(ueberzugpp_pid_file)
+    endif
+
+    ueberzugpp_pid_file = ''
+    ueberzugpp_pid = 0
+    ueberzugpp_socket = ''
+enddef
+
+def UeberzugppPreparedCacheKey(path: string, available_cols: number, available_lines: number, crop_top_lines: number): string
+    return path .. ':' .. getfsize(path) .. ':' .. getftime(path) .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. ':' .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
+enddef
+
+def PrepareUeberzugppImage(path: string, available_cols: number, available_lines: number, crop_top_lines: number, total_lines: number): string
+    if crop_top_lines <= 0 && available_lines >= total_lines
+        return path
+    endif
+
+    var python_cmd: string = PythonCommand()
+    var helper_path: string = NotebookHelperPath()
+
+    if empty(python_cmd) || !executable(python_cmd)
+        return path
+    endif
+
+    if empty(helper_path) || !filereadable(helper_path)
+        return path
+    endif
+
+    var cache_key: string = UeberzugppPreparedCacheKey(path, available_cols, available_lines, crop_top_lines)
+    if has_key(ueberzugpp_prepared_cache, cache_key) && filereadable(ueberzugpp_prepared_cache[cache_key])
+        return ueberzugpp_prepared_cache[cache_key]
+    endif
+
+    var max_pixel_width: number = max([1, available_cols * UeberzugppCellWidth()])
+    var crop_top_pixels: number = max([0, crop_top_lines * UeberzugppCellHeight()])
+    var crop_height_pixels: number = max([1, available_lines * UeberzugppCellHeight()])
+    var prepared_path: string = tempname() .. '.png'
+
+    systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+    if v:shell_error != 0 || !filereadable(prepared_path)
+        return path
+    endif
+
+    ueberzugpp_prepared_cache[cache_key] = prepared_path
+    return prepared_path
+enddef
+
+def ClearTerminalTextArea(visible_start: number, visible_lines: number, available_cols: number, screen_col: number)
+    var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
+    if absolute_row <= 0
+        return
+    endif
+
+    var clear_spaces: string = repeat(' ', available_cols)
+    var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
+
+    for i in range(visible_lines)
+        seq ..= "\<Esc>[" .. (absolute_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+    endfor
+
+    seq ..= "\<Esc>[?80h" .. "\<Esc>8"
+
+    if exists('*echoraw')
+        echoraw(seq)
+    else
+        writefile([seq], '/dev/tty', 'b')
+    endif
+enddef
+
+def DrawFigureAtWithUeberzugpp(path: string, start_lnum: number, end_lnum: number, visible_start: number, visible_lines: number, screen_col: number, available_cols: number)
+    if !UeberzugppSocketReady()
+        StartUeberzugppLayerDaemon()
+    endif
+
+    if !UeberzugppSocketReady()
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[ueberzugpp layer daemon is not ready]')
+        return
+    endif
+
+    var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
+    if absolute_row <= 0
+        return
+    endif
+
+    var crop_top_lines: number = visible_start - start_lnum
+    var total_lines: number = end_lnum - start_lnum + 1
+    var display_path: string = PrepareUeberzugppImage(path, available_cols, visible_lines, crop_top_lines, total_lines)
+    var identifier: string = 'notebook-python-vim-' .. getpid() .. '-' .. win_getid() .. '-' .. start_lnum
+
+    ClearTerminalTextArea(visible_start, visible_lines, available_cols, screen_col)
+
+    if UeberzugppCmd(['-i', identifier, '-a', 'add', '-x', string(max([0, screen_col - 1])), '-y', string(max([0, absolute_row - 1])), '--max-width', string(available_cols), '--max-height', string(visible_lines), '-f', display_path])
+        ueberzugpp_visible_image_ids[identifier] = true
+    else
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[could not render figure with ueberzugpp]')
+    endif
 enddef
 
 def DrawGapText(visible_start: number, visible_lines: number, available_cols: number, screen_col: number, message: string)
@@ -1084,6 +1447,12 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
         return
     endif
 
+    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    if IsUeberzugppEngine(engine)
+        DrawFigureAtWithUeberzugpp(path, start_lnum, end_lnum, visible_start, visible_lines, screen_col, available_cols)
+        return
+    endif
+
     var crop_top_lines: number = visible_start - start_lnum
     var sixel_data: string = GenerateFigureSixel(path, available_cols, visible_lines, crop_top_lines)
     if empty(sixel_data)
@@ -1140,6 +1509,11 @@ def DrawNotebookFigures()
         return
     endif
 
+    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    if IsUeberzugppEngine(engine)
+        ClearUeberzugppImages()
+    endif
+
     var screen_col: number = 1
 
     if exists('*getwininfo')
@@ -1189,11 +1563,13 @@ def ScheduleNotebookFigureDraw(delay_ms: number = 50)
 enddef
 
 def NotebookScrollRedraw()
+    ClearExternalImages()
     redraw!
     DrawNotebookFigures()
 enddef
 
 def NotebookRedraw()
+    ClearExternalImages()
     redraw!
     ScheduleNotebookFigureDraw()
 enddef
@@ -1243,7 +1619,7 @@ def RunPythonNotebookFromScratch()
             return
         endif
 
-        var helper_output: list<string> = systemlist([python_cmd, helper_path, input_path, output_path])
+        var helper_output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, input_path, output_path]))
 
         if v:shell_error != 0 || !filereadable(output_path)
             echohl ErrorMsg
@@ -1354,6 +1730,7 @@ def EnablePythonNotebookForBuffer(): bool
     execute 'autocmd VimResized <buffer> call ' .. script_sid .. 'NotebookRedraw()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
+    execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearExternalImages()'
     execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'
     augroup END
 
@@ -1435,12 +1812,28 @@ def PythonNotebookStatus()
     echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth()) .. 'x' .. string(ImageMagickCellHeight())
     echomsg '  sixel cell size: ' .. string(SixelCellWidth()) .. 'x' .. string(SixelCellHeight())
     echomsg '  sixel bottom guard lines: ' .. string(SixelBottomGuardLines())
+    echomsg '  ueberzugpp command: ' .. UeberzugppCommand()
+    echomsg '  ueberzugpp executable: ' .. UeberzugppExecutable()
+    echomsg '  ueberzugpp command found: ' .. string(!empty(UeberzugppCommand()) && executable(UeberzugppCommand()))
+    echomsg '  ueberzugpp output: ' .. UeberzugppOutput()
+    echomsg '  ueberzugpp cell size: ' .. string(UeberzugppCellWidth()) .. 'x' .. string(UeberzugppCellHeight())
+    echomsg '  ueberzugpp pid: ' .. string(ueberzugpp_pid)
+    echomsg '  ueberzugpp socket: ' .. ueberzugpp_socket
+    echomsg '  ueberzugpp ready: ' .. string(UeberzugppSocketReady())
 enddef
 
 execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'
 execute 'command! PythonNotebookTryEnable call ' .. script_sid .. 'TryEnablePythonNotebook(1)'
 execute 'command! PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookCommand()'
 execute 'command! PythonNotebookClearOutputs call ' .. script_sid .. 'ClearPythonNotebookCommand()'
+execute 'command! PythonNotebookStartUeberzugpp call ' .. script_sid .. 'StartUeberzugppLayerDaemon()'
+execute 'command! PythonNotebookStopUeberzugpp call ' .. script_sid .. 'StopUeberzugppLayerDaemon()'
+
+augroup PythonNotebookUeberzugpp
+    autocmd!
+    execute 'autocmd VimEnter * call ' .. script_sid .. 'StartUeberzugppLayerDaemon()'
+    execute 'autocmd VimLeavePre * call ' .. script_sid .. 'StopUeberzugppLayerDaemon()'
+augroup END
 
 augroup PythonNotebookAutoEnable
     autocmd!
