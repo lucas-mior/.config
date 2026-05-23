@@ -41,7 +41,6 @@ vim9script
 #
 # Commands:
 #
-#    :PythonNotebookStatus
 #    :PythonNotebookTryEnable
 #    :PythonNotebookRunAll
 #    :PythonNotebookClearOutputs
@@ -2958,73 +2957,6 @@ def ClearPythonNotebookCommand()
     NotebookRedraw()
 enddef
 
-def PythonNotebookStatus()
-    var python_cmd: string = 'python3'
-    var helper_path: string = g:python_notebook_helper
-
-    echomsg 'notebook-python.vim status:'
-    echomsg '  build: ' .. notebook_python_vim_build
-    echomsg '  filetype: ' .. &filetype
-    echomsg '  extension: ' .. expand('%:e')
-    echomsg '  is python buffer: ' .. string(IsPythonBuffer())
-    echomsg '  annotation found: ' .. string(HasNotebookAnnotation())
-    echomsg '  active: ' .. string(exists('b:python_notebook_active'))
-    echomsg '  python executable: ' .. python_cmd
-    echomsg '  python executable found: ' .. string(executable(python_cmd))
-    echomsg '  helper script: ' .. helper_path
-    echomsg '  helper script found: ' .. string(filereadable(helper_path))
-    echomsg '  figure dir: ' .. NotebookFigureDir()
-    echomsg '  figure lines: ' .. string(NotebookFigureLines())
-    echomsg '  draw engine: ' .. GetStringSetting(
-        'python_notebook_draw_engine', 'chafa')
-    echomsg '  chafa found: ' .. string(executable('chafa'))
-    echomsg '  imagemagick command: ' .. 'magick'
-    echomsg '  imagemagick command found: '
-        .. string(!empty('magick') && executable('magick'))
-    echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth())
-        .. 'x' .. string(ImageMagickCellHeight())
-    echomsg '  sixel cell size: ' .. string(SixelCellWidth())
-        .. 'x' .. string(SixelCellHeight())
-    echomsg '  sixel bottom guard lines: ' .. string(SixelBottomGuardLines())
-    echomsg '  ueberzugpp command: ' .. 'ueberzugpp'
-    echomsg '  ueberzugpp executable: ' .. UeberzugppExecutable()
-    echomsg '  ueberzugpp command found: '
-        .. string(!empty('ueberzugpp') && executable('ueberzugpp'))
-    echomsg '  ueberzugpp output: ' .. UeberzugppOutput()
-    echomsg '  ueberzugpp cell size: ' .. string(UeberzugppCellWidth())
-        .. 'x' .. string(UeberzugppCellHeight())
-    echomsg '  ueberzugpp pid: ' .. string(ueberzugpp_pid)
-    echomsg '  ueberzugpp job status: ' .. UeberzugppJobStatus()
-    echomsg '  ueberzugpp channel status: ' .. UeberzugppChannelStatus()
-    echomsg '  ueberzugpp job ready: ' .. string(UeberzugppLayerReady())
-    echomsg '  ueberzugpp stdout to tty: ' .. string(UeberzugppStdoutToTty())
-    echomsg '  ueberzugpp last error: ' .. ueberzugpp_last_error
-    echomsg '  ueberzugpp last stdout: ' .. ueberzugpp_last_stdout
-    echomsg '  ueberzugpp last stderr: ' .. ueberzugpp_last_stderr
-    echomsg '  ueberzugpp last exit status: ' .. ueberzugpp_last_exit_status
-    echomsg '  ueberzugpp last command: ' .. ueberzugpp_last_command
-    echomsg '  image prep worker enabled: true'
-    echomsg '  image prep worker timeout ms: '
-        .. string(ImagePrepWorkerTimeoutMs())
-    echomsg '  image prep worker cache size: '
-        .. string(ImagePrepWorkerCacheSize())
-    echomsg '  image prep worker pid: ' .. string(image_prep_worker_pid)
-    echomsg '  image prep worker job status: ' .. ImagePrepWorkerJobStatus()
-    echomsg '  image prep worker channel status: '
-        .. ImagePrepWorkerChannelStatus()
-    echomsg '  image prep worker ready: ' .. string(ImagePrepWorkerReady())
-    echomsg '  image prep worker last error: ' .. image_prep_worker_last_error
-    echomsg '  image prep worker last stderr: ' .. image_prep_worker_last_stderr
-    echomsg '  image prep worker last exit status: '
-        .. image_prep_worker_last_exit_status
-    echomsg '  image prep worker last request: '
-        .. image_prep_worker_last_request
-    echomsg '  image prep worker last response: '
-        .. image_prep_worker_last_response
-enddef
-
-execute 'command! PythonNotebookStatus call '
-    .. script_sid .. 'PythonNotebookStatus()'
 execute 'command! PythonNotebookTryEnable call '
     .. script_sid .. 'TryEnablePythonNotebook(1)'
 execute 'command! PythonNotebookRunAll call '
