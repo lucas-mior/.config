@@ -49,7 +49,7 @@ vim9script
 #
 # Shortcuts in active notebook buffers:
 #
-#    <C-l>      run everything from the top, from scratch
+#    <C-l>    run everything from the top, from scratch
 #    <leader>b clear all generated outputs
 
 if exists('g:loaded_python_notebook_vim')
@@ -96,9 +96,9 @@ endif
 #    let g:python_notebook_draw_engine = 'imagemagick'
 #    let g:python_notebook_draw_engine = 'ueberzugpp'
 #
-# Sixel/image renderers ultimately need pixel dimensions. These defaults approximate
-# one terminal cell in pixels; tune them if rendered figures are too large, too
-# small, or distorted for your terminal/font.
+# Sixel/image renderers ultimately need pixel dimensions. These defaults
+# approximate one terminal cell in pixels; tune them if rendered figures
+# are too large, too small, or distorted for your terminal/font.
 if !exists('g:python_notebook_imagemagick_command')
     g:python_notebook_imagemagick_command = ''
 endif
@@ -223,11 +223,13 @@ def GetNumberSetting(name: string, default_value: number): number
 enddef
 
 def NotebookHelperPath(): string
-    return expand(GetStringSetting('python_notebook_helper', script_dir .. '/notebook-python-draw.py'))
+    return expand(GetStringSetting('python_notebook_helper',
+        script_dir .. '/notebook-python-draw.py'))
 enddef
 
 def NotebookCacheDir(): string
-    return expand(GetStringSetting('python_notebook_cache_dir', expand('~/.cache/notebook-python-vim')))
+    return expand(GetStringSetting('python_notebook_cache_dir',
+        expand('~/.cache/notebook-python-vim')))
 enddef
 
 def NotebookFigureDir(): string
@@ -235,7 +237,8 @@ def NotebookFigureDir(): string
 enddef
 
 def NotebookFigureLines(): number
-    var figure_lines: number = GetNumberSetting('python_notebook_figure_lines', 18)
+    var figure_lines: number = GetNumberSetting(
+        'python_notebook_figure_lines', 18)
     if figure_lines <= 0
         figure_lines = 18
     endif
@@ -244,7 +247,8 @@ def NotebookFigureLines(): number
 enddef
 
 def ImageMagickCommand(): string
-    var configured_command: string = GetStringSetting('python_notebook_imagemagick_command', '')
+    var configured_command: string = GetStringSetting(
+        'python_notebook_imagemagick_command', '')
     if !empty(configured_command)
         return expand(configured_command)
     endif
@@ -261,7 +265,8 @@ def ImageMagickCommand(): string
 enddef
 
 def ImageMagickCellWidth(): number
-    var cell_width: number = GetNumberSetting('python_notebook_cell_width', 10)
+    var cell_width: number = GetNumberSetting(
+        'python_notebook_cell_width', 10)
     if cell_width <= 0
         cell_width = 10
     endif
@@ -270,7 +275,8 @@ def ImageMagickCellWidth(): number
 enddef
 
 def ImageMagickCellHeight(): number
-    var cell_height: number = GetNumberSetting('python_notebook_cell_height', 20)
+    var cell_height: number = GetNumberSetting(
+        'python_notebook_cell_height', 20)
     if cell_height <= 0
         cell_height = 20
     endif
@@ -279,7 +285,8 @@ def ImageMagickCellHeight(): number
 enddef
 
 def SixelCellWidth(): number
-    var cell_width: number = GetNumberSetting('python_notebook_sixel_cell_width', ImageMagickCellWidth())
+    var cell_width: number = GetNumberSetting(
+        'python_notebook_sixel_cell_width', ImageMagickCellWidth())
     if cell_width <= 0
         cell_width = ImageMagickCellWidth()
     endif
@@ -288,7 +295,8 @@ def SixelCellWidth(): number
 enddef
 
 def SixelCellHeight(): number
-    var cell_height: number = GetNumberSetting('python_notebook_sixel_cell_height', ImageMagickCellHeight())
+    var cell_height: number = GetNumberSetting(
+        'python_notebook_sixel_cell_height', ImageMagickCellHeight())
     if cell_height <= 0
         cell_height = ImageMagickCellHeight()
     endif
@@ -297,7 +305,8 @@ def SixelCellHeight(): number
 enddef
 
 def UeberzugppCommand(): string
-    return expand(GetStringSetting('python_notebook_ueberzugpp_command', 'ueberzugpp'))
+    return expand(GetStringSetting('python_notebook_ueberzugpp_command',
+        'ueberzugpp'))
 enddef
 
 def UeberzugppExecutable(): string
@@ -315,7 +324,8 @@ def UeberzugppOutput(): string
 enddef
 
 def UeberzugppPreparedOutputFormat(): string
-    var configured_format: string = GetStringSetting('python_notebook_ueberzugpp_prepared_output_format', '')
+    var configured_format: string = GetStringSetting(
+        'python_notebook_ueberzugpp_prepared_output_format', '')
     if !empty(configured_format)
         return configured_format
     endif
@@ -341,7 +351,8 @@ def UeberzugppPrepareCommandForFormat(output_format: string): string
 enddef
 
 def UeberzugppCellWidth(): number
-    var cell_width: number = GetNumberSetting('python_notebook_cell_width', SixelCellWidth())
+    var cell_width: number = GetNumberSetting('python_notebook_cell_width',
+        SixelCellWidth())
     if cell_width <= 0
         cell_width = SixelCellWidth()
     endif
@@ -350,7 +361,8 @@ def UeberzugppCellWidth(): number
 enddef
 
 def UeberzugppCellHeight(): number
-    var cell_height: number = GetNumberSetting('python_notebook_cell_height', SixelCellHeight())
+    var cell_height: number = GetNumberSetting('python_notebook_cell_height',
+        SixelCellHeight())
     if cell_height <= 0
         cell_height = SixelCellHeight()
     endif
@@ -367,7 +379,8 @@ def UeberzugppDebugEnabled(): bool
 enddef
 
 def UeberzugppLogLimit(): number
-    var limit: number = GetNumberSetting('python_notebook_ueberzugpp_log_limit', 80)
+    var limit: number = GetNumberSetting(
+        'python_notebook_ueberzugpp_log_limit', 80)
     if limit <= 0
         limit = 80
     endif
@@ -461,7 +474,8 @@ def UeberzugppExitCb(job: any, status: number)
     if status == 0
         AddUeberzugppLog('layer process exited with status 0')
     else
-        AddUeberzugppLog('layer process exited with status ' .. string(status), true)
+        AddUeberzugppLog('layer process exited with status '
+            .. string(status), true)
     endif
 
     ueberzugpp_job = v:none
@@ -497,11 +511,13 @@ def UseImagePrepWorker(): bool
         return GetNumberSetting('python_notebook_image_prep_worker', 1) != 0
     endif
 
-    return GetNumberSetting('python_notebook_ueberzugpp_use_image_prep_worker', 1) != 0
+    return GetNumberSetting(
+        'python_notebook_ueberzugpp_use_image_prep_worker', 1) != 0
 enddef
 
 def ImagePrepWorkerTimeoutMs(): number
-    var timeout_ms: number = GetNumberSetting('python_notebook_image_prep_worker_timeout_ms', 2000)
+    var timeout_ms: number = GetNumberSetting(
+        'python_notebook_image_prep_worker_timeout_ms', 2000)
     if timeout_ms <= 0
         timeout_ms = 2000
     endif
@@ -510,7 +526,8 @@ def ImagePrepWorkerTimeoutMs(): number
 enddef
 
 def ImagePrepWorkerCacheSize(): number
-    var cache_size: number = GetNumberSetting('python_notebook_image_prep_worker_cache_size', 16)
+    var cache_size: number = GetNumberSetting(
+        'python_notebook_image_prep_worker_cache_size', 16)
     if cache_size <= 0
         cache_size = 16
     endif
@@ -555,7 +572,8 @@ def ImagePrepWorkerReady(): bool
         return false
     endif
 
-    if type(image_prep_worker_job) != v:t_job || job_status(image_prep_worker_job) !=# 'run'
+    if type(image_prep_worker_job) != v:t_job
+            || job_status(image_prep_worker_job) !=# 'run'
         return false
     endif
 
@@ -589,7 +607,8 @@ def ImagePrepWorkerExitCb(job: any, status: number)
     if status == 0
         AddUeberzugppLog('image prep worker exited with status 0')
     else
-        image_prep_worker_last_error = 'image prep worker exited with status ' .. string(status)
+        image_prep_worker_last_error = 'image prep worker exited with status '
+            .. string(status)
         AddUeberzugppLog(image_prep_worker_last_error, true)
     endif
 
@@ -609,20 +628,26 @@ def StartImagePrepWorker()
     endif
 
     if !exists('*job_start')
-        image_prep_worker_last_error = 'job_start() is unavailable in this Vim build'
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error =
+            'job_start() is unavailable in this Vim build'
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         return
     endif
 
     if !exists('*job_getchannel')
-        image_prep_worker_last_error = 'job_getchannel() is unavailable in this Vim build'
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error =
+            'job_getchannel() is unavailable in this Vim build'
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         return
     endif
 
     if !exists('*ch_sendraw') || !exists('*ch_readraw')
-        image_prep_worker_last_error = 'ch_sendraw()/ch_readraw() is unavailable in this Vim build'
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error =
+            'ch_sendraw()/ch_readraw() is unavailable in this Vim build'
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         return
     endif
 
@@ -630,20 +655,25 @@ def StartImagePrepWorker()
     var helper_path: string = NotebookHelperPath()
 
     if empty(python_cmd) || !executable(python_cmd)
-        image_prep_worker_last_error = 'Python executable not found: ' .. python_cmd
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error = 'Python executable not found: '
+            .. python_cmd
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         return
     endif
 
     if empty(helper_path) || !filereadable(helper_path)
-        image_prep_worker_last_error = 'helper script not found: ' .. helper_path
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error = 'helper script not found: '
+            .. helper_path
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         return
     endif
 
     var argv: list<string> = [python_cmd, helper_path, '--image-prep-worker']
     var env: dict<string> = {
-        'NOTEBOOK_VIM_IMAGE_PREP_CACHE_SIZE': string(ImagePrepWorkerCacheSize()),
+        'NOTEBOOK_VIM_IMAGE_PREP_CACHE_SIZE':
+            string(ImagePrepWorkerCacheSize()),
     }
 
     var job_options: dict<any> = {
@@ -660,14 +690,16 @@ def StartImagePrepWorker()
     }
 
     if UeberzugppDebugEnabled()
-        AddUeberzugppLog('starting image prep worker: ' .. join(mapnew(copy(argv), (_, item) => shellescape(item)), ' '))
+        AddUeberzugppLog('starting image prep worker: ' .. join(mapnew(
+            copy(argv), (_, item) => shellescape(item)), ' '))
     endif
 
     try
         image_prep_worker_job = job_start(argv, job_options)
     catch
         image_prep_worker_last_error = 'job_start() failed: ' .. v:exception
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         image_prep_worker_job = v:none
         image_prep_worker_channel = v:none
         image_prep_worker_pid = 0
@@ -675,8 +707,11 @@ def StartImagePrepWorker()
     endtry
 
     if type(image_prep_worker_job) != v:t_job
-        image_prep_worker_last_error = 'job_start() did not return a job object; returned type=' .. string(type(image_prep_worker_job))
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error =
+            'job_start() did not return a job object; returned type='
+            .. string(type(image_prep_worker_job))
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         image_prep_worker_job = v:none
         image_prep_worker_channel = v:none
         image_prep_worker_pid = 0
@@ -684,8 +719,10 @@ def StartImagePrepWorker()
     endif
 
     if ImagePrepWorkerJobStatus() !=# 'run'
-        image_prep_worker_last_error = 'worker did not start; job status=' .. ImagePrepWorkerJobStatus()
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error =
+            'worker did not start; job status=' .. ImagePrepWorkerJobStatus()
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         image_prep_worker_job = v:none
         image_prep_worker_channel = v:none
         image_prep_worker_pid = 0
@@ -695,8 +732,10 @@ def StartImagePrepWorker()
     try
         image_prep_worker_channel = job_getchannel(image_prep_worker_job)
     catch
-        image_prep_worker_last_error = 'job_getchannel() failed: ' .. v:exception
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error = 'job_getchannel() failed: '
+            .. v:exception
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         try
             job_stop(image_prep_worker_job, 'term')
         catch
@@ -715,8 +754,11 @@ def StartImagePrepWorker()
     endtry
 
     if !ImagePrepWorkerReady()
-        image_prep_worker_last_error = 'worker channel is not ready; job status=' .. ImagePrepWorkerJobStatus() .. ', channel status=' .. ImagePrepWorkerChannelStatus()
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error = 'worker channel is not ready; status='
+            .. ImagePrepWorkerJobStatus() .. ', channel status='
+            .. ImagePrepWorkerChannelStatus()
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         try
             job_stop(image_prep_worker_job, 'term')
         catch
@@ -729,19 +771,24 @@ def StartImagePrepWorker()
 
     image_prep_worker_stdout_buffer = ''
     if UeberzugppDebugEnabled()
-        AddUeberzugppLog('image prep worker ready; pid=' .. string(image_prep_worker_pid) .. ', channel status=' .. ImagePrepWorkerChannelStatus())
+        AddUeberzugppLog('image prep worker ready; pid='
+            .. string(image_prep_worker_pid) .. ', channel status='
+            .. ImagePrepWorkerChannelStatus())
     endif
 enddef
 
 def ImagePrepWorkerTakeResponse(request_id: string): any
     while true
-        var newline_index: number = stridx(image_prep_worker_stdout_buffer, "\n")
+        var newline_index: number = stridx(
+            image_prep_worker_stdout_buffer, "\n")
         if newline_index < 0
             return v:none
         endif
 
-        var line_str: string = strpart(image_prep_worker_stdout_buffer, 0, newline_index)
-        image_prep_worker_stdout_buffer = strpart(image_prep_worker_stdout_buffer, newline_index + 1)
+        var line_str: string = strpart(image_prep_worker_stdout_buffer, 0,
+            newline_index)
+        image_prep_worker_stdout_buffer = strpart(
+            image_prep_worker_stdout_buffer, newline_index + 1)
         line_str = substitute(StripNullBytes(line_str), '\r$', '', '')
 
         if empty(line_str)
@@ -752,14 +799,18 @@ def ImagePrepWorkerTakeResponse(request_id: string): any
         try
             decoded = json_decode(line_str)
         catch
-            image_prep_worker_last_error = 'could not decode worker response: ' .. line_str
-            AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+            image_prep_worker_last_error =
+                'could not decode worker response: ' .. line_str
+            AddUeberzugppLog('image prep worker: '
+                .. image_prep_worker_last_error, true)
             continue
         endtry
 
         if type(decoded) != v:t_dict
-            image_prep_worker_last_error = 'worker response was not a dict: ' .. line_str
-            AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+            image_prep_worker_last_error =
+                'worker response was not a dict: ' .. line_str
+            AddUeberzugppLog('image prep worker: '
+                .. image_prep_worker_last_error, true)
             continue
         endif
 
@@ -770,7 +821,8 @@ def ImagePrepWorkerTakeResponse(request_id: string): any
         endif
 
         if UeberzugppDebugEnabled()
-            AddUeberzugppLog('image prep worker ignored response for id=' .. response_id .. '; waiting for id=' .. request_id)
+            AddUeberzugppLog('image prep worker ignored response for id='
+                .. response_id .. '; waiting for id=' .. request_id)
         endif
     endwhile
 
@@ -789,11 +841,18 @@ def ImagePrepWorkerReadResponse(request_id: string, timeout_ms: number): any
 
         var chunk: string = ''
         try
-            chunk = ch_readraw(image_prep_worker_channel, {'part': 'out', 'timeout': slice_ms})
+            chunk = ch_readraw(image_prep_worker_channel,
+                {'part': 'out', 'timeout': slice_ms})
         catch
-            image_prep_worker_last_error = 'ch_readraw() failed: ' .. v:exception
-            AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
-            return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+            image_prep_worker_last_error = 'ch_readraw() failed: '
+                .. v:exception
+            AddUeberzugppLog('image prep worker: '
+                .. image_prep_worker_last_error, true)
+            return {
+                'id': request_id,
+                'ok': false,
+                'error': image_prep_worker_last_error
+            }
         endtry
 
         if !empty(chunk)
@@ -804,9 +863,15 @@ def ImagePrepWorkerReadResponse(request_id: string, timeout_ms: number): any
         endif
     endwhile
 
-    image_prep_worker_last_error = 'timeout waiting for response id=' .. request_id .. ' after ' .. string(timeout_ms) .. ' ms'
-    AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
-    return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+    image_prep_worker_last_error = 'timeout waiting for response id='
+        .. request_id .. ' after ' .. string(timeout_ms) .. ' ms'
+    AddUeberzugppLog('image prep worker: '
+        .. image_prep_worker_last_error, true)
+    return {
+        'id': request_id,
+        'ok': false,
+        'error': image_prep_worker_last_error
+    }
 enddef
 
 def ImagePrepWorkerRequest(command: dict<any>): dict<any>
@@ -819,36 +884,53 @@ def ImagePrepWorkerRequest(command: dict<any>): dict<any>
     endif
 
     if !ImagePrepWorkerReady()
-        image_prep_worker_last_error = 'worker is not ready; job status=' .. ImagePrepWorkerJobStatus() .. ', channel status=' .. ImagePrepWorkerChannelStatus()
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_last_error = 'worker is not ready; job status='
+            .. ImagePrepWorkerJobStatus() .. ', channel status='
+            .. ImagePrepWorkerChannelStatus()
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
         return {'ok': false, 'error': image_prep_worker_last_error}
     endif
 
     image_prep_worker_next_request_id += 1
-    var request_id: string = string(getpid()) .. '-' .. string(image_prep_worker_next_request_id)
+    var request_id: string = string(getpid()) .. '-'
+        .. string(image_prep_worker_next_request_id)
     command['id'] = request_id
     image_prep_worker_last_request = json_encode(command)
 
     try
-        ch_sendraw(image_prep_worker_channel, image_prep_worker_last_request .. "\n")
+        ch_sendraw(image_prep_worker_channel,
+            image_prep_worker_last_request .. "\n")
     catch
         image_prep_worker_last_error = 'ch_sendraw() failed: ' .. v:exception
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
-        return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
+        return {
+            'id': request_id,
+            'ok': false,
+            'error': image_prep_worker_last_error
+        }
     endtry
 
-    var response_any: any = ImagePrepWorkerReadResponse(request_id, ImagePrepWorkerTimeoutMs())
+    var response_any: any = ImagePrepWorkerReadResponse(request_id,
+        ImagePrepWorkerTimeoutMs())
     if type(response_any) != v:t_dict
         image_prep_worker_last_error = 'worker returned a non-dict response'
-        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
-        return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+        AddUeberzugppLog('image prep worker: '
+            .. image_prep_worker_last_error, true)
+        return {
+            'id': request_id,
+            'ok': false,
+            'error': image_prep_worker_last_error
+        }
     endif
 
     var response: dict<any> = response_any
     image_prep_worker_last_response = json_encode(response)
 
     if !get(response, 'ok', false)
-        image_prep_worker_last_error = JsonValueToString(get(response, 'error', 'unknown worker error'))
+        image_prep_worker_last_error = JsonValueToString(get(response, 'error',
+            'unknown worker error'))
     endif
 
     return response
@@ -857,7 +939,8 @@ enddef
 def StopImagePrepWorker()
     if ImagePrepWorkerReady()
         try
-            ch_sendraw(image_prep_worker_channel, json_encode({'action': 'exit', 'id': 'exit'}) .. "\n")
+            ch_sendraw(image_prep_worker_channel,
+                json_encode({'action': 'exit', 'id': 'exit'}) .. "\n")
         catch
         endtry
 
@@ -874,7 +957,8 @@ def StopImagePrepWorker()
 enddef
 
 def SixelBottomGuardLines(): number
-    var guard_lines: number = GetNumberSetting('python_notebook_sixel_bottom_guard_lines', 1)
+    var guard_lines: number = GetNumberSetting(
+        'python_notebook_sixel_bottom_guard_lines', 1)
     if guard_lines < 0
         guard_lines = 0
     endif
@@ -898,7 +982,9 @@ def WindowTextWidth(): number
 enddef
 
 def IsImageMagickEngine(engine: string): bool
-    return engine ==# 'imagemagick' || engine ==# 'magick' || engine ==# 'convert'
+    return engine ==# 'imagemagick'
+        || engine ==# 'magick'
+        || engine ==# 'convert'
 enddef
 
 def FigureDisplayLines(path: string, available_cols: number): number
@@ -908,7 +994,8 @@ def FigureDisplayLines(path: string, available_cols: number): number
         return fallback_lines
     endif
 
-    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
+    var engine: string = GetStringSetting(
+        'python_notebook_draw_engine', 'chafa')
     var python_cmd: string = 'python3'
     var helper_path: string = NotebookHelperPath()
 
@@ -933,7 +1020,14 @@ def FigureDisplayLines(path: string, available_cols: number): number
         return fallback_lines
     endif
 
-    var output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, '--sixel-display-lines', path, string(max_pixel_width), string(cell_height)]))
+    var output: list<string> = systemlist(ShellCommand([
+        python_cmd,
+        helper_path,
+        '--sixel-display-lines',
+        path,
+        string(max_pixel_width),
+        string(cell_height)
+    ]))
 
     if v:shell_error != 0 || empty(output)
         return fallback_lines
@@ -959,7 +1053,11 @@ def ShellCommand(argv: list<string>): string
     return join(mapnew(argv, (_, item) => shellescape(item)), ' ')
 enddef
 
-def LastNonBlankLineInRange(start_lnum: number, end_lnum: number, fallback_lnum: number): number
+def LastNonBlankLineInRange(
+    start_lnum: number,
+    end_lnum: number,
+    fallback_lnum: number
+): number
     var lnum: number = end_lnum
 
     while lnum >= start_lnum
@@ -981,14 +1079,19 @@ enddef
 
 def EnsureNotebookHighlightGroups()
     execute 'highlight default link MdNotebookOutput Comment'
-    execute 'highlight MdNotebookFigure ctermfg=DarkGray ctermbg=NONE guifg=#808080 guibg=NONE'
-    execute 'highlight MdNotebookError ctermfg=Red ctermbg=NONE guifg=#ff5f5f guibg=NONE'
-    execute 'highlight MdNotebookStdout ctermfg=White ctermbg=NONE guifg=#ffffff guibg=NONE'
-    execute 'highlight MdNotebookResult ctermfg=Blue ctermbg=NONE guifg=#5fafff guibg=NONE'
+    execute 'highlight MdNotebookFigure ctermfg=DarkGray ctermbg=NONE '
+        .. 'guifg=#808080 guibg=NONE'
+    execute 'highlight MdNotebookError ctermfg=Red ctermbg=NONE '
+        .. 'guifg=#ff5f5f guibg=NONE'
+    execute 'highlight MdNotebookStdout ctermfg=White ctermbg=NONE '
+        .. 'guifg=#ffffff guibg=NONE'
+    execute 'highlight MdNotebookResult ctermfg=Blue ctermbg=NONE '
+        .. 'guifg=#5fafff guibg=NONE'
 enddef
 
 def HasNotebookAnnotation(): bool
-    var scan_lines: number = GetNumberSetting('python_notebook_annotation_scan_lines', 40)
+    var scan_lines: number = GetNumberSetting(
+        'python_notebook_annotation_scan_lines', 40)
     if scan_lines <= 0
         scan_lines = 40
     endif
@@ -1064,7 +1167,8 @@ def ResolveFigureRef(figure_ref: string): string
 enddef
 
 def FigurePathFromLine(line_str: string): string
-    var figure_ref: string = substitute(line_str, '^\s*#\s*nb-figure\s*:\s*', '', '')
+    var figure_ref: string = substitute(
+        line_str, '^\s*#\s*nb-figure\s*:\s*', '', '')
     return ResolveFigureRef(figure_ref)
 enddef
 
@@ -1111,7 +1215,8 @@ def FindFigureAreaEnd(figure_lnum: number): number
     while lnum <= max_lnum
         var line_str: string = getline(lnum)
 
-        if IsOutputEnd(line_str) || IsFigureLine(line_str) || IsErrorStart(line_str)
+        if IsOutputEnd(line_str) || IsFigureLine(line_str)
+                || IsErrorStart(line_str)
             return lnum - 1
         endif
 
@@ -1194,7 +1299,8 @@ def CellLineToBufferLine(cell: dict<any>, relative_line: number): number
 enddef
 
 def OutputInsertLineForResult(cell: dict<any>, result: dict<any>): number
-    var insert_lnum: number = str2nr(string(get(cell, 'insert_after', line('$'))))
+    var insert_lnum: number = str2nr(string(
+        get(cell, 'insert_after', line('$'))))
 
     if ResultHasFigure(result)
         var figure_line: number = str2nr(string(get(result, 'figure_line', 0)))
@@ -1221,12 +1327,14 @@ enddef
 
 def AddNotebookLineMatch(group_name: string, row: number)
     EnsureBufferMatchList()
-    add(b:python_notebook_match_ids, matchadd(group_name, '\%' .. row .. 'l.*', 100))
+    add(b:python_notebook_match_ids,
+        matchadd(group_name, '\%' .. row .. 'l.*', 100))
 enddef
 
 def AddNotebookHeaderWordMatch(group_name: string, row: number, word: string)
     EnsureBufferMatchList()
-    add(b:python_notebook_match_ids, matchadd(group_name, '\%' .. row .. 'l.*\zs\<' .. word .. '\>', 110))
+    add(b:python_notebook_match_ids,
+        matchadd(group_name, '\%' .. row .. 'l.*\zs\<' .. word .. '\>', 110))
 enddef
 
 def RefreshNotebookMatches()
@@ -1325,8 +1433,10 @@ def RefreshNotebookMatches()
                 var figure_lnum: number = first_figure_lnum
                 while figure_lnum < output_end
                     if IsFigureLine(getline(figure_lnum))
-                        var figure_area_end: number = FindFigureAreaEnd(figure_lnum)
-                        for row in range(figure_lnum, min([figure_area_end, output_end - 1]))
+                        var figure_area_end: number = FindFigureAreaEnd(
+                            figure_lnum)
+                        for row in range(figure_lnum,
+                                min([figure_area_end, output_end - 1]))
                             AddNotebookLineMatch('MdNotebookFigure', row)
                         endfor
                         figure_lnum = figure_area_end + 1
@@ -1410,7 +1520,8 @@ def ParseNotebookCells(): list<dict<any>>
             lines = getline(1, max_lnum)
         endif
 
-        var insert_after: number = LastNonBlankLineInRange(1, max_lnum, max_lnum)
+        var insert_after: number = LastNonBlankLineInRange(
+            1, max_lnum, max_lnum)
 
         add(cells, {
             'index': 0,
@@ -1426,7 +1537,8 @@ def ParseNotebookCells(): list<dict<any>>
 
     if markers[0] > 1
         var pre_lines: list<string> = getline(1, markers[0] - 1)
-        var pre_insert_after: number = LastNonBlankLineInRange(1, markers[0] - 1, markers[0] - 1)
+        var pre_insert_after: number = LastNonBlankLineInRange(
+            1, markers[0] - 1, markers[0] - 1)
 
         add(cells, {
             'index': len(cells),
@@ -1454,7 +1566,8 @@ def ParseNotebookCells(): list<dict<any>>
 
         var insert_after: number = marker_lnum
         if code_start <= code_end
-            insert_after = LastNonBlankLineInRange(code_start, code_end, marker_lnum)
+            insert_after = LastNonBlankLineInRange(
+                code_start, code_end, marker_lnum)
         endif
 
         add(cells, {
@@ -1486,7 +1599,12 @@ def ExtendCommented(lines: list<string>, source_lines: list<string>)
     endfor
 enddef
 
-def BuildOutputHeader(has_stdout: bool, has_stderr: bool, has_result: bool, has_figure: bool): string
+def BuildOutputHeader(
+    has_stdout: bool,
+    has_stderr: bool,
+    has_result: bool,
+    has_figure: bool
+): string
     var parts: list<string> = []
 
     if has_stdout
@@ -1515,8 +1633,10 @@ enddef
 def BuildOutputBlock(result: dict<any>): list<string>
     var block: list<string> = []
 
-    var stdout_lines: list<string> = JsonValueToStringList(get(result, 'stdout', []))
-    var stderr_lines: list<string> = JsonValueToStringList(get(result, 'stderr', []))
+    var stdout_lines: list<string> = JsonValueToStringList(
+        get(result, 'stdout', []))
+    var stderr_lines: list<string> = JsonValueToStringList(
+        get(result, 'stderr', []))
     var result_text: string = JsonValueToString(get(result, 'result', ''))
     var figure_refs: list<string> = JsonFigureRefs(get(result, 'figures', []))
 
@@ -1529,7 +1649,8 @@ def BuildOutputBlock(result: dict<any>): list<string>
         return block
     endif
 
-    add(block, BuildOutputHeader(has_stdout, has_stderr, has_result, has_figure))
+    add(block, BuildOutputHeader(
+        has_stdout, has_stderr, has_result, has_figure))
 
     if has_stdout
         ExtendCommented(block, stdout_lines)
@@ -1550,7 +1671,8 @@ def BuildOutputBlock(result: dict<any>): list<string>
             add(block, figure_marker_prefix .. figure_ref)
 
             var figure_path: string = ResolveFigureRef(figure_ref)
-            var figure_lines: number = FigureDisplayLines(figure_path, available_cols)
+            var figure_lines: number = FigureDisplayLines(
+                figure_path, available_cols)
             for _ in range(1, figure_lines)
                 add(block, '#')
             endfor
@@ -1562,7 +1684,8 @@ def BuildOutputBlock(result: dict<any>): list<string>
 enddef
 
 def BuildErrorBlock(result: dict<any>): list<string>
-    var error_lines: list<string> = JsonValueToStringList(get(result, 'error', []))
+    var error_lines: list<string> = JsonValueToStringList(
+        get(result, 'error', []))
     if empty(error_lines)
         return []
     endif
@@ -1574,28 +1697,46 @@ def BuildErrorBlock(result: dict<any>): list<string>
     return block
 enddef
 
-def SixelCacheKey(path: string, available_cols: number, available_lines: number, crop_top_lines: number, engine: string): string
+def SixelCacheKey(
+    path: string,
+    available_cols: number,
+    available_lines: number,
+    crop_top_lines: number,
+    engine: string
+): string
     var file_size: number = getfsize(path)
     var file_mtime: number = getftime(path)
     var extra_key: string = ''
 
     if engine ==# 'chafa'
         var helper_path: string = NotebookHelperPath()
-        extra_key = ':' .. 'python3' .. ':' .. helper_path .. ':' .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x' .. SixelCellHeight()
+        extra_key = ':' .. 'python3' .. ':' .. helper_path .. ':'
+            .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x'
+            .. SixelCellHeight()
     elseif IsImageMagickEngine(engine)
-        extra_key = ':' .. ImageMagickCommand() .. ':' .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
+        extra_key = ':' .. ImageMagickCommand() .. ':'
+            .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
     endif
 
-    return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. extra_key
+    return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime
+        .. ':' .. available_cols .. 'x' .. available_lines .. '@'
+        .. crop_top_lines .. extra_key
 enddef
 
-def GenerateFigureSixel(path: string, available_cols: number, available_lines: number, crop_top_lines: number): string
+def GenerateFigureSixel(
+    path: string,
+    available_cols: number,
+    available_lines: number,
+    crop_top_lines: number
+): string
     if !filereadable(path)
         return ''
     endif
 
-    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
-    var cache_key: string = SixelCacheKey(path, available_cols, available_lines, crop_top_lines, engine)
+    var engine: string = GetStringSetting('python_notebook_draw_engine',
+        'chafa')
+    var cache_key: string = SixelCacheKey(path, available_cols,
+        available_lines, crop_top_lines, engine)
     if has_key(figure_sixel_cache, cache_key)
         return figure_sixel_cache[cache_key]
     endif
@@ -1618,24 +1759,37 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var max_pixel_width: number = max([1, available_cols * SixelCellWidth()])
-        var crop_top_pixels: number = max([0, crop_top_lines * SixelCellHeight()])
-        var crop_height_pixels: number = max([1, available_lines * SixelCellHeight()])
+        var max_pixel_width: number = max([1,
+            available_cols * SixelCellWidth()])
+        var crop_top_pixels: number = max([0,
+            crop_top_lines * SixelCellHeight()])
+        var crop_height_pixels: number = max([1,
+            available_lines * SixelCellHeight()])
         var prepared_path: string = tempname() .. '.png'
 
         try
             if UseImagePrepWorker()
-                var worker_path: string = PrepareImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels, 'sixel', 'chafa image prep')
+                var worker_path: string = PrepareImageWithWorker(path,
+                    prepared_path, max_pixel_width, crop_top_pixels,
+                    crop_height_pixels, 'sixel', 'chafa image prep')
                 if !empty(worker_path)
                     prepared_path = worker_path
                 else
-                    systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                    systemlist(ShellCommand([
+                        python_cmd, helper_path, '--prepare-sixel-png', path,
+                        prepared_path, string(max_pixel_width),
+                        string(crop_top_pixels), string(crop_height_pixels)
+                    ]))
                     if v:shell_error != 0 || !filereadable(prepared_path)
                         return ''
                     endif
                 endif
             else
-                systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                systemlist(ShellCommand([
+                    python_cmd, helper_path, '--prepare-sixel-png', path,
+                    prepared_path, string(max_pixel_width),
+                    string(crop_top_pixels), string(crop_height_pixels)
+                ]))
                 if v:shell_error != 0 || !filereadable(prepared_path)
                     return ''
                 endif
@@ -1645,7 +1799,9 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             # visible vertical slice, then applies the transparent-palette
             # preparation. Do not pass -s here, because that would resize the
             # prepared paletted image again.
-            sixel_data = system(ShellCommand(['chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path]))
+            sixel_data = system(ShellCommand([
+                'chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path
+            ]))
         finally
             if !empty(prepared_path) && filereadable(prepared_path)
                 delete(prepared_path)
@@ -1667,30 +1823,45 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var pixel_width: number = max([1, available_cols * ImageMagickCellWidth()])
-        var crop_top_pixels: number = max([0, crop_top_lines * ImageMagickCellHeight()])
-        var crop_height_pixels: number = max([1, available_lines * ImageMagickCellHeight()])
+        var pixel_width: number = max([1,
+            available_cols * ImageMagickCellWidth()])
+        var crop_top_pixels: number = max([0,
+            crop_top_lines * ImageMagickCellHeight()])
+        var crop_height_pixels: number = max([1,
+            available_lines * ImageMagickCellHeight()])
         var prepared_path: string = tempname() .. '.png'
 
         try
             if UseImagePrepWorker()
-                var worker_path: string = PrepareImageWithWorker(path, prepared_path, pixel_width, crop_top_pixels, crop_height_pixels, 'rgba', 'imagemagick image prep')
+                var worker_path: string = PrepareImageWithWorker(path,
+                    prepared_path, pixel_width, crop_top_pixels,
+                    crop_height_pixels, 'rgba', 'imagemagick image prep')
                 if !empty(worker_path)
                     prepared_path = worker_path
                 else
-                    systemlist(ShellCommand([python_cmd, helper_path, '--prepare-ueberzugpp-png', path, prepared_path, string(pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                    systemlist(ShellCommand([
+                        python_cmd, helper_path, '--prepare-ueberzugpp-png',
+                        path, prepared_path, string(pixel_width),
+                        string(crop_top_pixels), string(crop_height_pixels)
+                    ]))
                     if v:shell_error != 0 || !filereadable(prepared_path)
                         return ''
                     endif
                 endif
             else
-                systemlist(ShellCommand([python_cmd, helper_path, '--prepare-ueberzugpp-png', path, prepared_path, string(pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+                systemlist(ShellCommand([
+                    python_cmd, helper_path, '--prepare-ueberzugpp-png', path,
+                    prepared_path, string(pixel_width),
+                    string(crop_top_pixels), string(crop_height_pixels)
+                ]))
                 if v:shell_error != 0 || !filereadable(prepared_path)
                     return ''
                 endif
             endif
 
-            sixel_data = system(ShellCommand([magick_cmd, prepared_path, 'sixel:-']))
+            sixel_data = system(ShellCommand([
+                magick_cmd, prepared_path, 'sixel:-'
+            ]))
         finally
             if !empty(prepared_path) && filereadable(prepared_path)
                 delete(prepared_path)
@@ -1710,9 +1881,11 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
 enddef
 
 def StartUeberzugppLayerDaemon()
-    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine',
+        'chafa')
     if !IsUeberzugppEngine(engine)
-        AddUeberzugppLog('not starting layer because current engine is ' .. engine)
+        AddUeberzugppLog('not starting layer because current engine is '
+            .. engine)
         return
     endif
 
@@ -1727,7 +1900,8 @@ def StartUeberzugppLayerDaemon()
     endif
 
     if !exists('*job_getchannel')
-        AddUeberzugppLog('job_getchannel() is unavailable in this Vim build', true)
+        AddUeberzugppLog('job_getchannel() is unavailable in this Vim build',
+            true)
         return
     endif
 
@@ -1747,13 +1921,16 @@ def StartUeberzugppLayerDaemon()
         return
     endif
 
-    var argv: list<string> = [UeberzugppExecutable(), 'layer', '--silent', '--use-escape-codes']
+    var argv: list<string> = [
+        UeberzugppExecutable(), 'layer', '--silent', '--use-escape-codes'
+    ]
     var output: string = UeberzugppOutput()
     if !empty(output)
         extend(argv, ['-o', output])
     endif
 
-    AddUeberzugppLog('starting layer job: ' .. join(mapnew(copy(argv), (_, item) => shellescape(item)), ' '))
+    AddUeberzugppLog('starting layer job: ' .. join(mapnew(copy(argv),
+        (_, item) => shellescape(item)), ' '))
 
     var job_options: dict<any> = {
         'in_io': 'pipe',
@@ -1785,7 +1962,9 @@ def StartUeberzugppLayerDaemon()
     endtry
 
     if type(ueberzugpp_job) != v:t_job
-        AddUeberzugppLog('job_start() did not return a job object; returned type=' .. string(type(ueberzugpp_job)), true)
+        AddUeberzugppLog(
+            'job_start() did not return a job object; returned type='
+            .. string(type(ueberzugpp_job)), true)
         ueberzugpp_job = v:none
         ueberzugpp_channel = v:none
         ueberzugpp_pid = 0
@@ -1794,7 +1973,8 @@ def StartUeberzugppLayerDaemon()
 
     var job_status_text: string = UeberzugppJobStatus()
     if job_status_text !=# 'run'
-        AddUeberzugppLog('layer job did not start; job status=' .. job_status_text, true)
+        AddUeberzugppLog('layer job did not start; job status='
+            .. job_status_text, true)
         ueberzugpp_job = v:none
         ueberzugpp_channel = v:none
         ueberzugpp_pid = 0
@@ -1824,7 +2004,9 @@ def StartUeberzugppLayerDaemon()
     endtry
 
     if !UeberzugppLayerReady()
-        AddUeberzugppLog('layer job channel is not ready; job status=' .. UeberzugppJobStatus() .. ', channel status=' .. UeberzugppChannelStatus(), true)
+        AddUeberzugppLog('layer job channel is not ready; job status='
+            .. UeberzugppJobStatus() .. ', channel status='
+            .. UeberzugppChannelStatus(), true)
         try
             job_stop(ueberzugpp_job, 'term')
         catch
@@ -1835,7 +2017,8 @@ def StartUeberzugppLayerDaemon()
         return
     endif
 
-    AddUeberzugppLog('layer job ready; pid=' .. string(ueberzugpp_pid) .. ', channel status=' .. UeberzugppChannelStatus())
+    AddUeberzugppLog('layer job ready; pid=' .. string(ueberzugpp_pid)
+        .. ', channel status=' .. UeberzugppChannelStatus())
     ScheduleNotebookFigureDraw(0)
 enddef
 
@@ -1843,19 +2026,24 @@ def UeberzugppSendJson(command: dict<any>): bool
     ueberzugpp_last_command = json_encode(command)
 
     if !UeberzugppLayerReady()
-        AddUeberzugppLog('send requested while layer is not ready; attempting restart; command=' .. ueberzugpp_last_command)
+        AddUeberzugppLog('send requested while layer is not ready; '
+            .. 'attempting restart; command=' .. ueberzugpp_last_command)
         StartUeberzugppLayerDaemon()
     endif
 
     if !UeberzugppLayerReady()
-        AddUeberzugppLog('cannot send command because layer is not ready; job status=' .. UeberzugppJobStatus() .. ', channel status=' .. UeberzugppChannelStatus() .. ', command=' .. ueberzugpp_last_command, true)
+        AddUeberzugppLog('cannot send command because layer is not ready; '
+            .. 'job status=' .. UeberzugppJobStatus() .. ', channel status='
+            .. UeberzugppChannelStatus() .. ', command='
+            .. ueberzugpp_last_command, true)
         return false
     endif
 
     try
         ch_sendraw(ueberzugpp_channel, ueberzugpp_last_command .. "\n")
     catch
-        AddUeberzugppLog('ch_sendraw() failed: ' .. v:exception .. '; command=' .. ueberzugpp_last_command, true)
+        AddUeberzugppLog('ch_sendraw() failed: ' .. v:exception
+            .. '; command=' .. ueberzugpp_last_command, true)
         return false
     endtry
 
@@ -1924,7 +2112,9 @@ def ClearVisibleFigureTextAreas()
             endif
 
             if visible_start <= visible_end
-                ClearTerminalTextArea(visible_start, visible_end - visible_start + 1, available_cols, screen_col)
+                ClearTerminalTextArea(visible_start,
+                    visible_end - visible_start + 1,
+                    available_cols, screen_col)
             endif
 
             lnum = end_lnum + 1
@@ -1936,7 +2126,8 @@ def ClearVisibleFigureTextAreas()
 enddef
 
 def ClearExternalImages()
-    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine',
+        'chafa')
     if IsUeberzugppEngine(engine)
         ClearUeberzugppImages()
         return
@@ -1965,7 +2156,8 @@ def ClearWholeTerminalTextArea()
 enddef
 
 def ClearExternalImagesForLayoutChange()
-    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine',
+        'chafa')
     if IsUeberzugppEngine(engine)
         ClearUeberzugppImages()
         return
@@ -2006,11 +2198,28 @@ def StopUeberzugppLayerDaemon()
     ueberzugpp_pid = 0
 enddef
 
-def UeberzugppPreparedCacheKey(path: string, available_cols: number, available_lines: number, crop_top_lines: number, output_format: string): string
-    return output_format .. ':' .. path .. ':' .. getfsize(path) .. ':' .. getftime(path) .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. ':' .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
+def UeberzugppPreparedCacheKey(
+    path: string,
+    available_cols: number,
+    available_lines: number,
+    crop_top_lines: number,
+    output_format: string
+): string
+    return output_format .. ':' .. path .. ':' .. getfsize(path) .. ':'
+        .. getftime(path) .. ':' .. available_cols .. 'x'
+        .. available_lines .. '@' .. crop_top_lines .. ':'
+        .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
 enddef
 
-def PrepareImageWithWorker(path: string, prepared_path: string, max_pixel_width: number, crop_top_pixels: number, crop_height_pixels: number, output_format: string, failure_context: string): string
+def PrepareImageWithWorker(
+    path: string,
+    prepared_path: string,
+    max_pixel_width: number,
+    crop_top_pixels: number,
+    crop_height_pixels: number,
+    output_format: string,
+    failure_context: string
+): string
     var response: dict<any> = ImagePrepWorkerRequest({
         'action': 'prepare',
         'input_path': path,
@@ -2022,27 +2231,39 @@ def PrepareImageWithWorker(path: string, prepared_path: string, max_pixel_width:
     })
 
     if get(response, 'ok', false)
-        var response_path: string = JsonValueToString(get(response, 'path', prepared_path))
+        var response_path: string = JsonValueToString(get(response, 'path',
+            prepared_path))
         if !empty(response_path) && filereadable(response_path)
             return response_path
         endif
 
-        AddUeberzugppLog(failure_context .. ' worker reported success but output is unreadable: ' .. response_path, true)
+        AddUeberzugppLog(failure_context
+            .. ' worker reported success but output is unreadable: '
+            .. response_path, true)
         return ''
     endif
 
-    AddUeberzugppLog(failure_context .. ' worker failed; source=' .. path .. '; error=' .. JsonValueToString(get(response, 'error', 'unknown error')), true)
+    AddUeberzugppLog(failure_context .. ' worker failed; source=' .. path
+        .. '; error=' .. JsonValueToString(get(response, 'error',
+        'unknown error')), true)
     return ''
 enddef
 
-def PrepareUeberzugppImage(path: string, available_cols: number, available_lines: number, crop_top_lines: number, total_lines: number): string
+def PrepareUeberzugppImage(
+    path: string,
+    available_cols: number,
+    available_lines: number,
+    crop_top_lines: number,
+    total_lines: number
+): string
     var output_format: string = UeberzugppPreparedOutputFormat()
 
     # In plain RGBA mode, a full visible image can be passed directly. In
     # sixel/XShape-prep mode, even a full visible image must be converted so
     # semi-transparent pixels become opaque edge pixels and alpha==0 remains
     # the binary transparency mask.
-    if output_format ==# 'rgba' && crop_top_lines <= 0 && available_lines >= total_lines
+    if output_format ==# 'rgba' && crop_top_lines <= 0
+            && available_lines >= total_lines
         return path
     endif
 
@@ -2057,28 +2278,43 @@ def PrepareUeberzugppImage(path: string, available_cols: number, available_lines
         return path
     endif
 
-    var cache_key: string = UeberzugppPreparedCacheKey(path, available_cols, available_lines, crop_top_lines, output_format)
-    if has_key(ueberzugpp_prepared_cache, cache_key) && filereadable(ueberzugpp_prepared_cache[cache_key])
+    var cache_key: string = UeberzugppPreparedCacheKey(path, available_cols,
+        available_lines, crop_top_lines, output_format)
+    if has_key(ueberzugpp_prepared_cache, cache_key)
+            && filereadable(ueberzugpp_prepared_cache[cache_key])
         return ueberzugpp_prepared_cache[cache_key]
     endif
 
-    var max_pixel_width: number = max([1, available_cols * UeberzugppCellWidth()])
-    var crop_top_pixels: number = max([0, crop_top_lines * UeberzugppCellHeight()])
-    var crop_height_pixels: number = max([1, available_lines * UeberzugppCellHeight()])
+    var max_pixel_width: number = max([1,
+        available_cols * UeberzugppCellWidth()])
+    var crop_top_pixels: number = max([0,
+        crop_top_lines * UeberzugppCellHeight()])
+    var crop_height_pixels: number = max([1,
+        available_lines * UeberzugppCellHeight()])
     var prepared_path: string = tempname() .. '.png'
 
     if UseImagePrepWorker()
-        var worker_path: string = PrepareImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels, output_format, 'ueberzugpp image prep')
+        var worker_path: string = PrepareImageWithWorker(path, prepared_path,
+            max_pixel_width, crop_top_pixels, crop_height_pixels,
+            output_format, 'ueberzugpp image prep')
         if !empty(worker_path)
             ueberzugpp_prepared_cache[cache_key] = worker_path
             return worker_path
         endif
     endif
 
-    var prepare_command: string = UeberzugppPrepareCommandForFormat(output_format)
-    var prepare_output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, prepare_command, path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+    var prepare_command: string = UeberzugppPrepareCommandForFormat(
+        output_format)
+    var prepare_output: list<string> = systemlist(ShellCommand([
+        python_cmd, helper_path, prepare_command, path, prepared_path,
+        string(max_pixel_width), string(crop_top_pixels),
+        string(crop_height_pixels)
+    ]))
     if v:shell_error != 0 || !filereadable(prepared_path)
-        AddUeberzugppLog('image preparation failed; shell_error=' .. string(v:shell_error) .. '; format=' .. output_format .. '; source=' .. path .. '; output=' .. join(StripNullBytesFromLines(prepare_output), ' | '), true)
+        AddUeberzugppLog('image preparation failed; shell_error='
+            .. string(v:shell_error) .. '; format=' .. output_format
+            .. '; source=' .. path .. '; output='
+            .. join(StripNullBytesFromLines(prepare_output), ' | '), true)
         return path
     endif
 
@@ -2086,7 +2322,12 @@ def PrepareUeberzugppImage(path: string, available_cols: number, available_lines
     return prepared_path
 enddef
 
-def ClearTerminalTextArea(visible_start: number, visible_lines: number, available_cols: number, screen_col: number)
+def ClearTerminalTextArea(
+    visible_start: number,
+    visible_lines: number,
+    available_cols: number,
+    screen_col: number
+)
     var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
     if absolute_row <= 0
         return
@@ -2096,7 +2337,8 @@ def ClearTerminalTextArea(visible_start: number, visible_lines: number, availabl
     var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
 
     for i in range(visible_lines)
-        seq ..= "\<Esc>[" .. (absolute_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+        seq ..= "\<Esc>[" .. (absolute_row + i) .. ";" .. screen_col
+            .. "H" .. clear_spaces
     endfor
 
     seq ..= "\<Esc>[?80h" .. "\<Esc>8"
@@ -2108,43 +2350,65 @@ def ClearTerminalTextArea(visible_start: number, visible_lines: number, availabl
     endif
 enddef
 
-def DrawFigureAtWithUeberzugpp(path: string, start_lnum: number, end_lnum: number, visible_start: number, visible_lines: number, screen_col: number, available_cols: number)
+def DrawFigureAtWithUeberzugpp(
+    path: string,
+    start_lnum: number,
+    end_lnum: number,
+    visible_start: number,
+    visible_lines: number,
+    screen_col: number,
+    available_cols: number
+)
     if !UeberzugppLayerReady()
         StartUeberzugppLayerDaemon()
     endif
 
     if !UeberzugppLayerReady()
-        AddUeberzugppLog('draw skipped because layer is not ready; job status=' .. UeberzugppJobStatus() .. ', channel status=' .. UeberzugppChannelStatus(), true)
-        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[ueberzugpp layer daemon is not ready]')
+        AddUeberzugppLog('draw skipped because layer is not ready; job status='
+            .. UeberzugppJobStatus() .. ', channel status='
+            .. UeberzugppChannelStatus(), true)
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col,
+            '[ueberzugpp layer daemon is not ready]')
         return
     endif
 
     var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
     if absolute_row <= 0
-        AddUeberzugppLog('draw skipped because screenpos() returned row=' .. string(absolute_row) .. ' for line=' .. string(visible_start))
+        AddUeberzugppLog('draw skipped because screenpos() returned row='
+            .. string(absolute_row) .. ' for line=' .. string(visible_start))
         return
     endif
 
     var crop_top_lines: number = visible_start - start_lnum
     var total_lines: number = end_lnum - start_lnum + 1
-    var display_path: string = PrepareUeberzugppImage(path, available_cols, visible_lines, crop_top_lines, total_lines)
+    var display_path: string = PrepareUeberzugppImage(path, available_cols,
+        visible_lines, crop_top_lines, total_lines)
 
     if !filereadable(display_path)
-        AddUeberzugppLog('draw skipped because prepared image is not readable; original=' .. path .. '; prepared=' .. display_path, true)
-        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[ueberzugpp prepared image not readable]')
+        AddUeberzugppLog('draw skipped because prepared image is not readable; '
+            .. 'original=' .. path .. '; prepared=' .. display_path, true)
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col,
+            '[ueberzugpp prepared image not readable]')
         return
     endif
 
     if UeberzugppDebugEnabled()
-        AddUeberzugppLog('draw request: original=' .. path .. '; prepared=' .. display_path .. '; line=' .. string(visible_start) .. '; row=' .. string(absolute_row) .. '; col=' .. string(screen_col) .. '; cols=' .. string(available_cols) .. '; lines=' .. string(visible_lines) .. '; crop_top=' .. string(crop_top_lines))
+        AddUeberzugppLog('draw request: original=' .. path .. '; prepared='
+            .. display_path .. '; line=' .. string(visible_start) .. '; row='
+            .. string(absolute_row) .. '; col=' .. string(screen_col)
+            .. '; cols=' .. string(available_cols) .. '; lines='
+            .. string(visible_lines) .. '; crop_top='
+            .. string(crop_top_lines))
     endif
 
     var file_id: string = substitute(fnamemodify(path, ':t'), '\W', '_', 'g')
-    var identifier: string = 'notebook-python-vim-' .. getpid() .. '-' .. win_getid() .. '-' .. file_id
+    var identifier: string = 'notebook-python-vim-' .. getpid() .. '-'
+        .. win_getid() .. '-' .. file_id
 
     ueberzugpp_current_cycle_ids[identifier] = true
 
-    ClearTerminalTextArea(visible_start, visible_lines, available_cols, screen_col)
+    ClearTerminalTextArea(visible_start, visible_lines, available_cols,
+        screen_col)
 
     if UeberzugppSendJson({
             'action': 'add',
@@ -2157,15 +2421,24 @@ def DrawFigureAtWithUeberzugpp(path: string, start_lnum: number, end_lnum: numbe
         })
         ueberzugpp_visible_image_ids[identifier] = true
         if UeberzugppDebugEnabled()
-            AddUeberzugppLog('add command sent for identifier=' .. identifier .. '; path=' .. display_path)
+            AddUeberzugppLog('add command sent for identifier=' .. identifier
+                .. '; path=' .. display_path)
         endif
     else
-        AddUeberzugppLog('add command failed for identifier=' .. identifier .. '; path=' .. display_path, true)
-        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[could not render figure with ueberzugpp]')
+        AddUeberzugppLog('add command failed for identifier=' .. identifier
+            .. '; path=' .. display_path, true)
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col,
+            '[could not render figure with ueberzugpp]')
     endif
 enddef
 
-def DrawGapText(visible_start: number, visible_lines: number, available_cols: number, screen_col: number, message: string)
+def DrawGapText(
+    visible_start: number,
+    visible_lines: number,
+    available_cols: number,
+    screen_col: number,
+    message: string
+)
     var absolute_row: number = screenpos(win_getid(), visible_start, 1).row
     if absolute_row <= 0
         return
@@ -2176,16 +2449,19 @@ def DrawGapText(visible_start: number, visible_lines: number, available_cols: nu
 
     var clipped_message: string = message
     if strdisplaywidth(clipped_message) > available_cols
-        clipped_message = strpart(clipped_message, 0, max([0, available_cols - 1]))
+        clipped_message = strpart(clipped_message, 0,
+            max([0, available_cols - 1]))
     endif
 
     var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
 
     for i in range(visible_lines)
-        seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+        seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col
+            .. "H" .. clear_spaces
     endfor
 
-    seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. "\<Esc>[31m" .. clipped_message .. "\<Esc>[0m"
+    seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. "\<Esc>[31m"
+        .. clipped_message .. "\<Esc>[0m"
     seq ..= "\<Esc>[?80h" .. "\<Esc>8"
 
     if exists('*echoraw')
@@ -2195,7 +2471,13 @@ def DrawGapText(visible_start: number, visible_lines: number, available_cols: nu
     endif
 enddef
 
-def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col: number, available_cols: number)
+def DrawFigureAt(
+    path: string,
+    start_lnum: number,
+    end_lnum: number,
+    screen_col: number,
+    available_cols: number
+)
     var window_start: number = line('w0')
     var window_end: number = line('w$')
 
@@ -2219,20 +2501,25 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
     endif
 
     if !filereadable(path)
-        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[figure not found: ' .. path .. ']')
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col,
+            '[figure not found: ' .. path .. ']')
         return
     endif
 
-    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine',
+        'chafa')
     if IsUeberzugppEngine(engine)
-        DrawFigureAtWithUeberzugpp(path, start_lnum, end_lnum, visible_start, visible_lines, screen_col, available_cols)
+        DrawFigureAtWithUeberzugpp(path, start_lnum, end_lnum, visible_start,
+            visible_lines, screen_col, available_cols)
         return
     endif
 
     var crop_top_lines: number = visible_start - start_lnum
-    var sixel_data: string = GenerateFigureSixel(path, available_cols, visible_lines, crop_top_lines)
+    var sixel_data: string = GenerateFigureSixel(path, available_cols,
+        visible_lines, crop_top_lines)
     if empty(sixel_data)
-        DrawGapText(visible_start, visible_lines, available_cols, screen_col, '[could not render figure as sixel]')
+        DrawGapText(visible_start, visible_lines, available_cols, screen_col,
+            '[could not render figure as sixel]')
         return
     endif
 
@@ -2247,7 +2534,8 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
     var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
 
     for i in range(visible_lines)
-        seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col .. "H" .. clear_spaces
+        seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col
+            .. "H" .. clear_spaces
     endfor
 
     seq ..= "\<Esc>[" .. target_row .. ";" .. screen_col .. "H" .. sixel_data
@@ -2286,7 +2574,8 @@ def DrawOtherVisibleNotebookWindows(current_winid: number)
     endif
 
     for wininfo in getwininfo()
-        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        var tabnr_value: number = str2nr(string(
+            get(wininfo, 'tabnr', tabpagenr())))
         if tabnr_value != tabpagenr()
             continue
         endif
@@ -2303,7 +2592,8 @@ def DrawOtherVisibleNotebookWindows(current_winid: number)
         endif
 
         try
-            win_execute(winid_value, 'call ' .. script_sid .. 'DrawNotebookFigures(false)')
+            win_execute(winid_value,
+                'call ' .. script_sid .. 'DrawNotebookFigures(false)')
         catch
         endtry
     endfor
@@ -2314,7 +2604,8 @@ def DrawNotebookFigures(remove_stale: bool = true)
         return
     endif
 
-    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine',
+        'chafa')
     var should_remove_stale: bool = IsUeberzugppEngine(engine) && remove_stale
 
     if should_remove_stale
@@ -2347,7 +2638,8 @@ def DrawNotebookFigures(remove_stale: bool = true)
             var end_lnum: number = FindFigureAreaEnd(lnum)
 
             if start_lnum <= end_lnum
-                DrawFigureAt(path, start_lnum, end_lnum, screen_col, available_cols)
+                DrawFigureAt(path, start_lnum, end_lnum, screen_col,
+                    available_cols)
             endif
 
             lnum = end_lnum + 1
@@ -2386,13 +2678,15 @@ def AnyVisibleNotebookBuffer(): bool
     endif
 
     for wininfo in getwininfo()
-        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        var tabnr_value: number = str2nr(string(
+            get(wininfo, 'tabnr', tabpagenr())))
         if tabnr_value != tabpagenr()
             continue
         endif
 
         var bufnr_value: number = str2nr(string(get(wininfo, 'bufnr', 0)))
-        if bufnr_value > 0 && getbufvar(bufnr_value, 'python_notebook_active', 0) != 0
+        if bufnr_value > 0
+                && getbufvar(bufnr_value, 'python_notebook_active', 0) != 0
             return true
         endif
     endfor
@@ -2402,13 +2696,15 @@ enddef
 
 def NotebookWindowLayoutSignature(): string
     if !exists('*getwininfo')
-        return string(tabpagenr()) .. ':' .. string(winnr('$')) .. ':' .. string(winwidth(0)) .. 'x' .. string(winheight(0))
+        return string(tabpagenr()) .. ':' .. string(winnr('$')) .. ':'
+            .. string(winwidth(0)) .. 'x' .. string(winheight(0))
     endif
 
     var parts: list<string> = []
 
     for wininfo in getwininfo()
-        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        var tabnr_value: number = str2nr(string(
+            get(wininfo, 'tabnr', tabpagenr())))
         if tabnr_value != tabpagenr()
             continue
         endif
@@ -2433,7 +2729,8 @@ def DrawNotebookFiguresInVisibleWindows()
     endif
 
     for wininfo in getwininfo()
-        var tabnr_value: number = str2nr(string(get(wininfo, 'tabnr', tabpagenr())))
+        var tabnr_value: number = str2nr(string(
+            get(wininfo, 'tabnr', tabpagenr())))
         if tabnr_value != tabpagenr()
             continue
         endif
@@ -2450,7 +2747,8 @@ def DrawNotebookFiguresInVisibleWindows()
         endif
 
         try
-            win_execute(winid_value, 'call ' .. script_sid .. 'DrawNotebookFigures(false)')
+            win_execute(winid_value,
+                'call ' .. script_sid .. 'DrawNotebookFigures(false)')
         catch
         endtry
     endfor
@@ -2492,13 +2790,15 @@ def ScheduleNotebookLayoutRedraw(force: bool = false, delay_ms: number = 50)
         return
     endif
 
-    if !force && !empty(notebook_layout_signature) && signature ==# notebook_layout_signature
+    if !force && !empty(notebook_layout_signature)
+            && signature ==# notebook_layout_signature
         return
     endif
 
     notebook_layout_signature = signature
     StopNotebookLayoutRedrawTimer()
-    notebook_layout_redraw_timer = timer_start(max([0, delay_ms]), NotebookLayoutRedrawTimer)
+    notebook_layout_redraw_timer = timer_start(max([0, delay_ms]),
+        NotebookLayoutRedrawTimer)
 enddef
 
 def StopNotebookFigureDrawTimer()
@@ -2541,7 +2841,8 @@ def RunPythonNotebookFromScratch()
 
     if empty(python_cmd) || !executable(python_cmd)
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: Python executable not found: ' .. python_cmd
+        echomsg 'notebook-python.vim: Python executable not found: '
+            .. python_cmd
         echohl None
         return
     endif
@@ -2580,7 +2881,9 @@ def RunPythonNotebookFromScratch()
             return
         endif
 
-        var helper_output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, input_path, output_path]))
+        var helper_output: list<string> = systemlist(ShellCommand([
+            python_cmd, helper_path, input_path, output_path
+        ]))
 
         if v:shell_error != 0 || !filereadable(output_path)
             echohl ErrorMsg
@@ -2592,7 +2895,8 @@ def RunPythonNotebookFromScratch()
             return
         endif
 
-        var response_text: string = StripNullBytes(join(readfile(output_path), "\n"))
+        var response_text: string = StripNullBytes(
+            join(readfile(output_path), "\n"))
         var response: dict<any> = json_decode(response_text)
         var results: list<any> = get(response, 'results', [])
 
@@ -2618,7 +2922,8 @@ def RunPythonNotebookFromScratch()
 
             var error_block: list<string> = BuildErrorBlock(result)
             if !empty(error_block)
-                var error_line: number = str2nr(string(get(result, 'error_line', 0)))
+                var error_line: number = str2nr(string(
+                    get(result, 'error_line', 0)))
                 var error_lnum: number = get(cell, 'insert_after', line('$'))
 
                 if error_line > 0
@@ -2658,8 +2963,14 @@ def SetupNotebookSyntax()
     silent! syntax clear MdNotebookResult
     silent! syntax clear MdNotebookFigure
 
-    execute 'syntax region MdNotebookOutput start=/^\s*#\s*nb-output\s*:\s*start.*$/ end=/^\s*#\s*nb-output\s*:\s*end\s*$/ keepend containedin=ALL'
-    execute 'syntax region MdNotebookError start=/^\s*#\s*nb-error\s*:\s*start.*$/ end=/^\s*#\s*nb-error\s*:\s*end\s*$/ keepend containedin=ALL'
+    execute 'syntax region MdNotebookOutput '
+        .. 'start=/^\s*#\s*nb-output\s*:\s*start.*$/ '
+        .. 'end=/^\s*#\s*nb-output\s*:\s*end\s*$/ '
+        .. 'keepend containedin=ALL'
+    execute 'syntax region MdNotebookError '
+        .. 'start=/^\s*#\s*nb-error\s*:\s*start.*$/ '
+        .. 'end=/^\s*#\s*nb-error\s*:\s*end\s*$/ '
+        .. 'keepend containedin=ALL'
 
     EnsureNotebookHighlightGroups()
     RefreshNotebookMatches()
@@ -2677,21 +2988,30 @@ def EnablePythonNotebookForBuffer(): bool
 
     set nocursorline nocursorcolumn scrolloff=50
 
-    execute 'command! -buffer PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookFromScratch()'
-    execute 'command! -buffer PythonNotebookClearOutputs call ' .. script_sid .. 'ClearNotebookOutputs()'
-    execute 'command! -buffer PythonNotebookDrawFigures call ' .. script_sid .. 'DrawNotebookFigures()'
+    execute 'command! -buffer PythonNotebookRunAll call '
+        .. script_sid .. 'RunPythonNotebookFromScratch()'
+    execute 'command! -buffer PythonNotebookClearOutputs call '
+        .. script_sid .. 'ClearNotebookOutputs()'
+    execute 'command! -buffer PythonNotebookDrawFigures call '
+        .. script_sid .. 'DrawNotebookFigures()'
 
     nnoremap <buffer> <silent> <C-L> <Cmd>PythonNotebookRunAll<CR>
     nnoremap <buffer> <silent> <Leader>b <Cmd>PythonNotebookClearOutputs<CR>
 
     execute 'augroup PythonNotebookBuffer_' .. bufnr('%')
     autocmd! * <buffer>
-    execute 'autocmd BufWinEnter,WinEnter <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
-    execute 'autocmd WinScrolled <buffer> call ' .. script_sid .. 'NotebookScrollRedraw()'
-    execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'RefreshNotebookMatches()'
-    execute 'autocmd TextChanged,TextChangedI <buffer> call ' .. script_sid .. 'ScheduleNotebookFigureDraw()'
-    execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'NotebookWindowLeave()'
-    execute 'autocmd BufWinLeave,BufUnload <buffer> call ' .. script_sid .. 'ClearNotebookMatches()'
+    execute 'autocmd BufWinEnter,WinEnter <buffer> call '
+        .. script_sid .. 'ScheduleNotebookFigureDraw()'
+    execute 'autocmd WinScrolled <buffer> call '
+        .. script_sid .. 'NotebookScrollRedraw()'
+    execute 'autocmd TextChanged,TextChangedI <buffer> call '
+        .. script_sid .. 'RefreshNotebookMatches()'
+    execute 'autocmd TextChanged,TextChangedI <buffer> call '
+        .. script_sid .. 'ScheduleNotebookFigureDraw()'
+    execute 'autocmd BufWinLeave,BufUnload <buffer> call '
+        .. script_sid .. 'NotebookWindowLeave()'
+    execute 'autocmd BufWinLeave,BufUnload <buffer> call '
+        .. script_sid .. 'ClearNotebookMatches()'
     augroup END
 
     echomsg 'notebook-python.vim: enabled for this buffer'
@@ -2766,18 +3086,24 @@ def PythonNotebookStatus()
     echomsg '  helper script found: ' .. string(filereadable(helper_path))
     echomsg '  figure dir: ' .. NotebookFigureDir()
     echomsg '  figure lines: ' .. string(NotebookFigureLines())
-    echomsg '  draw engine: ' .. GetStringSetting('python_notebook_draw_engine', 'chafa')
+    echomsg '  draw engine: ' .. GetStringSetting(
+        'python_notebook_draw_engine', 'chafa')
     echomsg '  chafa found: ' .. string(executable('chafa'))
     echomsg '  imagemagick command: ' .. ImageMagickCommand()
-    echomsg '  imagemagick command found: ' .. string(!empty(ImageMagickCommand()) && executable(ImageMagickCommand()))
-    echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth()) .. 'x' .. string(ImageMagickCellHeight())
-    echomsg '  sixel cell size: ' .. string(SixelCellWidth()) .. 'x' .. string(SixelCellHeight())
+    echomsg '  imagemagick command found: '
+        .. string(!empty(ImageMagickCommand()) && executable(ImageMagickCommand()))
+    echomsg '  imagemagick cell size: ' .. string(ImageMagickCellWidth())
+        .. 'x' .. string(ImageMagickCellHeight())
+    echomsg '  sixel cell size: ' .. string(SixelCellWidth())
+        .. 'x' .. string(SixelCellHeight())
     echomsg '  sixel bottom guard lines: ' .. string(SixelBottomGuardLines())
     echomsg '  ueberzugpp command: ' .. UeberzugppCommand()
     echomsg '  ueberzugpp executable: ' .. UeberzugppExecutable()
-    echomsg '  ueberzugpp command found: ' .. string(!empty(UeberzugppCommand()) && executable(UeberzugppCommand()))
+    echomsg '  ueberzugpp command found: '
+        .. string(!empty(UeberzugppCommand()) && executable(UeberzugppCommand()))
     echomsg '  ueberzugpp output: ' .. UeberzugppOutput()
-    echomsg '  ueberzugpp cell size: ' .. string(UeberzugppCellWidth()) .. 'x' .. string(UeberzugppCellHeight())
+    echomsg '  ueberzugpp cell size: ' .. string(UeberzugppCellWidth())
+        .. 'x' .. string(UeberzugppCellHeight())
     echomsg '  ueberzugpp pid: ' .. string(ueberzugpp_pid)
     echomsg '  ueberzugpp job status: ' .. UeberzugppJobStatus()
     echomsg '  ueberzugpp channel status: ' .. UeberzugppChannelStatus()
@@ -2790,17 +3116,23 @@ def PythonNotebookStatus()
     echomsg '  ueberzugpp last exit status: ' .. ueberzugpp_last_exit_status
     echomsg '  ueberzugpp last command: ' .. ueberzugpp_last_command
     echomsg '  image prep worker enabled: ' .. string(UseImagePrepWorker())
-    echomsg '  image prep worker timeout ms: ' .. string(ImagePrepWorkerTimeoutMs())
-    echomsg '  image prep worker cache size: ' .. string(ImagePrepWorkerCacheSize())
+    echomsg '  image prep worker timeout ms: '
+        .. string(ImagePrepWorkerTimeoutMs())
+    echomsg '  image prep worker cache size: '
+        .. string(ImagePrepWorkerCacheSize())
     echomsg '  image prep worker pid: ' .. string(image_prep_worker_pid)
     echomsg '  image prep worker job status: ' .. ImagePrepWorkerJobStatus()
-    echomsg '  image prep worker channel status: ' .. ImagePrepWorkerChannelStatus()
+    echomsg '  image prep worker channel status: '
+        .. ImagePrepWorkerChannelStatus()
     echomsg '  image prep worker ready: ' .. string(ImagePrepWorkerReady())
     echomsg '  image prep worker last error: ' .. image_prep_worker_last_error
     echomsg '  image prep worker last stderr: ' .. image_prep_worker_last_stderr
-    echomsg '  image prep worker last exit status: ' .. image_prep_worker_last_exit_status
-    echomsg '  image prep worker last request: ' .. image_prep_worker_last_request
-    echomsg '  image prep worker last response: ' .. image_prep_worker_last_response
+    echomsg '  image prep worker last exit status: '
+        .. image_prep_worker_last_exit_status
+    echomsg '  image prep worker last request: '
+        .. image_prep_worker_last_request
+    echomsg '  image prep worker last response: '
+        .. image_prep_worker_last_response
 enddef
 
 def PythonNotebookUeberzugppLog()
@@ -2815,41 +3147,61 @@ def PythonNotebookUeberzugppLog()
     endfor
 enddef
 
-execute 'command! PythonNotebookStatus call ' .. script_sid .. 'PythonNotebookStatus()'
-execute 'command! PythonNotebookTryEnable call ' .. script_sid .. 'TryEnablePythonNotebook(1)'
-execute 'command! PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookCommand()'
-execute 'command! PythonNotebookClearOutputs call ' .. script_sid .. 'ClearPythonNotebookCommand()'
-execute 'command! PythonNotebookStartUeberzugpp call ' .. script_sid .. 'StartUeberzugppLayerDaemon()'
-execute 'command! PythonNotebookStopUeberzugpp call ' .. script_sid .. 'StopUeberzugppLayerDaemon()'
-execute 'command! PythonNotebookStartImagePrepWorker call ' .. script_sid .. 'StartImagePrepWorker()'
-execute 'command! PythonNotebookStopImagePrepWorker call ' .. script_sid .. 'StopImagePrepWorker()'
-execute 'command! PythonNotebookUeberzugppLog call ' .. script_sid .. 'PythonNotebookUeberzugppLog()'
+execute 'command! PythonNotebookStatus call '
+    .. script_sid .. 'PythonNotebookStatus()'
+execute 'command! PythonNotebookTryEnable call '
+    .. script_sid .. 'TryEnablePythonNotebook(1)'
+execute 'command! PythonNotebookRunAll call '
+    .. script_sid .. 'RunPythonNotebookCommand()'
+execute 'command! PythonNotebookClearOutputs call '
+    .. script_sid .. 'ClearPythonNotebookCommand()'
+execute 'command! PythonNotebookStartUeberzugpp call '
+    .. script_sid .. 'StartUeberzugppLayerDaemon()'
+execute 'command! PythonNotebookStopUeberzugpp call '
+    .. script_sid .. 'StopUeberzugppLayerDaemon()'
+execute 'command! PythonNotebookStartImagePrepWorker call '
+    .. script_sid .. 'StartImagePrepWorker()'
+execute 'command! PythonNotebookStopImagePrepWorker call '
+    .. script_sid .. 'StopImagePrepWorker()'
+execute 'command! PythonNotebookUeberzugppLog call '
+    .. script_sid .. 'PythonNotebookUeberzugppLog()'
 
 augroup PythonNotebookUeberzugpp
     autocmd!
-    execute 'autocmd VimEnter * call ' .. script_sid .. 'StartImagePrepWorker()'
-    execute 'autocmd VimEnter * call ' .. script_sid .. 'StartUeberzugppLayerDaemon()'
-    execute 'autocmd VimLeavePre * call ' .. script_sid .. 'StopUeberzugppLayerDaemon()'
+    execute 'autocmd VimEnter * call '
+        .. script_sid .. 'StartImagePrepWorker()'
+    execute 'autocmd VimEnter * call '
+        .. script_sid .. 'StartUeberzugppLayerDaemon()'
+    execute 'autocmd VimLeavePre * call '
+        .. script_sid .. 'StopUeberzugppLayerDaemon()'
 augroup END
 
 augroup PythonNotebookWindowLayout
     autocmd!
-    execute 'autocmd VimResized * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+    execute 'autocmd VimResized * call '
+        .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
     if exists('##WinResized')
-        execute 'autocmd WinResized * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+        execute 'autocmd WinResized * call '
+            .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
     endif
     if exists('##WinNew')
-        execute 'autocmd WinNew * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+        execute 'autocmd WinNew * call '
+            .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
     endif
     if exists('##WinClosed')
-        execute 'autocmd WinClosed * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
+        execute 'autocmd WinClosed * call '
+            .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
     endif
-    execute 'autocmd TabEnter * call ' .. script_sid .. 'ScheduleNotebookLayoutRedraw()'
+    execute 'autocmd TabEnter * call '
+        .. script_sid .. 'ScheduleNotebookLayoutRedraw()'
 augroup END
 
 augroup PythonNotebookAutoEnable
     autocmd!
-    execute 'autocmd FileType python call ' .. script_sid .. 'TryEnablePythonNotebook(0)'
-    execute 'autocmd BufEnter *.py call ' .. script_sid .. 'TryEnablePythonNotebook(0)'
-    execute 'autocmd BufReadPost *.py call ' .. script_sid .. 'TryEnablePythonNotebook(0)'
+    execute 'autocmd FileType python call '
+        .. script_sid .. 'TryEnablePythonNotebook(0)'
+    execute 'autocmd BufEnter *.py call '
+        .. script_sid .. 'TryEnablePythonNotebook(0)'
+    execute 'autocmd BufReadPost *.py call '
+        .. script_sid .. 'TryEnablePythonNotebook(0)'
 augroup END
