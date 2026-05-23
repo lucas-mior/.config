@@ -210,11 +210,6 @@ def GetNumberSetting(name: string, default_value: number): number
     return str2nr(string(value))
 enddef
 
-def NotebookHelperPath(): string
-    return expand(GetStringSetting('python_notebook_helper',
-        script_dir .. '/notebook-python-draw.py'))
-enddef
-
 def NotebookFigureDir(): string
     return expand('~/.cache/notebook-python-vim')
            .. '/figures/buf_' .. bufnr('%')
@@ -592,7 +587,7 @@ def StartImagePrepWorker()
     endif
 
     var python_cmd: string = 'python3'
-    var helper_path: string = NotebookHelperPath()
+    var helper_path: string = g:python_notebook_helper
 
     if empty(python_cmd) || !executable(python_cmd)
         image_prep_worker_last_error = 'Python executable not found: '
@@ -933,7 +928,7 @@ def FigureDisplayLines(path: string, available_cols: number): number
     var engine: string = GetStringSetting(
         'python_notebook_draw_engine', 'chafa')
     var python_cmd: string = 'python3'
-    var helper_path: string = NotebookHelperPath()
+    var helper_path: string = g:python_notebook_helper
 
     if empty(python_cmd) || !executable(python_cmd)
         return fallback_lines
@@ -1645,7 +1640,7 @@ def SixelCacheKey(
     var extra_key: string = ''
 
     if engine ==# 'chafa'
-        var helper_path: string = NotebookHelperPath()
+        var helper_path: string = g:python_notebook_helper
         extra_key = ':' .. 'python3' .. ':' .. helper_path .. ':'
             .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x'
             .. SixelCellHeight()
@@ -1685,7 +1680,7 @@ def GenerateFigureSixel(
         endif
 
         var python_cmd: string = 'python3'
-        var helper_path: string = NotebookHelperPath()
+        var helper_path: string = g:python_notebook_helper
 
         if empty(python_cmd) || !executable(python_cmd)
             return ''
@@ -1732,7 +1727,7 @@ def GenerateFigureSixel(
         endif
 
         var python_cmd: string = 'python3'
-        var helper_path: string = NotebookHelperPath()
+        var helper_path: string = g:python_notebook_helper
         if empty(python_cmd) || !executable(python_cmd)
             return ''
         endif
@@ -2168,7 +2163,7 @@ def PrepareUeberzugppImage(
     endif
 
     var python_cmd: string = 'python3'
-    var helper_path: string = NotebookHelperPath()
+    var helper_path: string = g:python_notebook_helper
 
     if empty(python_cmd) || !executable(python_cmd)
         return path
@@ -2719,7 +2714,7 @@ enddef
 
 def RunPythonNotebookFromScratch()
     var python_cmd: string = 'python3'
-    var helper_path: string = NotebookHelperPath()
+    var helper_path: string = g:python_notebook_helper
 
     if empty(python_cmd) || !executable(python_cmd)
         echohl ErrorMsg
@@ -2953,7 +2948,7 @@ enddef
 
 def PythonNotebookStatus()
     var python_cmd: string = 'python3'
-    var helper_path: string = NotebookHelperPath()
+    var helper_path: string = g:python_notebook_helper
 
     echomsg 'notebook-python.vim status:'
     echomsg '  build: ' .. notebook_python_vim_build
