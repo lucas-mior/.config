@@ -311,6 +311,153 @@ def _prepare_sixel_png(input_path, output_path, max_pixel_width, crop_top_pixels
         sixel_friendly.save(output_path, format="PNG", optimize=False)
 
 
+def _prepare_ueberzugpp_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels):
+    max_pixel_width = max(1, int(max_pixel_width))
+    crop_top_pixels = max(0, int(crop_top_pixels))
+    crop_height_pixels = max(1, int(crop_height_pixels))
+
+    from PIL import Image
+
+    with Image.open(input_path) as image:
+        rgba = image.convert("RGBA")
+        fitted_size = _width_constrained_size(rgba.width, rgba.height, max_pixel_width)
+        resized = rgba.resize(fitted_size, _resample_filter(Image))
+        cropped = _crop_vertical(resized, crop_top_pixels, crop_height_pixels)
+        cropped.save(output_path, format="PNG", optimize=False)
+
+
+def _prepare_ueberzugpp_png_cli(argv):
+    if len(argv) != 7:
+        print(
+            "usage: notebook-vim.py --prepare-ueberzugpp-png INPUT_PNG OUTPUT_PNG MAX_WIDTH CROP_TOP CROP_HEIGHT",
+            file=sys.stderr,
+        )
+        return 2
+
+    input_path = argv[2]
+    output_path = argv[3]
+
+    try:
+        max_pixel_width = int(argv[4])
+        crop_top_pixels = int(argv[5])
+        crop_height_pixels = int(argv[6])
+    except ValueError:
+        print("MAX_WIDTH, CROP_TOP, and CROP_HEIGHT must be integers", file=sys.stderr)
+        return 2
+
+    try:
+        _prepare_ueberzugpp_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels)
+    except Exception as exc:
+        print("could not prepare ueberzugpp PNG: {}".format(exc), file=sys.stderr)
+        return 1
+
+    return 0
+
+
+def _image_prep_worker_cache_size():
+    try:
+        value = int(os.environ.get("NOTEBOOK_VIM_IMAGE_PREP_CACHE_SIZE", "16"))
+    except ValueError:
+        value = 16
+
+    return max(1, value)
+
+
+def _image_prep_worker_cli(argv):
+    if len(argv) != 2:
+        print("usage: notebook-vim.py --image-prep-worker", file=sys.stderr)
+        return 2
+
+    from PIL import Image
+
+    resized_cache = {}
+    cache_order = []
+    cache_size = _image_prep_worker_cache_size()
+
+    def send_response(response):
+        print(json.dumps(response, separators=(",", ":")), flush=True)
+
+    def stat_key(path, max_pixel_width):
+        stat_result = os.stat(path)
+        mtime_ns = getattr(stat_result, "st_mtime_ns", int(stat_result.st_mtime * 1000000000))
+        return (path, stat_result.st_size, mtime_ns, max(1, int(max_pixel_width)))
+
+    def cached_resized_image(path, max_pixel_width):
+        key = stat_key(path, max_pixel_width)
+        cached = resized_cache.get(key)
+        if cached is not None:
+            return cached
+
+        with Image.open(path) as image:
+            rgba = image.convert("RGBA")
+            fitted_size = _width_constrained_size(rgba.width, rgba.height, max_pixel_width)
+            resized = rgba.resize(fitted_size, _resample_filter(Image))
+
+        resized_cache[key] = resized
+        cache_order.append(key)
+
+        while len(cache_order) > cache_size:
+            old_key = cache_order.pop(0)
+            resized_cache.pop(old_key, None)
+
+        return resized
+
+    for raw_line in sys.stdin:
+        raw_line = raw_line.strip()
+        if not raw_line:
+            continue
+
+        request_id = ""
+
+        try:
+            request = json.loads(raw_line)
+            request_id = _strip_null_bytes(request.get("id", ""))
+            action = _strip_null_bytes(request.get("action", "prepare"))
+
+            if action == "exit":
+                send_response({"id": request_id, "ok": True, "exiting": True})
+                break
+
+            if action != "prepare":
+                raise ValueError("unknown image prep worker action: {}".format(action))
+
+            input_path = _strip_null_bytes(request.get("input_path", ""))
+            output_path = _strip_null_bytes(request.get("output_path", ""))
+            max_pixel_width = int(request.get("max_pixel_width", 1))
+            crop_top_pixels = max(0, int(request.get("crop_top_pixels", 0)))
+            crop_height_pixels = max(1, int(request.get("crop_height_pixels", 1)))
+
+            if not input_path:
+                raise ValueError("input_path is empty")
+
+            if not output_path:
+                raise ValueError("output_path is empty")
+
+            output_dir = os.path.dirname(output_path)
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
+
+            resized = cached_resized_image(input_path, max_pixel_width)
+            cropped = _crop_vertical(resized, crop_top_pixels, crop_height_pixels)
+            cropped.save(output_path, format="PNG", optimize=False)
+
+            send_response({
+                "id": request_id,
+                "ok": True,
+                "path": _strip_null_bytes(output_path),
+                "width": int(cropped.width),
+                "height": int(cropped.height),
+            })
+        except Exception as exc:
+            send_response({
+                "id": request_id,
+                "ok": False,
+                "error": _strip_null_bytes(str(exc)),
+            })
+
+    return 0
+
+
 def _prepare_sixel_png_cli(argv):
     if len(argv) != 7:
         print(
@@ -468,6 +615,12 @@ def _run_cell(cell, namespace, figure_dir):
 def main():
     if len(sys.argv) >= 2 and sys.argv[1] == "--prepare-sixel-png":
         return _prepare_sixel_png_cli(sys.argv)
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "--prepare-ueberzugpp-png":
+        return _prepare_ueberzugpp_png_cli(sys.argv)
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "--image-prep-worker":
+        return _image_prep_worker_cli(sys.argv)
 
     if len(sys.argv) >= 2 and sys.argv[1] == "--sixel-display-lines":
         return _sixel_display_lines_cli(sys.argv)

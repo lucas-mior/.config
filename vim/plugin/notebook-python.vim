@@ -57,7 +57,7 @@ if exists('g:loaded_python_notebook_vim')
 endif
 g:loaded_python_notebook_vim = 1
 
-var notebook_python_vim_build: string = 'ueberzugpp-persistent-json-diagnostics-2026-05-23b'
+var notebook_python_vim_build: string = 'ueberzugpp-persistent-json-image-prep-worker-2026-05-23c'
 
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
@@ -169,6 +169,20 @@ if !exists('g:python_notebook_ueberzugpp_stdout_to_tty')
     g:python_notebook_ueberzugpp_stdout_to_tty = 0
 endif
 
+# Use one long-lived Python/PIL process for ueberzugpp image crop/resize
+# requests. This removes Python startup from the scroll hot path.
+if !exists('g:python_notebook_ueberzugpp_use_image_prep_worker')
+    g:python_notebook_ueberzugpp_use_image_prep_worker = 1
+endif
+
+if !exists('g:python_notebook_image_prep_worker_timeout_ms')
+    g:python_notebook_image_prep_worker_timeout_ms = 2000
+endif
+
+if !exists('g:python_notebook_image_prep_worker_cache_size')
+    g:python_notebook_image_prep_worker_cache_size = 16
+endif
+
 var output_start_marker_prefix: string = '# nb-output: start'
 var output_end_marker: string = '# nb-output: end'
 var error_start_marker: string = '# nb-error: start'
@@ -190,6 +204,17 @@ var ueberzugpp_last_command: string = ''
 var ueberzugpp_last_stdout: string = ''
 var ueberzugpp_last_stderr: string = ''
 var ueberzugpp_last_exit_status: string = ''
+
+var image_prep_worker_job: any = v:none
+var image_prep_worker_channel: any = v:none
+var image_prep_worker_pid: number = 0
+var image_prep_worker_stdout_buffer: string = ''
+var image_prep_worker_next_request_id: number = 0
+var image_prep_worker_last_error: string = ''
+var image_prep_worker_last_request: string = ''
+var image_prep_worker_last_response: string = ''
+var image_prep_worker_last_stderr: string = ''
+var image_prep_worker_last_exit_status: string = ''
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -461,6 +486,383 @@ def UeberzugppLayerReady(): bool
     endtry
 
     return status ==# 'open' || status ==# 'buffered'
+enddef
+
+def UseImagePrepWorker(): bool
+    return GetNumberSetting('python_notebook_ueberzugpp_use_image_prep_worker', 1) != 0
+enddef
+
+def ImagePrepWorkerTimeoutMs(): number
+    var timeout_ms: number = GetNumberSetting('python_notebook_image_prep_worker_timeout_ms', 2000)
+    if timeout_ms <= 0
+        timeout_ms = 2000
+    endif
+
+    return timeout_ms
+enddef
+
+def ImagePrepWorkerCacheSize(): number
+    var cache_size: number = GetNumberSetting('python_notebook_image_prep_worker_cache_size', 16)
+    if cache_size <= 0
+        cache_size = 16
+    endif
+
+    return cache_size
+enddef
+
+def ImagePrepWorkerJobStatus(): string
+    if !exists('*job_status')
+        return 'job_status() unavailable'
+    endif
+
+    if type(image_prep_worker_job) != v:t_job
+        return 'none'
+    endif
+
+    try
+        return job_status(image_prep_worker_job)
+    catch
+        return 'error: ' .. v:exception
+    endtry
+enddef
+
+def ImagePrepWorkerChannelStatus(): string
+    if !exists('*ch_status')
+        return 'ch_status() unavailable'
+    endif
+
+    if type(image_prep_worker_channel) != v:t_channel
+        return 'none'
+    endif
+
+    try
+        return ch_status(image_prep_worker_channel)
+    catch
+        return 'error: ' .. v:exception
+    endtry
+enddef
+
+def ImagePrepWorkerReady(): bool
+    if !exists('*job_status') || !exists('*ch_status')
+        return false
+    endif
+
+    if type(image_prep_worker_job) != v:t_job || job_status(image_prep_worker_job) !=# 'run'
+        return false
+    endif
+
+    if type(image_prep_worker_channel) != v:t_channel
+        return false
+    endif
+
+    var status: string = ''
+    try
+        status = ch_status(image_prep_worker_channel)
+    catch
+        return false
+    endtry
+
+    return status ==# 'open' || status ==# 'buffered'
+enddef
+
+def ImagePrepWorkerStderrCb(channel: any, message: string)
+    var clean_message: string = StripNullBytes(message)
+    if empty(clean_message)
+        return
+    endif
+
+    image_prep_worker_last_stderr = clean_message
+    image_prep_worker_last_error = clean_message
+    AddUeberzugppLog('image prep worker stderr: ' .. clean_message, true)
+enddef
+
+def ImagePrepWorkerExitCb(job: any, status: number)
+    image_prep_worker_last_exit_status = string(status)
+    if status == 0
+        AddUeberzugppLog('image prep worker exited with status 0')
+    else
+        image_prep_worker_last_error = 'image prep worker exited with status ' .. string(status)
+        AddUeberzugppLog(image_prep_worker_last_error, true)
+    endif
+
+    image_prep_worker_job = v:none
+    image_prep_worker_channel = v:none
+    image_prep_worker_pid = 0
+    image_prep_worker_stdout_buffer = ''
+enddef
+
+def StartImagePrepWorker()
+    if !UseImagePrepWorker()
+        return
+    endif
+
+    if ImagePrepWorkerReady()
+        return
+    endif
+
+    if !exists('*job_start')
+        image_prep_worker_last_error = 'job_start() is unavailable in this Vim build'
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return
+    endif
+
+    if !exists('*job_getchannel')
+        image_prep_worker_last_error = 'job_getchannel() is unavailable in this Vim build'
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return
+    endif
+
+    if !exists('*ch_sendraw') || !exists('*ch_readraw')
+        image_prep_worker_last_error = 'ch_sendraw()/ch_readraw() is unavailable in this Vim build'
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return
+    endif
+
+    var python_cmd: string = PythonCommand()
+    var helper_path: string = NotebookHelperPath()
+
+    if empty(python_cmd) || !executable(python_cmd)
+        image_prep_worker_last_error = 'Python executable not found: ' .. python_cmd
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return
+    endif
+
+    if empty(helper_path) || !filereadable(helper_path)
+        image_prep_worker_last_error = 'helper script not found: ' .. helper_path
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return
+    endif
+
+    var argv: list<string> = [python_cmd, helper_path, '--image-prep-worker']
+    var env: dict<string> = {
+        'NOTEBOOK_VIM_IMAGE_PREP_CACHE_SIZE': string(ImagePrepWorkerCacheSize()),
+    }
+
+    var job_options: dict<any> = {
+        'in_io': 'pipe',
+        'out_io': 'pipe',
+        'err_io': 'pipe',
+        'in_mode': 'raw',
+        'out_mode': 'raw',
+        'err_mode': 'nl',
+        'drop': 'never',
+        'err_cb': function(script_sid .. 'ImagePrepWorkerStderrCb'),
+        'exit_cb': function(script_sid .. 'ImagePrepWorkerExitCb'),
+        'env': env,
+    }
+
+    if UeberzugppDebugEnabled()
+        AddUeberzugppLog('starting image prep worker: ' .. join(mapnew(copy(argv), (_, item) => shellescape(item)), ' '))
+    endif
+
+    try
+        image_prep_worker_job = job_start(argv, job_options)
+    catch
+        image_prep_worker_last_error = 'job_start() failed: ' .. v:exception
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_job = v:none
+        image_prep_worker_channel = v:none
+        image_prep_worker_pid = 0
+        return
+    endtry
+
+    if type(image_prep_worker_job) != v:t_job
+        image_prep_worker_last_error = 'job_start() did not return a job object; returned type=' .. string(type(image_prep_worker_job))
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_job = v:none
+        image_prep_worker_channel = v:none
+        image_prep_worker_pid = 0
+        return
+    endif
+
+    if ImagePrepWorkerJobStatus() !=# 'run'
+        image_prep_worker_last_error = 'worker did not start; job status=' .. ImagePrepWorkerJobStatus()
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        image_prep_worker_job = v:none
+        image_prep_worker_channel = v:none
+        image_prep_worker_pid = 0
+        return
+    endif
+
+    try
+        image_prep_worker_channel = job_getchannel(image_prep_worker_job)
+    catch
+        image_prep_worker_last_error = 'job_getchannel() failed: ' .. v:exception
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        try
+            job_stop(image_prep_worker_job, 'term')
+        catch
+        endtry
+        image_prep_worker_job = v:none
+        image_prep_worker_channel = v:none
+        image_prep_worker_pid = 0
+        return
+    endtry
+
+    try
+        var info: dict<any> = job_info(image_prep_worker_job)
+        image_prep_worker_pid = str2nr(string(get(info, 'process', 0)))
+    catch
+        image_prep_worker_pid = 0
+    endtry
+
+    if !ImagePrepWorkerReady()
+        image_prep_worker_last_error = 'worker channel is not ready; job status=' .. ImagePrepWorkerJobStatus() .. ', channel status=' .. ImagePrepWorkerChannelStatus()
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        try
+            job_stop(image_prep_worker_job, 'term')
+        catch
+        endtry
+        image_prep_worker_job = v:none
+        image_prep_worker_channel = v:none
+        image_prep_worker_pid = 0
+        return
+    endif
+
+    image_prep_worker_stdout_buffer = ''
+    if UeberzugppDebugEnabled()
+        AddUeberzugppLog('image prep worker ready; pid=' .. string(image_prep_worker_pid) .. ', channel status=' .. ImagePrepWorkerChannelStatus())
+    endif
+enddef
+
+def ImagePrepWorkerTakeResponse(request_id: string): any
+    while true
+        var newline_index: number = stridx(image_prep_worker_stdout_buffer, "\n")
+        if newline_index < 0
+            return v:none
+        endif
+
+        var line_str: string = strpart(image_prep_worker_stdout_buffer, 0, newline_index)
+        image_prep_worker_stdout_buffer = strpart(image_prep_worker_stdout_buffer, newline_index + 1)
+        line_str = substitute(StripNullBytes(line_str), '\r$', '', '')
+
+        if empty(line_str)
+            continue
+        endif
+
+        var decoded: any = v:none
+        try
+            decoded = json_decode(line_str)
+        catch
+            image_prep_worker_last_error = 'could not decode worker response: ' .. line_str
+            AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+            continue
+        endtry
+
+        if type(decoded) != v:t_dict
+            image_prep_worker_last_error = 'worker response was not a dict: ' .. line_str
+            AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+            continue
+        endif
+
+        var response: dict<any> = decoded
+        var response_id: string = JsonValueToString(get(response, 'id', ''))
+        if response_id ==# request_id
+            return response
+        endif
+
+        if UeberzugppDebugEnabled()
+            AddUeberzugppLog('image prep worker ignored response for id=' .. response_id .. '; waiting for id=' .. request_id)
+        endif
+    endwhile
+
+    return v:none
+enddef
+
+def ImagePrepWorkerReadResponse(request_id: string, timeout_ms: number): any
+    var waited_ms: number = 0
+    var slice_ms: number = 10
+
+    while waited_ms <= timeout_ms
+        var response: any = ImagePrepWorkerTakeResponse(request_id)
+        if type(response) == v:t_dict
+            return response
+        endif
+
+        var chunk: string = ''
+        try
+            chunk = ch_readraw(image_prep_worker_channel, {'part': 'out', 'timeout': slice_ms})
+        catch
+            image_prep_worker_last_error = 'ch_readraw() failed: ' .. v:exception
+            AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+            return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+        endtry
+
+        if !empty(chunk)
+            image_prep_worker_stdout_buffer ..= chunk
+            waited_ms = 0
+        else
+            waited_ms += slice_ms
+        endif
+    endwhile
+
+    image_prep_worker_last_error = 'timeout waiting for response id=' .. request_id .. ' after ' .. string(timeout_ms) .. ' ms'
+    AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+    return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+enddef
+
+def ImagePrepWorkerRequest(command: dict<any>): dict<any>
+    if !UseImagePrepWorker()
+        return {'ok': false, 'error': 'image prep worker disabled'}
+    endif
+
+    if !ImagePrepWorkerReady()
+        StartImagePrepWorker()
+    endif
+
+    if !ImagePrepWorkerReady()
+        image_prep_worker_last_error = 'worker is not ready; job status=' .. ImagePrepWorkerJobStatus() .. ', channel status=' .. ImagePrepWorkerChannelStatus()
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return {'ok': false, 'error': image_prep_worker_last_error}
+    endif
+
+    image_prep_worker_next_request_id += 1
+    var request_id: string = string(getpid()) .. '-' .. string(image_prep_worker_next_request_id)
+    command['id'] = request_id
+    image_prep_worker_last_request = json_encode(command)
+
+    try
+        ch_sendraw(image_prep_worker_channel, image_prep_worker_last_request .. "\n")
+    catch
+        image_prep_worker_last_error = 'ch_sendraw() failed: ' .. v:exception
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+    endtry
+
+    var response_any: any = ImagePrepWorkerReadResponse(request_id, ImagePrepWorkerTimeoutMs())
+    if type(response_any) != v:t_dict
+        image_prep_worker_last_error = 'worker returned a non-dict response'
+        AddUeberzugppLog('image prep worker: ' .. image_prep_worker_last_error, true)
+        return {'id': request_id, 'ok': false, 'error': image_prep_worker_last_error}
+    endif
+
+    var response: dict<any> = response_any
+    image_prep_worker_last_response = json_encode(response)
+
+    if !get(response, 'ok', false)
+        image_prep_worker_last_error = JsonValueToString(get(response, 'error', 'unknown worker error'))
+    endif
+
+    return response
+enddef
+
+def StopImagePrepWorker()
+    if ImagePrepWorkerReady()
+        try
+            ch_sendraw(image_prep_worker_channel, json_encode({'action': 'exit', 'id': 'exit'}) .. "\n")
+        catch
+        endtry
+
+        try
+            job_stop(image_prep_worker_job, 'term')
+        catch
+        endtry
+    endif
+
+    image_prep_worker_job = v:none
+    image_prep_worker_channel = v:none
+    image_prep_worker_pid = 0
+    image_prep_worker_stdout_buffer = ''
 enddef
 
 def SixelBottomGuardLines(): number
@@ -1458,6 +1860,7 @@ enddef
 def StopUeberzugppLayerDaemon()
     ClearUeberzugppImages()
     ClearUeberzugppPreparedImages()
+    StopImagePrepWorker()
 
     if UeberzugppLayerReady()
         AddUeberzugppLog('stopping layer job; pid=' .. string(ueberzugpp_pid))
@@ -1475,6 +1878,30 @@ enddef
 
 def UeberzugppPreparedCacheKey(path: string, available_cols: number, available_lines: number, crop_top_lines: number): string
     return path .. ':' .. getfsize(path) .. ':' .. getftime(path) .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. ':' .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
+enddef
+
+def PrepareUeberzugppImageWithWorker(path: string, prepared_path: string, max_pixel_width: number, crop_top_pixels: number, crop_height_pixels: number): string
+    var response: dict<any> = ImagePrepWorkerRequest({
+        'action': 'prepare',
+        'input_path': path,
+        'output_path': prepared_path,
+        'max_pixel_width': max_pixel_width,
+        'crop_top_pixels': crop_top_pixels,
+        'crop_height_pixels': crop_height_pixels,
+    })
+
+    if get(response, 'ok', false)
+        var response_path: string = JsonValueToString(get(response, 'path', prepared_path))
+        if !empty(response_path) && filereadable(response_path)
+            return response_path
+        endif
+
+        AddUeberzugppLog('image prep worker reported success but output is unreadable: ' .. response_path, true)
+        return ''
+    endif
+
+    AddUeberzugppLog('image prep worker failed; source=' .. path .. '; error=' .. JsonValueToString(get(response, 'error', 'unknown error')), true)
+    return ''
 enddef
 
 def PrepareUeberzugppImage(path: string, available_cols: number, available_lines: number, crop_top_lines: number, total_lines: number): string
@@ -1503,7 +1930,15 @@ def PrepareUeberzugppImage(path: string, available_cols: number, available_lines
     var crop_height_pixels: number = max([1, available_lines * UeberzugppCellHeight()])
     var prepared_path: string = tempname() .. '.png'
 
-    var prepare_output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, '--prepare-sixel-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+    if UseImagePrepWorker()
+        var worker_path: string = PrepareUeberzugppImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels)
+        if !empty(worker_path)
+            ueberzugpp_prepared_cache[cache_key] = worker_path
+            return worker_path
+        endif
+    endif
+
+    var prepare_output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, '--prepare-ueberzugpp-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
     if v:shell_error != 0 || !filereadable(prepared_path)
         AddUeberzugppLog('image preparation failed; shell_error=' .. string(v:shell_error) .. '; source=' .. path .. '; output=' .. join(StripNullBytesFromLines(prepare_output), ' | '), true)
         return path
@@ -2037,6 +2472,18 @@ def PythonNotebookStatus()
     echomsg '  ueberzugpp last stderr: ' .. ueberzugpp_last_stderr
     echomsg '  ueberzugpp last exit status: ' .. ueberzugpp_last_exit_status
     echomsg '  ueberzugpp last command: ' .. ueberzugpp_last_command
+    echomsg '  image prep worker enabled: ' .. string(UseImagePrepWorker())
+    echomsg '  image prep worker timeout ms: ' .. string(ImagePrepWorkerTimeoutMs())
+    echomsg '  image prep worker cache size: ' .. string(ImagePrepWorkerCacheSize())
+    echomsg '  image prep worker pid: ' .. string(image_prep_worker_pid)
+    echomsg '  image prep worker job status: ' .. ImagePrepWorkerJobStatus()
+    echomsg '  image prep worker channel status: ' .. ImagePrepWorkerChannelStatus()
+    echomsg '  image prep worker ready: ' .. string(ImagePrepWorkerReady())
+    echomsg '  image prep worker last error: ' .. image_prep_worker_last_error
+    echomsg '  image prep worker last stderr: ' .. image_prep_worker_last_stderr
+    echomsg '  image prep worker last exit status: ' .. image_prep_worker_last_exit_status
+    echomsg '  image prep worker last request: ' .. image_prep_worker_last_request
+    echomsg '  image prep worker last response: ' .. image_prep_worker_last_response
 enddef
 
 def PythonNotebookUeberzugppLog()
@@ -2057,6 +2504,8 @@ execute 'command! PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNoteboo
 execute 'command! PythonNotebookClearOutputs call ' .. script_sid .. 'ClearPythonNotebookCommand()'
 execute 'command! PythonNotebookStartUeberzugpp call ' .. script_sid .. 'StartUeberzugppLayerDaemon()'
 execute 'command! PythonNotebookStopUeberzugpp call ' .. script_sid .. 'StopUeberzugppLayerDaemon()'
+execute 'command! PythonNotebookStartImagePrepWorker call ' .. script_sid .. 'StartImagePrepWorker()'
+execute 'command! PythonNotebookStopImagePrepWorker call ' .. script_sid .. 'StopImagePrepWorker()'
 execute 'command! PythonNotebookUeberzugppLog call ' .. script_sid .. 'PythonNotebookUeberzugppLog()'
 
 augroup PythonNotebookUeberzugpp
