@@ -90,15 +90,15 @@ if !exists('g:python_notebook_figure_lines')
     g:python_notebook_figure_lines = 18
 endif
 
-if !exists('g:python_notebook_sixel_engine')
-    g:python_notebook_sixel_engine = 'ueberzugpp'
+if !exists('g:python_notebook_draw_engine')
+    g:python_notebook_draw_engine = 'ueberzugpp'
 endif
 
 # Image engine options:
 #
-#    let g:python_notebook_sixel_engine = 'chafa'
-#    let g:python_notebook_sixel_engine = 'imagemagick'
-#    let g:python_notebook_sixel_engine = 'ueberzugpp'
+#    let g:python_notebook_draw_engine = 'chafa'
+#    let g:python_notebook_draw_engine = 'imagemagick'
+#    let g:python_notebook_draw_engine = 'ueberzugpp'
 #
 # Sixel/image renderers ultimately need pixel dimensions. These defaults approximate
 # one terminal cell in pixels; tune them if rendered figures are too large, too
@@ -133,7 +133,7 @@ if !exists('g:python_notebook_sixel_bottom_guard_lines')
 endif
 
 # Ueberzug++ runs as a layer daemon. The plugin starts it on VimEnter when
-# g:python_notebook_sixel_engine is set to 'ueberzugpp'. Leave output empty to
+# g:python_notebook_draw_engine is set to 'ueberzugpp'. Leave output empty to
 # let ueberzugpp choose from its config/environment, or set it to one of its
 # supported outputs such as 'x11', 'wayland', 'sixel', 'kitty', or 'chafa'.
 if !exists('g:python_notebook_ueberzugpp_command')
@@ -904,7 +904,7 @@ def FigureDisplayLines(path: string, available_cols: number): number
         return fallback_lines
     endif
 
-    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
     var python_cmd: string = PythonCommand()
     var helper_path: string = NotebookHelperPath()
 
@@ -1590,7 +1590,7 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
         return ''
     endif
 
-    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
     var cache_key: string = SixelCacheKey(path, available_cols, available_lines, crop_top_lines, engine)
     if has_key(figure_sixel_cache, cache_key)
         return figure_sixel_cache[cache_key]
@@ -1706,7 +1706,7 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
 enddef
 
 def StartUeberzugppLayerDaemon()
-    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
     if !IsUeberzugppEngine(engine)
         AddUeberzugppLog('not starting layer because current engine is ' .. engine)
         return
@@ -1886,7 +1886,7 @@ def ClearUeberzugppImages()
 enddef
 
 def ClearExternalImages()
-    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
     if IsUeberzugppEngine(engine)
         ClearUeberzugppImages()
     endif
@@ -2131,7 +2131,7 @@ def DrawFigureAt(path: string, start_lnum: number, end_lnum: number, screen_col:
         return
     endif
 
-    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
     if IsUeberzugppEngine(engine)
         DrawFigureAtWithUeberzugpp(path, start_lnum, end_lnum, visible_start, visible_lines, screen_col, available_cols)
         return
@@ -2193,7 +2193,7 @@ def DrawNotebookFigures()
         return
     endif
 
-    var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
     ueberzugpp_current_cycle_ids = {}
 
     var screen_col: number = 1
@@ -2495,7 +2495,7 @@ def PythonNotebookStatus()
     echomsg '  helper script found: ' .. string(filereadable(helper_path))
     echomsg '  figure dir: ' .. NotebookFigureDir()
     echomsg '  figure lines: ' .. string(NotebookFigureLines())
-    echomsg '  sixel engine: ' .. GetStringSetting('python_notebook_sixel_engine', 'chafa')
+    echomsg '  draw engine: ' .. GetStringSetting('python_notebook_draw_engine', 'chafa')
     echomsg '  chafa found: ' .. string(executable('chafa'))
     echomsg '  imagemagick command: ' .. ImageMagickCommand()
     echomsg '  imagemagick command found: ' .. string(!empty(ImageMagickCommand()) && executable(ImageMagickCommand()))
