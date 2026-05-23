@@ -132,7 +132,7 @@ if !exists('g:python_notebook_sixel_bottom_guard_lines')
     g:python_notebook_sixel_bottom_guard_lines = 0
 endif
 
-# Ueberzug++ runs as a layer daemon. The plugin starts it on VimEnter when
+# ueberzugpp runs as a layer daemon. The plugin starts it on VimEnter when
 # g:python_notebook_draw_engine is set to 'ueberzugpp'. Leave output empty to
 # let ueberzugpp choose from its config/environment, or set it to one of its
 # supported outputs such as 'x11', 'wayland', 'sixel', 'kitty', or 'chafa'.
@@ -383,7 +383,7 @@ def UeberzugppCellHeight(): number
 enddef
 
 def IsUeberzugppEngine(engine: string): bool
-    return engine ==# 'ueberzugpp' || engine ==# 'ueberzug++'
+    return engine ==# 'ueberzugpp'
 enddef
 
 def UeberzugppDebugEnabled(): bool
