@@ -295,65 +295,6 @@ def _sixel_display_lines(input_path, max_pixel_width, cell_height):
     return max(1, _ceil_div(fitted_height, cell_height))
 
 
-def _prepare_sixel_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels):
-    max_pixel_width = max(1, int(max_pixel_width))
-    crop_top_pixels = max(0, int(crop_top_pixels))
-    crop_height_pixels = max(1, int(crop_height_pixels))
-
-    from PIL import Image
-
-    with Image.open(input_path) as image:
-        rgba = image.convert("RGBA")
-        fitted_size = _width_constrained_size(rgba.width, rgba.height, max_pixel_width)
-        resized = rgba.resize(fitted_size, _resample_filter(Image))
-        cropped = _crop_vertical(resized, crop_top_pixels, crop_height_pixels)
-        sixel_friendly = _rgba_to_sixel_friendly_palette(Image, cropped)
-        sixel_friendly.save(output_path, format="PNG", optimize=False)
-
-
-def _prepare_ueberzugpp_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels):
-    max_pixel_width = max(1, int(max_pixel_width))
-    crop_top_pixels = max(0, int(crop_top_pixels))
-    crop_height_pixels = max(1, int(crop_height_pixels))
-
-    from PIL import Image
-
-    with Image.open(input_path) as image:
-        rgba = image.convert("RGBA")
-        fitted_size = _width_constrained_size(rgba.width, rgba.height, max_pixel_width)
-        resized = rgba.resize(fitted_size, _resample_filter(Image))
-        cropped = _crop_vertical(resized, crop_top_pixels, crop_height_pixels)
-        cropped.save(output_path, format="PNG", optimize=False)
-
-
-def _prepare_ueberzugpp_png_cli(argv):
-    if len(argv) != 7:
-        print(
-            "usage: notebook-vim.py --prepare-ueberzugpp-png INPUT_PNG OUTPUT_PNG MAX_WIDTH CROP_TOP CROP_HEIGHT",
-            file=sys.stderr,
-        )
-        return 2
-
-    input_path = argv[2]
-    output_path = argv[3]
-
-    try:
-        max_pixel_width = int(argv[4])
-        crop_top_pixels = int(argv[5])
-        crop_height_pixels = int(argv[6])
-    except ValueError:
-        print("MAX_WIDTH, CROP_TOP, and CROP_HEIGHT must be integers", file=sys.stderr)
-        return 2
-
-    try:
-        _prepare_ueberzugpp_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels)
-    except Exception as exc:
-        print("could not prepare ueberzugpp PNG: {}".format(exc), file=sys.stderr)
-        return 1
-
-    return 0
-
-
 def _image_prep_worker_cache_size():
     try:
         value = int(os.environ.get("NOTEBOOK_VIM_IMAGE_PREP_CACHE_SIZE", "16"))
@@ -468,34 +409,6 @@ def _image_prep_worker_cli(argv):
                 "ok": False,
                 "error": _strip_null_bytes(str(exc)),
             })
-
-    return 0
-
-
-def _prepare_sixel_png_cli(argv):
-    if len(argv) != 7:
-        print(
-            "usage: notebook-vim.py --prepare-sixel-png INPUT_PNG OUTPUT_PNG MAX_WIDTH CROP_TOP CROP_HEIGHT",
-            file=sys.stderr,
-        )
-        return 2
-
-    input_path = argv[2]
-    output_path = argv[3]
-
-    try:
-        max_pixel_width = int(argv[4])
-        crop_top_pixels = int(argv[5])
-        crop_height_pixels = int(argv[6])
-    except ValueError:
-        print("MAX_WIDTH, CROP_TOP, and CROP_HEIGHT must be integers", file=sys.stderr)
-        return 2
-
-    try:
-        _prepare_sixel_png(input_path, output_path, max_pixel_width, crop_top_pixels, crop_height_pixels)
-    except Exception as exc:
-        print("could not prepare sixel PNG: {}".format(exc), file=sys.stderr)
-        return 1
 
     return 0
 
@@ -627,12 +540,6 @@ def _run_cell(cell, namespace, figure_dir):
 
 
 def main():
-    if len(sys.argv) >= 2 and sys.argv[1] == "--prepare-sixel-png":
-        return _prepare_sixel_png_cli(sys.argv)
-
-    if len(sys.argv) >= 2 and sys.argv[1] == "--prepare-ueberzugpp-png":
-        return _prepare_ueberzugpp_png_cli(sys.argv)
-
     if len(sys.argv) >= 2 and sys.argv[1] == "--image-prep-worker":
         return _image_prep_worker_cli(sys.argv)
 

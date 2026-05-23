@@ -49,7 +49,7 @@ vim9script
 #
 # Shortcuts in active notebook buffers:
 #
-#    <C-l>    run everything from the top, from scratch
+#    <C-l>   run everything from the top, from scratch
 #    <leader>b clear all generated outputs
 
 if exists('g:loaded_python_notebook_vim')
@@ -141,12 +141,6 @@ endif
 # to capture stdout in :PythonNotebookUeberzugppLog while debugging startup.
 if !exists('g:python_notebook_ueberzugpp_stdout_to_tty')
     g:python_notebook_ueberzugpp_stdout_to_tty = 0
-endif
-
-# Use one long-lived Python/PIL process for ueberzugpp image crop/resize
-# requests. This removes Python startup from the scroll hot path.
-if !exists('g:python_notebook_ueberzugpp_use_image_prep_worker')
-    g:python_notebook_ueberzugpp_use_image_prep_worker = 1
 endif
 
 if !exists('g:python_notebook_image_prep_worker_timeout_ms')
@@ -313,14 +307,6 @@ def UeberzugppPreparedOutputFormat(): string
     return 'rgba'
 enddef
 
-def UeberzugppPrepareCommandForFormat(output_format: string): string
-    if output_format ==# 'sixel'
-        return '--prepare-sixel-png'
-    endif
-
-    return '--prepare-ueberzugpp-png'
-enddef
-
 def UeberzugppCellWidth(): number
     var cell_width: number = GetNumberSetting('python_notebook_cell_width',
         SixelCellWidth())
@@ -477,15 +463,6 @@ def UeberzugppLayerReady(): bool
     return status ==# 'open' || status ==# 'buffered'
 enddef
 
-def UseImagePrepWorker(): bool
-    if has_key(g:, 'python_notebook_image_prep_worker')
-        return GetNumberSetting('python_notebook_image_prep_worker', 1) != 0
-    endif
-
-    return GetNumberSetting(
-        'python_notebook_ueberzugpp_use_image_prep_worker', 1) != 0
-enddef
-
 def ImagePrepWorkerTimeoutMs(): number
     var timeout_ms: number = GetNumberSetting(
         'python_notebook_image_prep_worker_timeout_ms', 2000)
@@ -590,10 +567,6 @@ def ImagePrepWorkerExitCb(job: any, status: number)
 enddef
 
 def StartImagePrepWorker()
-    if !UseImagePrepWorker()
-        return
-    endif
-
     if ImagePrepWorkerReady()
         return
     endif
@@ -846,10 +819,6 @@ def ImagePrepWorkerReadResponse(request_id: string, timeout_ms: number): any
 enddef
 
 def ImagePrepWorkerRequest(command: dict<any>): dict<any>
-    if !UseImagePrepWorker()
-        return {'ok': false, 'error': 'image prep worker disabled'}
-    endif
-
     if !ImagePrepWorkerReady()
         StartImagePrepWorker()
     endif
@@ -1739,31 +1708,13 @@ def GenerateFigureSixel(
         var prepared_path: string = tempname() .. '.png'
 
         try
-            if UseImagePrepWorker()
-                var worker_path: string = PrepareImageWithWorker(path,
-                    prepared_path, max_pixel_width, crop_top_pixels,
-                    crop_height_pixels, 'sixel', 'chafa image prep')
-                if !empty(worker_path)
-                    prepared_path = worker_path
-                else
-                    systemlist(ShellCommand([
-                        python_cmd, helper_path, '--prepare-sixel-png', path,
-                        prepared_path, string(max_pixel_width),
-                        string(crop_top_pixels), string(crop_height_pixels)
-                    ]))
-                    if v:shell_error != 0 || !filereadable(prepared_path)
-                        return ''
-                    endif
-                endif
+            var worker_path: string = PrepareImageWithWorker(path,
+                prepared_path, max_pixel_width, crop_top_pixels,
+                crop_height_pixels, 'sixel', 'chafa image prep')
+            if !empty(worker_path)
+                prepared_path = worker_path
             else
-                systemlist(ShellCommand([
-                    python_cmd, helper_path, '--prepare-sixel-png', path,
-                    prepared_path, string(max_pixel_width),
-                    string(crop_top_pixels), string(crop_height_pixels)
-                ]))
-                if v:shell_error != 0 || !filereadable(prepared_path)
-                    return ''
-                endif
+                return ''
             endif
 
             # The helper resizes the PNG proportionally by width, crops the
@@ -1803,31 +1754,13 @@ def GenerateFigureSixel(
         var prepared_path: string = tempname() .. '.png'
 
         try
-            if UseImagePrepWorker()
-                var worker_path: string = PrepareImageWithWorker(path,
-                    prepared_path, pixel_width, crop_top_pixels,
-                    crop_height_pixels, 'rgba', 'imagemagick image prep')
-                if !empty(worker_path)
-                    prepared_path = worker_path
-                else
-                    systemlist(ShellCommand([
-                        python_cmd, helper_path, '--prepare-ueberzugpp-png',
-                        path, prepared_path, string(pixel_width),
-                        string(crop_top_pixels), string(crop_height_pixels)
-                    ]))
-                    if v:shell_error != 0 || !filereadable(prepared_path)
-                        return ''
-                    endif
-                endif
+            var worker_path: string = PrepareImageWithWorker(path,
+                prepared_path, pixel_width, crop_top_pixels,
+                crop_height_pixels, 'rgba', 'imagemagick image prep')
+            if !empty(worker_path)
+                prepared_path = worker_path
             else
-                systemlist(ShellCommand([
-                    python_cmd, helper_path, '--prepare-ueberzugpp-png', path,
-                    prepared_path, string(pixel_width),
-                    string(crop_top_pixels), string(crop_height_pixels)
-                ]))
-                if v:shell_error != 0 || !filereadable(prepared_path)
-                    return ''
-                endif
+                return ''
             endif
 
             sixel_data = system(ShellCommand([
@@ -2264,33 +2197,15 @@ def PrepareUeberzugppImage(
         available_lines * UeberzugppCellHeight()])
     var prepared_path: string = tempname() .. '.png'
 
-    if UseImagePrepWorker()
-        var worker_path: string = PrepareImageWithWorker(path, prepared_path,
-            max_pixel_width, crop_top_pixels, crop_height_pixels,
-            output_format, 'ueberzugpp image prep')
-        if !empty(worker_path)
-            ueberzugpp_prepared_cache[cache_key] = worker_path
-            return worker_path
-        endif
+    var worker_path: string = PrepareImageWithWorker(path, prepared_path,
+        max_pixel_width, crop_top_pixels, crop_height_pixels,
+        output_format, 'ueberzugpp image prep')
+    if !empty(worker_path)
+        ueberzugpp_prepared_cache[cache_key] = worker_path
+        return worker_path
     endif
 
-    var prepare_command: string = UeberzugppPrepareCommandForFormat(
-        output_format)
-    var prepare_output: list<string> = systemlist(ShellCommand([
-        python_cmd, helper_path, prepare_command, path, prepared_path,
-        string(max_pixel_width), string(crop_top_pixels),
-        string(crop_height_pixels)
-    ]))
-    if v:shell_error != 0 || !filereadable(prepared_path)
-        AddUeberzugppLog('image preparation failed; shell_error='
-            .. string(v:shell_error) .. '; format=' .. output_format
-            .. '; source=' .. path .. '; output='
-            .. join(StripNullBytesFromLines(prepare_output), ' | '), true)
-        return path
-    endif
-
-    ueberzugpp_prepared_cache[cache_key] = prepared_path
-    return prepared_path
+    return path
 enddef
 
 def ClearTerminalTextArea(
@@ -3086,7 +3001,7 @@ def PythonNotebookStatus()
     echomsg '  ueberzugpp last stderr: ' .. ueberzugpp_last_stderr
     echomsg '  ueberzugpp last exit status: ' .. ueberzugpp_last_exit_status
     echomsg '  ueberzugpp last command: ' .. ueberzugpp_last_command
-    echomsg '  image prep worker enabled: ' .. string(UseImagePrepWorker())
+    echomsg '  image prep worker enabled: true'
     echomsg '  image prep worker timeout ms: '
         .. string(ImagePrepWorkerTimeoutMs())
     echomsg '  image prep worker cache size: '
