@@ -215,13 +215,9 @@ def NotebookHelperPath(): string
         script_dir .. '/notebook-python-draw.py'))
 enddef
 
-def NotebookCacheDir(): string
-    return expand(GetStringSetting('python_notebook_cache_dir',
-        expand('~/.cache/notebook-python-vim')))
-enddef
-
 def NotebookFigureDir(): string
-    return NotebookCacheDir() .. '/figures/buf_' .. bufnr('%')
+    return expand('~/.cache/notebook-python-vim')
+           .. '/figures/buf_' .. bufnr('%')
 enddef
 
 def NotebookFigureLines(): number
