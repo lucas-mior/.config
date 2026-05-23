@@ -1176,18 +1176,8 @@ def DrawNotebookFigures()
     endwhile
 enddef
 
-def RedrawNotebookChrome()
-    # Sixel pixels are not part of Vim's screen grid. During a terminal scroll,
-    # old sixel pixels can be copied into the status line before Vim repaints
-    # that UI area. Redraw only Vim's chrome instead of doing a full redraw!, so
-    # the figure area can keep scrolling smoothly without flicker.
-    silent! redrawstatus
-    silent! redrawtabline
-enddef
-
 def DrawNotebookFiguresTimer(timer_id: number)
     DrawNotebookFigures()
-    RedrawNotebookChrome()
 enddef
 
 def ScheduleNotebookFigureDraw(delay_ms: number = 50)
@@ -1199,15 +1189,8 @@ def ScheduleNotebookFigureDraw(delay_ms: number = 50)
 enddef
 
 def NotebookScrollRedraw()
-    # Do not call redraw! while scrolling. Vim's own terminal scroll can move
-    # the existing sixel pixels smoothly; a forced redraw clears them first and
-    # causes the visible disappear/reappear flicker.
-    #
-    # However, terminal scrolling can temporarily copy sixel pixels into Vim's
-    # status line. Repair the status/tab line immediately, then repaint the
-    # visible figure slices after Vim has settled the new viewport.
-    RedrawNotebookChrome()
-    ScheduleNotebookFigureDraw(25)
+    redraw!
+    DrawNotebookFigures()
 enddef
 
 def NotebookRedraw()
