@@ -107,20 +107,12 @@ if !exists('g:python_notebook_imagemagick_command')
     g:python_notebook_imagemagick_command = ''
 endif
 
-if !exists('g:python_notebook_imagemagick_cell_width')
-    g:python_notebook_imagemagick_cell_width = 10
+if !exists('g:python_notebook_cell_width')
+    g:python_notebook_cell_width = 10
 endif
 
-if !exists('g:python_notebook_imagemagick_cell_height')
-    g:python_notebook_imagemagick_cell_height = 20
-endif
-
-if !exists('g:python_notebook_sixel_cell_width')
-    g:python_notebook_sixel_cell_width = g:python_notebook_imagemagick_cell_width
-endif
-
-if !exists('g:python_notebook_sixel_cell_height')
-    g:python_notebook_sixel_cell_height = g:python_notebook_imagemagick_cell_height
+if !exists('g:python_notebook_cell_height')
+    g:python_notebook_cell_height = 20
 endif
 
 # Sixel images are painted directly by the terminal, outside Vim's normal
@@ -142,14 +134,6 @@ endif
 
 if !exists('g:python_notebook_ueberzugpp_output')
     g:python_notebook_ueberzugpp_output = 'x11'
-endif
-
-if !exists('g:python_notebook_ueberzugpp_cell_width')
-    g:python_notebook_ueberzugpp_cell_width = g:python_notebook_sixel_cell_width
-endif
-
-if !exists('g:python_notebook_ueberzugpp_cell_height')
-    g:python_notebook_ueberzugpp_cell_height = g:python_notebook_sixel_cell_height
 endif
 
 # Diagnostics for the ueberzugpp persistent layer process. Errors are always
@@ -285,7 +269,7 @@ def ImageMagickCommand(): string
 enddef
 
 def ImageMagickCellWidth(): number
-    var cell_width: number = GetNumberSetting('python_notebook_imagemagick_cell_width', 10)
+    var cell_width: number = GetNumberSetting('python_notebook_cell_width', 10)
     if cell_width <= 0
         cell_width = 10
     endif
@@ -294,7 +278,7 @@ def ImageMagickCellWidth(): number
 enddef
 
 def ImageMagickCellHeight(): number
-    var cell_height: number = GetNumberSetting('python_notebook_imagemagick_cell_height', 20)
+    var cell_height: number = GetNumberSetting('python_notebook_cell_height', 20)
     if cell_height <= 0
         cell_height = 20
     endif
@@ -365,7 +349,7 @@ def UeberzugppPrepareCommandForFormat(output_format: string): string
 enddef
 
 def UeberzugppCellWidth(): number
-    var cell_width: number = GetNumberSetting('python_notebook_ueberzugpp_cell_width', SixelCellWidth())
+    var cell_width: number = GetNumberSetting('python_notebook_cell_width', SixelCellWidth())
     if cell_width <= 0
         cell_width = SixelCellWidth()
     endif
@@ -374,7 +358,7 @@ def UeberzugppCellWidth(): number
 enddef
 
 def UeberzugppCellHeight(): number
-    var cell_height: number = GetNumberSetting('python_notebook_ueberzugpp_cell_height', SixelCellHeight())
+    var cell_height: number = GetNumberSetting('python_notebook_cell_height', SixelCellHeight())
     if cell_height <= 0
         cell_height = SixelCellHeight()
     endif
