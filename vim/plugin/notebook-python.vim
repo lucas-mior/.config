@@ -1724,7 +1724,7 @@ def EnablePythonNotebookForBuffer(): bool
 
     SetupNotebookSyntax()
 
-    set nocursorline nocursorcolumn
+    set nocursorline nocursorcolumn scrolloff=50
 
     execute 'command! -buffer PythonNotebookRunAll call ' .. script_sid .. 'RunPythonNotebookFromScratch()'
     execute 'command! -buffer PythonNotebookClearOutputs call ' .. script_sid .. 'ClearNotebookOutputs()'
