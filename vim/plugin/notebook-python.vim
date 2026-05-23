@@ -57,7 +57,7 @@ if exists('g:loaded_python_notebook_vim')
 endif
 g:loaded_python_notebook_vim = 1
 
-var notebook_python_vim_build: string = 'all-backends-persistent-image-prep-worker-2026-05-23d'
+var notebook_python_vim_build: string = 'ueberzugpp-x11-shape-sixel-prep-2026-05-23e'
 
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
@@ -334,6 +334,32 @@ enddef
 
 def UeberzugppOutput(): string
     return GetStringSetting('python_notebook_ueberzugpp_output', '')
+enddef
+
+def UeberzugppPreparedOutputFormat(): string
+    var configured_format: string = GetStringSetting('python_notebook_ueberzugpp_prepared_output_format', '')
+    if !empty(configured_format)
+        return configured_format
+    endif
+
+    # The patched ueberzugpp X11 backend uses XShape for 1-bit alpha:
+    # alpha == 0 becomes outside the child-window shape, while alpha > 0 is
+    # drawn opaquely. Feed it the same sixel-friendly PNG that chafa uses:
+    # fully transparent pixels remain transparent, and partially transparent
+    # anti-aliased pixels are pre-composited into opaque RGB.
+    if UeberzugppOutput() ==# 'x11'
+        return 'sixel'
+    endif
+
+    return 'rgba'
+enddef
+
+def UeberzugppPrepareCommandForFormat(output_format: string): string
+    if output_format ==# 'sixel'
+        return '--prepare-sixel-png'
+    endif
+
+    return '--prepare-ueberzugpp-png'
 enddef
 
 def UeberzugppCellWidth(): number
@@ -1921,8 +1947,8 @@ def StopUeberzugppLayerDaemon()
     ueberzugpp_pid = 0
 enddef
 
-def UeberzugppPreparedCacheKey(path: string, available_cols: number, available_lines: number, crop_top_lines: number): string
-    return path .. ':' .. getfsize(path) .. ':' .. getftime(path) .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. ':' .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
+def UeberzugppPreparedCacheKey(path: string, available_cols: number, available_lines: number, crop_top_lines: number, output_format: string): string
+    return output_format .. ':' .. path .. ':' .. getfsize(path) .. ':' .. getftime(path) .. ':' .. available_cols .. 'x' .. available_lines .. '@' .. crop_top_lines .. ':' .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
 enddef
 
 def PrepareImageWithWorker(path: string, prepared_path: string, max_pixel_width: number, crop_top_pixels: number, crop_height_pixels: number, output_format: string, failure_context: string): string
@@ -1951,7 +1977,13 @@ def PrepareImageWithWorker(path: string, prepared_path: string, max_pixel_width:
 enddef
 
 def PrepareUeberzugppImage(path: string, available_cols: number, available_lines: number, crop_top_lines: number, total_lines: number): string
-    if crop_top_lines <= 0 && available_lines >= total_lines
+    var output_format: string = UeberzugppPreparedOutputFormat()
+
+    # In plain RGBA mode, a full visible image can be passed directly. In
+    # sixel/XShape-prep mode, even a full visible image must be converted so
+    # semi-transparent pixels become opaque edge pixels and alpha==0 remains
+    # the binary transparency mask.
+    if output_format ==# 'rgba' && crop_top_lines <= 0 && available_lines >= total_lines
         return path
     endif
 
@@ -1966,7 +1998,7 @@ def PrepareUeberzugppImage(path: string, available_cols: number, available_lines
         return path
     endif
 
-    var cache_key: string = UeberzugppPreparedCacheKey(path, available_cols, available_lines, crop_top_lines)
+    var cache_key: string = UeberzugppPreparedCacheKey(path, available_cols, available_lines, crop_top_lines, output_format)
     if has_key(ueberzugpp_prepared_cache, cache_key) && filereadable(ueberzugpp_prepared_cache[cache_key])
         return ueberzugpp_prepared_cache[cache_key]
     endif
@@ -1977,16 +2009,17 @@ def PrepareUeberzugppImage(path: string, available_cols: number, available_lines
     var prepared_path: string = tempname() .. '.png'
 
     if UseImagePrepWorker()
-        var worker_path: string = PrepareImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels, 'rgba', 'ueberzugpp image prep')
+        var worker_path: string = PrepareImageWithWorker(path, prepared_path, max_pixel_width, crop_top_pixels, crop_height_pixels, output_format, 'ueberzugpp image prep')
         if !empty(worker_path)
             ueberzugpp_prepared_cache[cache_key] = worker_path
             return worker_path
         endif
     endif
 
-    var prepare_output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, '--prepare-ueberzugpp-png', path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
+    var prepare_command: string = UeberzugppPrepareCommandForFormat(output_format)
+    var prepare_output: list<string> = systemlist(ShellCommand([python_cmd, helper_path, prepare_command, path, prepared_path, string(max_pixel_width), string(crop_top_pixels), string(crop_height_pixels)]))
     if v:shell_error != 0 || !filereadable(prepared_path)
-        AddUeberzugppLog('image preparation failed; shell_error=' .. string(v:shell_error) .. '; source=' .. path .. '; output=' .. join(StripNullBytesFromLines(prepare_output), ' | '), true)
+        AddUeberzugppLog('image preparation failed; shell_error=' .. string(v:shell_error) .. '; format=' .. output_format .. '; source=' .. path .. '; output=' .. join(StripNullBytesFromLines(prepare_output), ' | '), true)
         return path
     endif
 
