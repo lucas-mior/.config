@@ -5,51 +5,51 @@ vim9script
 #
 # Install:
 #
-#   ~/.vim/plugin/notebook-python.vim
-#   ~/.vim/plugin/notebook-vim.py
+#    ~/.vim/plugin/notebook-python.vim
+#    ~/.vim/plugin/notebook-vim.py
 #
 # Activation:
 #
-#   The plugin is globally loaded by Vim, but notebook behavior only activates
-#   for Python buffers containing one of these comments near the top:
+#    The plugin is globally loaded by Vim, but notebook behavior only activates
+#    for Python buffers containing one of these comments near the top:
 #
-#       # notebook-python: enable
-#       # nb: enable
+#        # notebook-python: enable
+#        # nb: enable
 #
 # Cell syntax:
 #
-#   # %%
-#   x = 10
-#   x + 5
+#    # %%
+#    x = 10
+#    x + 5
 #
 # Generated output:
 #
-#   # nb-output: start [stdout, result, figure]
-#   # stdout text
-#   # result text
-#   # nb-figure: cell_0007_fig_0001.png
-#   #
-#   #
-#   # nb-output: end
+#    # nb-output: start [stdout, result, figure]
+#    # stdout text
+#    # result text
+#    # nb-figure: cell_0007_fig_0001.png
+#    #
+#    #
+#    # nb-output: end
 #
 # Generated errors:
 #
-#   # nb-error: start
-#   # traceback text
-#   # nb-error: end
+#    # nb-error: start
+#    # traceback text
+#    # nb-error: end
 #
 # Commands:
 #
-#   :PythonNotebookStatus
-#   :PythonNotebookTryEnable
-#   :PythonNotebookRunAll
-#   :PythonNotebookClearOutputs
-#   :PythonNotebookDrawFigures
+#    :PythonNotebookStatus
+#    :PythonNotebookTryEnable
+#    :PythonNotebookRunAll
+#    :PythonNotebookClearOutputs
+#    :PythonNotebookDrawFigures
 #
 # Shortcuts in active notebook buffers:
 #
-#   <C-l>      run everything from the top, from scratch
-#   <leader>b clear all generated outputs
+#    <C-l>      run everything from the top, from scratch
+#    <leader>b clear all generated outputs
 
 if exists('g:loaded_python_notebook_vim')
     finish
@@ -93,9 +93,9 @@ endif
 
 # Image engine options:
 #
-#   let g:python_notebook_sixel_engine = 'chafa'
-#   let g:python_notebook_sixel_engine = 'imagemagick'
-#   let g:python_notebook_sixel_engine = 'ueberzugpp'
+#    let g:python_notebook_sixel_engine = 'chafa'
+#    let g:python_notebook_sixel_engine = 'imagemagick'
+#    let g:python_notebook_sixel_engine = 'ueberzugpp'
 #
 # Sixel/image renderers ultimately need pixel dimensions. These defaults approximate
 # one terminal cell in pixels; tune them if rendered figures are too large, too
@@ -163,6 +163,7 @@ var ueberzugpp_pid: number = 0
 var ueberzugpp_socket: string = ''
 var ueberzugpp_ready_timer: number = -1
 var ueberzugpp_visible_image_ids: dict<bool> = {}
+var ueberzugpp_current_cycle_ids: dict<bool> = {}
 var ueberzugpp_prepared_cache: dict<string> = {}
 
 def GetStringSetting(name: string, default_value: string): string
@@ -1378,7 +1379,11 @@ def DrawFigureAtWithUeberzugpp(path: string, start_lnum: number, end_lnum: numbe
     var crop_top_lines: number = visible_start - start_lnum
     var total_lines: number = end_lnum - start_lnum + 1
     var display_path: string = PrepareUeberzugppImage(path, available_cols, visible_lines, crop_top_lines, total_lines)
-    var identifier: string = 'notebook-python-vim-' .. getpid() .. '-' .. win_getid() .. '-' .. start_lnum
+    
+    var file_id: string = substitute(fnamemodify(path, ':t'), '\W', '_', 'g')
+    var identifier: string = 'notebook-python-vim-' .. getpid() .. '-' .. win_getid() .. '-' .. file_id
+
+    ueberzugpp_current_cycle_ids[identifier] = true
 
     ClearTerminalTextArea(visible_start, visible_lines, available_cols, screen_col)
 
@@ -1510,9 +1515,7 @@ def DrawNotebookFigures()
     endif
 
     var engine: string = GetStringSetting('python_notebook_sixel_engine', 'chafa')
-    if IsUeberzugppEngine(engine)
-        ClearUeberzugppImages()
-    endif
+    ueberzugpp_current_cycle_ids = {}
 
     var screen_col: number = 1
 
@@ -1548,6 +1551,15 @@ def DrawNotebookFigures()
 
         lnum += 1
     endwhile
+
+    if IsUeberzugppEngine(engine)
+        for identifier in keys(ueberzugpp_visible_image_ids)
+            if !has_key(ueberzugpp_current_cycle_ids, identifier)
+                UeberzugppRemoveImage(identifier)
+                remove(ueberzugpp_visible_image_ids, identifier)
+            endif
+        endfor
+    endif
 enddef
 
 def DrawNotebookFiguresTimer(timer_id: number)
@@ -1563,13 +1575,11 @@ def ScheduleNotebookFigureDraw(delay_ms: number = 50)
 enddef
 
 def NotebookScrollRedraw()
-    ClearExternalImages()
     redraw!
     DrawNotebookFigures()
 enddef
 
 def NotebookRedraw()
-    ClearExternalImages()
     redraw!
     ScheduleNotebookFigureDraw()
 enddef
