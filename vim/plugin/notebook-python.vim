@@ -7,7 +7,7 @@ vim9script
 # Install:
 #
 #    ~/.vim/plugin/notebook-python.vim
-#    ~/.vim/plugin/notebook-vim.py
+#    ~/.vim/plugin/notebook-python-draw.py
 #
 # Activation:
 #
@@ -63,7 +63,7 @@ var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
 
 if !exists('g:python_notebook_helper')
-    g:python_notebook_helper = script_dir .. '/notebook-vim.py'
+    g:python_notebook_helper = script_dir .. '/notebook-python-draw.py'
 endif
 
 if !exists('g:python_notebook_cache_dir')
@@ -223,7 +223,7 @@ def GetNumberSetting(name: string, default_value: number): number
 enddef
 
 def NotebookHelperPath(): string
-    return expand(GetStringSetting('python_notebook_helper', script_dir .. '/notebook-vim.py'))
+    return expand(GetStringSetting('python_notebook_helper', script_dir .. '/notebook-python-draw.py'))
 enddef
 
 def NotebookCacheDir(): string
