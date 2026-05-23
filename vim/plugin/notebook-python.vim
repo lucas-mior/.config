@@ -62,10 +62,6 @@ var notebook_python_vim_build: string = 'visible-window-cycle-2026-05-23g'
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
 
-if !exists('g:python_notebook_python')
-    g:python_notebook_python = 'python3'
-endif
-
 if !exists('g:python_notebook_helper')
     g:python_notebook_helper = script_dir .. '/notebook-vim.py'
 endif
@@ -224,10 +220,6 @@ def GetNumberSetting(name: string, default_value: number): number
     endif
 
     return str2nr(string(value))
-enddef
-
-def PythonCommand(): string
-    return GetStringSetting('python_notebook_python', 'python3')
 enddef
 
 def NotebookHelperPath(): string
@@ -634,7 +626,7 @@ def StartImagePrepWorker()
         return
     endif
 
-    var python_cmd: string = PythonCommand()
+    var python_cmd: string = 'python3'
     var helper_path: string = NotebookHelperPath()
 
     if empty(python_cmd) || !executable(python_cmd)
@@ -917,7 +909,7 @@ def FigureDisplayLines(path: string, available_cols: number): number
     endif
 
     var engine: string = GetStringSetting('python_notebook_draw_engine', 'chafa')
-    var python_cmd: string = PythonCommand()
+    var python_cmd: string = 'python3'
     var helper_path: string = NotebookHelperPath()
 
     if empty(python_cmd) || !executable(python_cmd)
@@ -1589,7 +1581,7 @@ def SixelCacheKey(path: string, available_cols: number, available_lines: number,
 
     if engine ==# 'chafa'
         var helper_path: string = NotebookHelperPath()
-        extra_key = ':' .. PythonCommand() .. ':' .. helper_path .. ':' .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x' .. SixelCellHeight()
+        extra_key = ':' .. 'python3' .. ':' .. helper_path .. ':' .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x' .. SixelCellHeight()
     elseif IsImageMagickEngine(engine)
         extra_key = ':' .. ImageMagickCommand() .. ':' .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
     endif
@@ -1615,7 +1607,7 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var python_cmd: string = PythonCommand()
+        var python_cmd: string = 'python3'
         var helper_path: string = NotebookHelperPath()
 
         if empty(python_cmd) || !executable(python_cmd)
@@ -1665,7 +1657,7 @@ def GenerateFigureSixel(path: string, available_cols: number, available_lines: n
             return ''
         endif
 
-        var python_cmd: string = PythonCommand()
+        var python_cmd: string = 'python3'
         var helper_path: string = NotebookHelperPath()
         if empty(python_cmd) || !executable(python_cmd)
             return ''
@@ -2054,7 +2046,7 @@ def PrepareUeberzugppImage(path: string, available_cols: number, available_lines
         return path
     endif
 
-    var python_cmd: string = PythonCommand()
+    var python_cmd: string = 'python3'
     var helper_path: string = NotebookHelperPath()
 
     if empty(python_cmd) || !executable(python_cmd)
@@ -2544,7 +2536,7 @@ def NotebookWindowLeave()
 enddef
 
 def RunPythonNotebookFromScratch()
-    var python_cmd: string = PythonCommand()
+    var python_cmd: string = 'python3'
     var helper_path: string = NotebookHelperPath()
 
     if empty(python_cmd) || !executable(python_cmd)
@@ -2758,7 +2750,7 @@ def ClearPythonNotebookCommand()
 enddef
 
 def PythonNotebookStatus()
-    var python_cmd: string = PythonCommand()
+    var python_cmd: string = 'python3'
     var helper_path: string = NotebookHelperPath()
 
     echomsg 'notebook-python.vim status:'
