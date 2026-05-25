@@ -86,13 +86,13 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_draw_engine')
-    g:python_notebook_draw_engine = 'ueberzugpp'
+    g:python_notebook_draw_engine = 'magick'
 endif
 
 # Image engine options:
 #
 #    let g:python_notebook_draw_engine = 'chafa'
-#    let g:python_notebook_draw_engine = 'imagemagick'
+#    let g:python_notebook_draw_engine = 'magick'
 #    let g:python_notebook_draw_engine = 'ueberzugpp'
 #
 # Sixel/image renderers ultimately need pixel dimensions. These defaults
@@ -213,7 +213,7 @@ def NotebookFigureLines(): number
     return figure_lines
 enddef
 
-def ImageMagickCellWidth(): number
+def MagickCellWidth(): number
     var cell_width: number = GetNumberSetting(
         'python_notebook_cell_width', 10)
     if cell_width <= 0
@@ -223,7 +223,7 @@ def ImageMagickCellWidth(): number
     return cell_width
 enddef
 
-def ImageMagickCellHeight(): number
+def MagickCellHeight(): number
     var cell_height: number = GetNumberSetting(
         'python_notebook_cell_height', 20)
     if cell_height <= 0
@@ -235,9 +235,9 @@ enddef
 
 def SixelCellWidth(): number
     var cell_width: number = GetNumberSetting(
-        'python_notebook_cell_width', ImageMagickCellWidth())
+        'python_notebook_cell_width', MagickCellWidth())
     if cell_width <= 0
-        cell_width = ImageMagickCellWidth()
+        cell_width = MagickCellWidth()
     endif
 
     return cell_width
@@ -245,9 +245,9 @@ enddef
 
 def SixelCellHeight(): number
     var cell_height: number = GetNumberSetting(
-        'python_notebook_cell_height', ImageMagickCellHeight())
+        'python_notebook_cell_height', MagickCellHeight())
     if cell_height <= 0
-        cell_height = ImageMagickCellHeight()
+        cell_height = MagickCellHeight()
     endif
 
     return cell_height
@@ -903,10 +903,8 @@ def WindowTextWidth(): number
     return max([1, text_width])
 enddef
 
-def IsImageMagickEngine(engine: string): bool
-    return engine ==# 'imagemagick'
-        || engine ==# 'magick'
-        || engine ==# 'convert'
+def IsMagickEngine(engine: string): bool
+    return engine ==# 'magick'
 enddef
 
 def FigureDisplayLines(path: string, available_cols: number): number
@@ -932,9 +930,9 @@ def FigureDisplayLines(path: string, available_cols: number): number
     var max_pixel_width: number = max([1, available_cols * SixelCellWidth()])
     var cell_height: number = SixelCellHeight()
 
-    if IsImageMagickEngine(engine)
-        max_pixel_width = max([1, available_cols * ImageMagickCellWidth()])
-        cell_height = ImageMagickCellHeight()
+    if IsMagickEngine(engine)
+        max_pixel_width = max([1, available_cols * MagickCellWidth()])
+        cell_height = MagickCellHeight()
     elseif IsUeberzugppEngine(engine)
         max_pixel_width = max([1, available_cols * UeberzugppCellWidth()])
         cell_height = UeberzugppCellHeight()
@@ -1635,9 +1633,9 @@ def SixelCacheKey(
         extra_key = ':' .. 'python3' .. ':' .. helper_path .. ':'
             .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x'
             .. SixelCellHeight()
-    elseif IsImageMagickEngine(engine)
+    elseif IsMagickEngine(engine)
         extra_key = ':' .. 'magick' .. ':'
-            .. ImageMagickCellWidth() .. 'x' .. ImageMagickCellHeight()
+            .. MagickCellWidth() .. 'x' .. MagickCellHeight()
     endif
 
     return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime
@@ -1711,7 +1709,7 @@ def GenerateFigureSixel(
                 delete(prepared_path)
             endif
         endtry
-    elseif IsImageMagickEngine(engine)
+    elseif IsMagickEngine(engine)
         var magick_cmd: string = 'magick'
         if empty(magick_cmd) || !executable(magick_cmd)
             return ''
@@ -1728,17 +1726,17 @@ def GenerateFigureSixel(
         endif
 
         var pixel_width: number = max([1,
-            available_cols * ImageMagickCellWidth()])
+            available_cols * MagickCellWidth()])
         var crop_top_pixels: number = max([0,
-            crop_top_lines * ImageMagickCellHeight()])
+            crop_top_lines * MagickCellHeight()])
         var crop_height_pixels: number = max([1,
-            available_lines * ImageMagickCellHeight()])
+            available_lines * MagickCellHeight()])
         var prepared_path: string = tempname() .. '.png'
 
         try
             var worker_path: string = PrepareImageWithWorker(path,
                 prepared_path, pixel_width, crop_top_pixels,
-                crop_height_pixels, 'rgba', 'imagemagick image prep')
+                crop_height_pixels, 'rgba', 'magick image prep')
             if !empty(worker_path)
                 prepared_path = worker_path
             else
