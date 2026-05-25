@@ -2485,12 +2485,28 @@ def DrawNotebookFigures(remove_stale: bool = true)
     endif
 enddef
 
+def DrawNotebookFiguresAfterTerminalRedraw()
+    var engine: string = GetStringSetting('python_notebook_draw_engine',
+        'chafa')
+
+    if engine ==# 'ueberzugpp'
+        DrawNotebookFigures()
+        return
+    endif
+
+    # Sixel output is part of the terminal grid, not a per-window overlay.
+    # Any Vim redraw triggered by scrolling one split can erase images in every
+    # split. Repaint all visible notebook windows so the inactive splits do not
+    # stay blank until they are focused again.
+    DrawNotebookFiguresInVisibleWindows()
+enddef
+
 def DrawNotebookFiguresTimer(timer_id: number)
     if figure_draw_timer == timer_id
         figure_draw_timer = -1
     endif
 
-    DrawNotebookFigures()
+    DrawNotebookFiguresAfterTerminalRedraw()
 enddef
 
 def AnyVisibleNotebookBuffer(): bool
@@ -2641,7 +2657,7 @@ enddef
 def NotebookScrollRedraw()
     ClearExternalImages()
     redraw!
-    DrawNotebookFigures()
+    DrawNotebookFiguresAfterTerminalRedraw()
 enddef
 
 def NotebookRedraw()
