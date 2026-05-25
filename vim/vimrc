@@ -42,11 +42,11 @@ call plug#end()
 command! Picon exe 'normal m`'
                 \ | silent! undojoin | exe '%!picon -a' | exe 'normal ``'
 
-packadd termdebug
-nnoremap <buffer> <C-@> :Break<CR>
-nnoremap <buffer> <leader>c :Continue<CR>
-nnoremap <buffer> <space>   :Step<CR>
-nnoremap <buffer> <enter>   :Step<CR>
+# packadd termdebug
+# nnoremap <buffer> <C-@> :Break<CR>
+# nnoremap <buffer> <leader>c :Continue<CR>
+# nnoremap <buffer> <space>   :Step<CR>
+# nnoremap <buffer> <enter>   :Step<CR>
 
 augroup CDebug
     autocmd!

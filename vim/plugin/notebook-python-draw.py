@@ -623,7 +623,7 @@ def _save_figures(cell_index, figure_dir):
 
 class NotebookInput(io.TextIOBase):
     def readline(self, size=-1):
-        raise EOFError("input() is not supported by notebook-python.vim run-all")
+        raise EOFError("input() is not supported by notebook-python.vim")
 
 
 def _run_cell(cell, namespace, figure_dir):
@@ -678,9 +678,156 @@ def _run_cell(cell, namespace, figure_dir):
     return result
 
 
+
+def _ensure_figure_dir(figure_dir):
+    figure_dir = _strip_null_bytes(figure_dir)
+
+    if not figure_dir:
+        return ""
+
+    try:
+        os.makedirs(figure_dir, exist_ok=True)
+    except Exception:
+        return ""
+
+    return figure_dir
+
+
+def _clear_cell_figures(figure_dir, cell_index):
+    figure_dir = _strip_null_bytes(figure_dir)
+
+    if not figure_dir or not os.path.isdir(figure_dir):
+        return
+
+    try:
+        cell_index = int(cell_index)
+    except Exception:
+        return
+
+    prefix = "cell_{:04d}_fig_".format(cell_index)
+
+    try:
+        for name in os.listdir(figure_dir):
+            if not name.startswith(prefix):
+                continue
+
+            path = os.path.join(figure_dir, name)
+            if os.path.isfile(path) or os.path.islink(path):
+                try:
+                    os.unlink(path)
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+
+def _make_notebook_namespace(buffer_path):
+    return {
+        "__name__": "__main__",
+        "__file__": _strip_null_bytes(buffer_path or "<notebook-python-buffer>"),
+    }
+
+
+def _run_notebook_cells(cells, namespace, figure_dir, stop_on_error):
+    results = []
+
+    for cell in cells:
+        cell_result = _run_cell(cell, namespace, figure_dir)
+        results.append(cell_result)
+
+        if stop_on_error and not cell_result["ok"]:
+            break
+
+    return results
+
+
+def _send_json_line(response):
+    print(json.dumps(response, separators=(",", ":")), file=sys.__stdout__, flush=True)
+
+
+def _kernel_worker_cli(argv):
+    if len(argv) != 2:
+        print("usage: notebook-vim.py --kernel-worker", file=sys.stderr)
+        return 2
+
+    namespace = _make_notebook_namespace("<notebook-python-buffer>")
+    current_buffer_path = "<notebook-python-buffer>"
+
+    for raw_line in sys.stdin:
+        raw_line = raw_line.strip()
+        if not raw_line:
+            continue
+
+        request_id = ""
+
+        try:
+            request = json.loads(raw_line)
+            request_id = _strip_null_bytes(request.get("id", ""))
+            action = _strip_null_bytes(request.get("action", "run_cell"))
+
+            if action == "exit":
+                _send_json_line({"id": request_id, "ok": True, "exiting": True})
+                break
+
+            buffer_path = _strip_null_bytes(request.get("buffer_path", current_buffer_path))
+            if buffer_path:
+                current_buffer_path = buffer_path
+                namespace["__file__"] = current_buffer_path
+
+            if action == "reset":
+                namespace = _make_notebook_namespace(current_buffer_path)
+                _send_json_line({"id": request_id, "ok": True, "reset": True})
+                continue
+
+            figure_dir = _ensure_figure_dir(request.get("figure_dir", ""))
+
+            if action == "run_cell":
+                cell = request.get("cell", {})
+                if not isinstance(cell, dict):
+                    raise ValueError("cell must be a JSON object")
+
+                _clear_cell_figures(figure_dir, cell.get("index", 0))
+                result = _run_cell(cell, namespace, figure_dir)
+                _send_json_line({
+                    "id": request_id,
+                    "ok": True,
+                    "results": [result],
+                })
+                continue
+
+            if action == "run_all":
+                namespace = _make_notebook_namespace(current_buffer_path)
+                figure_dir = _prepare_figure_dir(request.get("figure_dir", ""))
+                cells = request.get("cells", [])
+                if not isinstance(cells, list):
+                    raise ValueError("cells must be a JSON array")
+
+                stop_on_error = bool(request.get("stop_on_error", True))
+                results = _run_notebook_cells(cells, namespace, figure_dir, stop_on_error)
+                _send_json_line({
+                    "id": request_id,
+                    "ok": True,
+                    "results": results,
+                })
+                continue
+
+            raise ValueError("unknown kernel worker action: {}".format(action))
+        except BaseException as exc:
+            _send_json_line({
+                "id": request_id,
+                "ok": False,
+                "error": _strip_null_bytes(str(exc)),
+            })
+
+    return 0
+
+
 def main():
     if len(sys.argv) >= 2 and sys.argv[1] == "--image-prep-worker":
         return _image_prep_worker_cli(sys.argv)
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "--kernel-worker":
+        return _kernel_worker_cli(sys.argv)
 
     if len(sys.argv) >= 2 and sys.argv[1] == "--sixel-display-lines":
         return _sixel_display_lines_cli(sys.argv)
@@ -698,20 +845,8 @@ def main():
     cells = payload.get("cells", [])
     stop_on_error = bool(payload.get("stop_on_error", True))
     figure_dir = _prepare_figure_dir(payload.get("figure_dir", ""))
-
-    namespace = {
-        "__name__": "__main__",
-        "__file__": _strip_null_bytes(payload.get("buffer_path", "<notebook-python-buffer>")),
-    }
-
-    results = []
-
-    for cell in cells:
-        cell_result = _run_cell(cell, namespace, figure_dir)
-        results.append(cell_result)
-
-        if stop_on_error and not cell_result["ok"]:
-            break
+    namespace = _make_notebook_namespace(payload.get("buffer_path", "<notebook-python-buffer>"))
+    results = _run_notebook_cells(cells, namespace, figure_dir, stop_on_error)
 
     response = {
         "ok": True,
