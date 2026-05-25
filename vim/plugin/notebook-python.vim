@@ -86,7 +86,7 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_draw_engine')
-    g:python_notebook_draw_engine = 'magick'
+    g:python_notebook_draw_engine = 'chafa'
 endif
 
 # Image engine options:
