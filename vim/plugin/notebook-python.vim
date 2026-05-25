@@ -2062,7 +2062,8 @@ def UeberzugppPreparedCacheKey(
         .. total_lines .. ':' .. CellWidth() .. 'x' .. CellHeight()
 enddef
 
-def ImagePrepLayoutKey(path: string, total_lines: number, available_cols: number): string
+def ImagePrepLayoutKey(path: string,
+                       total_lines: number, available_cols: number): string
     return path .. ':' .. getfsize(path) .. ':' .. getftime(path)
         .. ':cols=' .. string(max([1, available_cols]))
         .. ':lines=' .. string(max([1, total_lines]))
@@ -2219,9 +2220,9 @@ def DrawFigureAtWithUeberzugpp(
     endif
 
     if !UeberzugppLayerReady()
-        ueberzugpp_error = 'draw skipped because layer is not ready; job status='
-            .. UeberzugppJobStatus() .. ', channel status='
-            .. UeberzugppChannelStatus()
+        ueberzugpp_error = 'draw skipped because layer is not ready;'
+            .. 'job status=' .. UeberzugppJobStatus()
+            .. ', channel status=' .. UeberzugppChannelStatus()
         echohl ErrorMsg
         echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
@@ -2271,7 +2272,8 @@ def DrawFigureAtWithUeberzugpp(
         })
         ueberzugpp_visible_image_ids[identifier] = true
     else
-        ueberzugpp_error = 'add command failed for identifier=' .. identifier
+        ueberzugpp_error = 'add command failed for '
+            .. 'identifier=' .. identifier
             .. '; path=' .. display_path
         echohl ErrorMsg
         echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
@@ -2673,7 +2675,8 @@ enddef
 
 def ScheduleNotebookFigureDraw(delay_ms: number = 50)
     StopNotebookFigureDrawTimer()
-    figure_draw_timer = timer_start(max([0, delay_ms]), DrawNotebookFiguresTimer)
+    figure_draw_timer = timer_start(max([0, delay_ms]),
+                                    DrawNotebookFiguresTimer)
 enddef
 
 def NotebookScrollRedraw()
