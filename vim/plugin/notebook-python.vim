@@ -306,10 +306,6 @@ def UeberzugppPreparedOutputFormat(): string
     return 'rgba'
 enddef
 
-def IsUeberzugppEngine(engine: string): bool
-    return engine ==# 'ueberzugpp'
-enddef
-
 def UeberzugppStdoutToTty(): bool
     return GetNumberSetting('python_notebook_ueberzugpp_stdout_to_tty', 1) != 0
 enddef
@@ -903,10 +899,6 @@ def WindowTextWidth(): number
     return max([1, text_width])
 enddef
 
-def IsMagickEngine(engine: string): bool
-    return engine ==# 'magick'
-enddef
-
 def FigureDisplayLines(path: string, available_cols: number): number
     var fallback_lines: number = NotebookFigureLines()
 
@@ -930,14 +922,14 @@ def FigureDisplayLines(path: string, available_cols: number): number
     var max_pixel_width: number = max([1, available_cols * SixelCellWidth()])
     var cell_height: number = SixelCellHeight()
 
-    if IsMagickEngine(engine)
+    if engine ==# 'magick'
         max_pixel_width = max([1, available_cols * MagickCellWidth()])
         cell_height = MagickCellHeight()
-    elseif IsUeberzugppEngine(engine)
+    elseif engine ==# 'ueberzugpp'
         max_pixel_width = max([1, available_cols * UeberzugppCellWidth()])
         cell_height = UeberzugppCellHeight()
-    elseif engine !=# 'chafa'
-        return fallback_lines
+    else
+        assert_true(engine ==# 'chafa')
     endif
 
     var output: list<string> = systemlist(ShellCommand([
@@ -1633,7 +1625,7 @@ def SixelCacheKey(
         extra_key = ':' .. 'python3' .. ':' .. helper_path .. ':'
             .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x'
             .. SixelCellHeight()
-    elseif IsMagickEngine(engine)
+    elseif engine ==# 'magick'
         extra_key = ':' .. 'magick' .. ':'
             .. MagickCellWidth() .. 'x' .. MagickCellHeight()
     endif
@@ -1709,7 +1701,7 @@ def GenerateFigureSixel(
                 delete(prepared_path)
             endif
         endtry
-    elseif IsMagickEngine(engine)
+    elseif engine ==# 'magick'
         var magick_cmd: string = 'magick'
         if empty(magick_cmd) || !executable(magick_cmd)
             return ''
@@ -1767,7 +1759,7 @@ enddef
 def StartUeberzugppLayerDaemon()
     var engine: string = GetStringSetting('python_notebook_draw_engine',
         'chafa')
-    if !IsUeberzugppEngine(engine)
+    if !(engine ==# 'ueberzugpp')
         return
     endif
 
@@ -2030,7 +2022,7 @@ enddef
 def ClearExternalImages()
     var engine: string = GetStringSetting('python_notebook_draw_engine',
         'chafa')
-    if IsUeberzugppEngine(engine)
+    if engine ==# 'ueberzugpp'
         ClearUeberzugppImages()
         return
     endif
@@ -2060,7 +2052,7 @@ enddef
 def ClearExternalImagesForLayoutChange()
     var engine: string = GetStringSetting('python_notebook_draw_engine',
         'chafa')
-    if IsUeberzugppEngine(engine)
+    if engine ==# 'ueberzugpp'
         ClearUeberzugppImages()
         return
     endif
@@ -2394,7 +2386,7 @@ def DrawFigureAt(
 
     var engine: string = GetStringSetting('python_notebook_draw_engine',
         'chafa')
-    if IsUeberzugppEngine(engine)
+    if engine ==# 'ueberzugpp'
         DrawFigureAtWithUeberzugpp(path, start_lnum, end_lnum, visible_start,
             visible_lines, screen_col, available_cols)
         return
@@ -2492,7 +2484,7 @@ def DrawNotebookFigures(remove_stale: bool = true)
 
     var engine: string = GetStringSetting('python_notebook_draw_engine',
         'chafa')
-    var should_remove_stale: bool = IsUeberzugppEngine(engine) && remove_stale
+    var should_remove_stale: bool = (engine ==# 'ueberzugpp') && remove_stale
 
     if should_remove_stale
         ueberzugpp_current_cycle_ids = {}
