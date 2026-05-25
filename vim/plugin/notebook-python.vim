@@ -89,7 +89,7 @@ endif
 #    let g:python_notebook_draw_engine = 'magick'
 #    let g:python_notebook_draw_engine = 'ueberzugpp'
 if !exists('g:python_notebook_draw_engine')
-    g:python_notebook_draw_engine = 'ueberzugpp'
+    g:python_notebook_draw_engine = 'chafa'
 endif
 
 # Image renderers ultimately need pixel dimensions. These defaults
