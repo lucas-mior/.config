@@ -76,7 +76,7 @@ if !exists('g:python_notebook_stop_on_error')
 endif
 
 if !exists('g:python_notebook_annotation_scan_lines')
-    g:python_notebook_annotation_scan_lines = 40
+    g:python_notebook_annotation_scan_lines = 120
 endif
 
 if !exists('g:python_notebook_figure_lines')
@@ -941,8 +941,7 @@ def EnsureNotebookHighlightGroups()
 enddef
 
 def HasNotebookAnnotation(): bool
-    var scan_lines: number = GetNumberSetting(
-        'python_notebook_annotation_scan_lines', 40)
+    var scan_lines: number = g:python_notebook_annotation_scan_lines
     if scan_lines <= 0
         scan_lines = 40
     endif
