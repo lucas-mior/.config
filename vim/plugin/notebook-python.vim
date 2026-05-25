@@ -2693,6 +2693,7 @@ def RunPythonNotebookFromScratch()
     var python_cmd: string = 'python3'
     var helper_path: string = g:python_notebook_helper
 
+    PythonNotebookClearOutputs
     if empty(python_cmd) || !executable(python_cmd)
         echohl ErrorMsg
         echomsg 'notebook-python.vim: Python executable not found: '

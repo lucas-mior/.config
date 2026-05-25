@@ -85,6 +85,17 @@ def _call_root_name(func):
     return ""
 
 
+def _node_output_line(node):
+    # Python 3.8+ records the full source span for AST nodes. Use end_lineno
+    # when available so generated output is inserted after a complete
+    # multi-line plotting call rather than after the call's opening line.
+    end_lineno = getattr(node, "end_lineno", 0)
+    if end_lineno:
+        return end_lineno
+
+    return getattr(node, "lineno", 0)
+
+
 def _infer_figure_line(code):
     try:
         tree = ast.parse(_strip_null_bytes(code), filename="<notebook-figure-line>", mode="exec")
@@ -138,11 +149,11 @@ def _infer_figure_line(code):
         root = _call_root_name(node.func)
 
         if leaf in figure_call_names:
-            best_line = max(best_line, getattr(node, "lineno", 0))
+            best_line = max(best_line, _node_output_line(node))
             continue
 
         if root in {"plt", "pyplot"}:
-            best_line = max(best_line, getattr(node, "lineno", 0))
+            best_line = max(best_line, _node_output_line(node))
 
     return best_line
 
