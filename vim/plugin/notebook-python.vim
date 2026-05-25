@@ -86,7 +86,7 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_draw_engine')
-    g:python_notebook_draw_engine = 'ueberzugpp'
+    g:python_notebook_draw_engine = 'chafa'
 endif
 
 # Image engine options:
@@ -95,7 +95,7 @@ endif
 #    let g:python_notebook_draw_engine = 'magick'
 #    let g:python_notebook_draw_engine = 'ueberzugpp'
 #
-# Sixel/image renderers ultimately need pixel dimensions. These defaults
+# Image renderers ultimately need pixel dimensions. These defaults
 # approximate one terminal cell in pixels; tune them if rendered figures
 # are too large, too small, or distorted for your terminal/font.
 
@@ -105,15 +105,6 @@ endif
 
 if !exists('g:python_notebook_cell_height')
     g:python_notebook_cell_height = 20
-endif
-
-# Sixel images are painted directly by the terminal, outside Vim's normal
-# screen model. If terminal cell metrics are inaccurate, a sixel can slightly
-# overpaint the status line. By default we use all text rows and repair Vim's
-# status line after scroll/draw events; raise this only if your terminal still
-# needs a physical bottom margin.
-if !exists('g:python_notebook_sixel_bottom_guard_lines')
-    g:python_notebook_sixel_bottom_guard_lines = 0
 endif
 
 # ueberzugpp runs as a layer daemon. The plugin starts it on VimEnter when
@@ -832,16 +823,6 @@ def StopImagePrepWorker()
     image_prep_worker_channel = v:none
     image_prep_worker_pid = 0
     image_prep_worker_stdout_buffer = ''
-enddef
-
-def SixelBottomGuardLines(): number
-    var guard_lines: number = GetNumberSetting(
-        'python_notebook_sixel_bottom_guard_lines', 1)
-    if guard_lines < 0
-        guard_lines = 0
-    endif
-
-    return guard_lines
 enddef
 
 def WindowTextWidth(): number
@@ -1961,10 +1942,6 @@ def ClearVisibleFigureTextAreas()
             var visible_start: number = max([start_lnum, window_start])
             var visible_end: number = min([end_lnum, window_end])
 
-            if visible_end >= window_end
-                visible_end -= SixelBottomGuardLines()
-            endif
-
             if visible_start <= visible_end
                 ClearTerminalTextArea(visible_start,
                     visible_end - visible_start + 1,
@@ -2321,13 +2298,6 @@ def DrawFigureAt(
 
     var visible_start: number = max([start_lnum, window_start])
     var visible_end: number = min([end_lnum, window_end])
-
-    # Terminals do not clip sixel graphics to Vim's text area. If a figure is
-    # visible through the bottom edge of the window, keep a configurable guard
-    # row so a slightly over-tall sixel does not paint over the status line.
-    if visible_end >= window_end
-        visible_end -= SixelBottomGuardLines()
-    endif
 
     if visible_start > visible_end
         return
