@@ -253,6 +253,26 @@ def SixelCellHeight(): number
     return cell_height
 enddef
 
+def UeberzugppCellWidth(): number
+    var cell_width: number = GetNumberSetting('python_notebook_cell_width',
+        SixelCellWidth())
+    if cell_width <= 0
+        cell_width = SixelCellWidth()
+    endif
+
+    return cell_width
+enddef
+
+def UeberzugppCellHeight(): number
+    var cell_height: number = GetNumberSetting('python_notebook_cell_height',
+        SixelCellHeight())
+    if cell_height <= 0
+        cell_height = SixelCellHeight()
+    endif
+
+    return cell_height
+enddef
+
 def UeberzugppExecutable(): string
     var command: string = 'ueberzugpp'
     var resolved: string = exepath(command)
@@ -284,26 +304,6 @@ def UeberzugppPreparedOutputFormat(): string
     endif
 
     return 'rgba'
-enddef
-
-def UeberzugppCellWidth(): number
-    var cell_width: number = GetNumberSetting('python_notebook_cell_width',
-        SixelCellWidth())
-    if cell_width <= 0
-        cell_width = SixelCellWidth()
-    endif
-
-    return cell_width
-enddef
-
-def UeberzugppCellHeight(): number
-    var cell_height: number = GetNumberSetting('python_notebook_cell_height',
-        SixelCellHeight())
-    if cell_height <= 0
-        cell_height = SixelCellHeight()
-    endif
-
-    return cell_height
 enddef
 
 def IsUeberzugppEngine(engine: string): bool
