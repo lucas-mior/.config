@@ -235,7 +235,7 @@ enddef
 
 def SixelCellWidth(): number
     var cell_width: number = GetNumberSetting(
-        'python_notebook_sixel_cell_width', ImageMagickCellWidth())
+        'python_notebook_cell_width', ImageMagickCellWidth())
     if cell_width <= 0
         cell_width = ImageMagickCellWidth()
     endif
@@ -245,7 +245,7 @@ enddef
 
 def SixelCellHeight(): number
     var cell_height: number = GetNumberSetting(
-        'python_notebook_sixel_cell_height', ImageMagickCellHeight())
+        'python_notebook_cell_height', ImageMagickCellHeight())
     if cell_height <= 0
         cell_height = ImageMagickCellHeight()
     endif
