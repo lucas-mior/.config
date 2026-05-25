@@ -2873,6 +2873,54 @@ def ClearPythonNotebookCommand()
     NotebookRedraw()
 enddef
 
+def QueryCellSize()
+    if exists('*echoraw')
+        echoraw("\<Esc>[16t")
+    else
+        try
+            writefile(["\<Esc>[16t"], '/dev/tty', 'b')
+        catch
+        endtry
+    endif
+enddef
+
+def HandleCellSizeResponse()
+    var h_str: string = ''
+    var w_str: string = ''
+    var c: string = getcharstr()
+    var iterations: number = 0
+
+    while c != ';' && c != 't' && c != "\<Esc>" && iterations < 10
+        h_str ..= c
+        c = getcharstr()
+        iterations += 1
+    endwhile
+
+    if c == ';'
+        c = getcharstr()
+        iterations = 0
+        while c != 't' && c != "\<Esc>" && iterations < 10
+            w_str ..= c
+            c = getcharstr()
+            iterations += 1
+        endwhile
+    endif
+
+    if !empty(h_str) && !empty(w_str)
+        var new_w: number = str2nr(w_str)
+        var new_h: number = str2nr(h_str)
+        if new_w > 0 && new_h > 0
+            g:python_notebook_cell_width = new_w
+            g:python_notebook_cell_height = new_h
+            ScheduleNotebookLayoutRedraw(1)
+        endif
+    endif
+enddef
+
+execute 'nnoremap <silent> <Esc>[6; :<C-u>call ' .. script_sid .. 'HandleCellSizeResponse()<CR>'
+execute 'vnoremap <silent> <Esc>[6; :<C-u>call ' .. script_sid .. 'HandleCellSizeResponse()<CR>'
+execute 'inoremap <silent> <Esc>[6; <Cmd>call ' .. script_sid .. 'HandleCellSizeResponse()<CR>'
+
 execute 'command! PythonNotebookTryEnable call '
     .. script_sid .. 'TryEnablePythonNotebook(1)'
 execute 'command! PythonNotebookRunAll call '
@@ -2891,6 +2939,8 @@ execute 'command! PythonNotebookStopImagePrepWorker call '
 augroup PythonNotebookUeberzugpp
     autocmd!
     execute 'autocmd VimEnter * call '
+        .. script_sid .. 'QueryCellSize()'
+    execute 'autocmd VimEnter * call '
         .. script_sid .. 'StartImagePrepWorker()'
     execute 'autocmd VimEnter * call '
         .. script_sid .. 'StartUeberzugppLayerDaemon()'
@@ -2900,6 +2950,8 @@ augroup END
 
 augroup PythonNotebookWindowLayout
     autocmd!
+    execute 'autocmd VimResized * call '
+        .. script_sid .. 'QueryCellSize()'
     execute 'autocmd VimResized * call '
         .. script_sid .. 'ScheduleNotebookLayoutRedraw(1)'
     if exists('##WinResized')
