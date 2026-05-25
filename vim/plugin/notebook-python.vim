@@ -837,10 +837,10 @@ def WindowTextWidth(): number
 enddef
 
 def FigureDisplayLines(path: string, available_cols: number): number
-    var fallback_lines: number = NotebookFigureLines()
+    var max_lines: number = NotebookFigureLines()
 
     if !filereadable(path)
-        return fallback_lines
+        return max_lines
     endif
 
     var engine: string = GetStringSetting(
@@ -849,11 +849,11 @@ def FigureDisplayLines(path: string, available_cols: number): number
     var helper_path: string = g:python_notebook_helper
 
     if empty(python_cmd) || !executable(python_cmd)
-        return fallback_lines
+        return max_lines
     endif
 
     if empty(helper_path) || !filereadable(helper_path)
-        return fallback_lines
+        return max_lines
     endif
 
     var max_pixel_width: number = max([1, available_cols * CellWidth()])
@@ -875,19 +875,20 @@ def FigureDisplayLines(path: string, available_cols: number): number
         '--sixel-display-lines',
         path,
         string(max_pixel_width),
-        string(cell_height)
+        string(cell_height),
+        string(max_lines)
     ]))
 
     if v:shell_error != 0 || empty(output)
-        return fallback_lines
+        return max_lines
     endif
 
     var display_lines: number = str2nr(output[0])
     if display_lines <= 0
-        return fallback_lines
+        return max_lines
     endif
 
-    return display_lines
+    return min([display_lines, max_lines])
 enddef
 
 def StripNullBytes(text: string): string
@@ -1551,6 +1552,7 @@ def SixelCacheKey(
     available_cols: number,
     available_lines: number,
     crop_top_lines: number,
+    total_lines: number,
     engine: string
 ): string
     var file_size: number = getfsize(path)
@@ -1569,7 +1571,7 @@ def SixelCacheKey(
 
     return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime
         .. ':' .. available_cols .. 'x' .. available_lines .. '@'
-        .. crop_top_lines .. extra_key
+        .. crop_top_lines .. '/total=' .. total_lines .. extra_key
 enddef
 
 def GenerateFigureSixel(
@@ -1587,9 +1589,10 @@ def GenerateFigureSixel(
         'chafa')
     var current_cell_width: number = CellWidth()
     var current_cell_height: number = CellHeight()
-    var layout_key: string = ImagePrepLayoutKey(path, total_lines)
+    var layout_key: string = ImagePrepLayoutKey(path, total_lines,
+        available_cols)
     var cache_key: string = SixelCacheKey(path, available_cols,
-        available_lines, crop_top_lines, engine)
+        available_lines, crop_top_lines, total_lines, engine)
     if has_key(figure_sixel_cache, cache_key)
         return figure_sixel_cache[cache_key]
     endif
@@ -1614,6 +1617,8 @@ def GenerateFigureSixel(
 
         var max_pixel_width: number = max([1,
             available_cols * current_cell_width])
+        var max_pixel_height: number = max([1,
+            total_lines * current_cell_height])
         var crop_top_pixels: number = max([0,
             crop_top_lines * current_cell_height])
         var crop_height_pixels: number = max([1,
@@ -1622,19 +1627,21 @@ def GenerateFigureSixel(
 
         try
             var worker_path: string = PrepareImageWithWorker(path,
-                prepared_path, max_pixel_width, crop_top_pixels,
-                crop_height_pixels, 'sixel', 'chafa image prep',
-                layout_key, current_cell_width, current_cell_height)
+                prepared_path, max_pixel_width, max_pixel_height,
+                crop_top_pixels, crop_height_pixels, 'sixel',
+                'chafa image prep', layout_key, current_cell_width,
+                current_cell_height)
             if !empty(worker_path)
                 prepared_path = worker_path
             else
                 return ''
             endif
 
-            # The helper resizes the PNG proportionally by width, crops the
-            # visible vertical slice, then applies the transparent-palette
-            # preparation. Do not pass -s here, because that would resize the
-            # prepared paletted image again.
+            # The helper fits the PNG into the reserved terminal-cell box,
+            # crops the visible vertical slice, then applies the
+            # transparent-palette preparation needed for clean sixel output.
+            # Do not pass -s here, because that would resize the prepared
+            # paletted image again.
             sixel_data = system(ShellCommand([
                 'chafa', '-f', 'sixel', '--dither', 'diffusion', prepared_path
             ]))
@@ -1661,6 +1668,8 @@ def GenerateFigureSixel(
 
         var pixel_width: number = max([1,
             available_cols * current_cell_width])
+        var max_pixel_height: number = max([1,
+            total_lines * current_cell_height])
         var crop_top_pixels: number = max([0,
             crop_top_lines * current_cell_height])
         var crop_height_pixels: number = max([1,
@@ -1669,9 +1678,10 @@ def GenerateFigureSixel(
 
         try
             var worker_path: string = PrepareImageWithWorker(path,
-                prepared_path, pixel_width, crop_top_pixels,
-                crop_height_pixels, 'rgba', 'magick image prep',
-                layout_key, current_cell_width, current_cell_height)
+                prepared_path, pixel_width, max_pixel_height,
+                crop_top_pixels, crop_height_pixels, 'rgba',
+                'magick image prep', layout_key, current_cell_width,
+                current_cell_height)
             if !empty(worker_path)
                 prepared_path = worker_path
             else
@@ -2038,16 +2048,18 @@ def UeberzugppPreparedCacheKey(
     available_cols: number,
     available_lines: number,
     crop_top_lines: number,
+    total_lines: number,
     output_format: string
 ): string
     return output_format .. ':' .. path .. ':' .. getfsize(path) .. ':'
         .. getftime(path) .. ':' .. available_cols .. 'x'
-        .. available_lines .. '@' .. crop_top_lines .. ':'
-        .. CellWidth() .. 'x' .. CellHeight()
+        .. available_lines .. '@' .. crop_top_lines .. '/total='
+        .. total_lines .. ':' .. CellWidth() .. 'x' .. CellHeight()
 enddef
 
-def ImagePrepLayoutKey(path: string, total_lines: number): string
+def ImagePrepLayoutKey(path: string, total_lines: number, available_cols: number): string
     return path .. ':' .. getfsize(path) .. ':' .. getftime(path)
+        .. ':cols=' .. string(max([1, available_cols]))
         .. ':lines=' .. string(max([1, total_lines]))
 enddef
 
@@ -2055,6 +2067,7 @@ def PrepareImageWithWorker(
     path: string,
     prepared_path: string,
     max_pixel_width: number,
+    max_pixel_height: number,
     crop_top_pixels: number,
     crop_height_pixels: number,
     output_format: string,
@@ -2068,6 +2081,7 @@ def PrepareImageWithWorker(
         'input_path': path,
         'output_path': prepared_path,
         'max_pixel_width': max_pixel_width,
+        'max_pixel_height': max_pixel_height,
         'crop_top_pixels': crop_top_pixels,
         'crop_height_pixels': crop_height_pixels,
         'output_format': output_format,
@@ -2127,9 +2141,10 @@ def PrepareUeberzugppImage(
 
     var current_cell_width: number = CellWidth()
     var current_cell_height: number = CellHeight()
-    var layout_key: string = ImagePrepLayoutKey(path, total_lines)
+    var layout_key: string = ImagePrepLayoutKey(path, total_lines,
+        available_cols)
     var cache_key: string = UeberzugppPreparedCacheKey(path, available_cols,
-        available_lines, crop_top_lines, output_format)
+        available_lines, crop_top_lines, total_lines, output_format)
     if has_key(ueberzugpp_prepared_cache, cache_key)
             && filereadable(ueberzugpp_prepared_cache[cache_key])
         return ueberzugpp_prepared_cache[cache_key]
@@ -2137,6 +2152,8 @@ def PrepareUeberzugppImage(
 
     var max_pixel_width: number = max([1,
         available_cols * current_cell_width])
+    var max_pixel_height: number = max([1,
+        total_lines * current_cell_height])
     var crop_top_pixels: number = max([0,
         crop_top_lines * current_cell_height])
     var crop_height_pixels: number = max([1,
@@ -2144,9 +2161,9 @@ def PrepareUeberzugppImage(
     var prepared_path: string = tempname() .. '.png'
 
     var worker_path: string = PrepareImageWithWorker(path, prepared_path,
-        max_pixel_width, crop_top_pixels, crop_height_pixels,
-        output_format, 'ueberzugpp image prep', layout_key,
-        current_cell_width, current_cell_height)
+        max_pixel_width, max_pixel_height, crop_top_pixels,
+        crop_height_pixels, output_format, 'ueberzugpp image prep',
+        layout_key, current_cell_width, current_cell_height)
     if !empty(worker_path)
         ueberzugpp_prepared_cache[cache_key] = worker_path
         return worker_path
@@ -2169,7 +2186,7 @@ def ClearTerminalTextArea(
     var clear_spaces: string = repeat(' ', available_cols)
     var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
 
-    for i in range(visible_lines)
+    for i in range(0, visible_lines - 1)
         seq ..= "\<Esc>[" .. (absolute_row + i) .. ";" .. screen_col
             .. "H" .. clear_spaces
     endfor
@@ -2282,7 +2299,7 @@ def DrawGapText(
 
     var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
 
-    for i in range(visible_lines)
+    for i in range(0, visible_lines - 1)
         seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col
             .. "H" .. clear_spaces
     endfor
@@ -2354,7 +2371,7 @@ def DrawFigureAt(
 
     var seq: string = "\<Esc>7" .. "\<Esc>[?80l" .. "\<Esc>[0m"
 
-    for i in range(visible_lines)
+    for i in range(0, visible_lines - 1)
         seq ..= "\<Esc>[" .. (target_row + i) .. ";" .. screen_col
             .. "H" .. clear_spaces
     endfor

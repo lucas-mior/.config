@@ -249,19 +249,29 @@ def _resample_filter(Image):
     return Image.LANCZOS
 
 
-def _width_constrained_size(width, height, max_width):
+def _bounded_size(width, height, max_width, max_height=None):
     width = max(1, int(width))
     height = max(1, int(height))
     max_width = max(1, int(max_width))
 
+    limits = [1.0, max_width / width]
+
+    if max_height is not None:
+        max_height = max(1, int(max_height))
+        limits.append(max_height / height)
+
     # Do not upscale smaller figures when the image is first fitted to the
     # terminal. Later font cell-size changes are handled by scaling from this
     # first fitted size, so the figure keeps the same terminal-line footprint.
-    scale = min(1.0, max_width / width)
+    scale = min(limits)
     fitted_width = max(1, int(round(width * scale)))
     fitted_height = max(1, int(round(height * scale)))
 
     return fitted_width, fitted_height
+
+
+def _width_constrained_size(width, height, max_width):
+    return _bounded_size(width, height, max_width)
 
 
 def _cell_scaled_size(base_width, base_height, base_cell_width, base_cell_height, cell_width, cell_height):
@@ -295,17 +305,28 @@ def _ceil_div(numerator, denominator):
     return (numerator + denominator - 1) // denominator
 
 
-def _sixel_display_lines(input_path, max_pixel_width, cell_height):
+def _sixel_display_lines(input_path, max_pixel_width, cell_height, max_lines=None):
     max_pixel_width = max(1, int(max_pixel_width))
     cell_height = max(1, int(cell_height))
+
+    if max_lines is None:
+        max_pixel_height = None
+    else:
+        max_lines = max(1, int(max_lines))
+        max_pixel_height = max_lines * cell_height
 
     from PIL import Image
 
     with Image.open(input_path) as image:
         width, height = image.size
 
-    _, fitted_height = _width_constrained_size(width, height, max_pixel_width)
-    return max(1, _ceil_div(fitted_height, cell_height))
+    _, fitted_height = _bounded_size(width, height, max_pixel_width, max_pixel_height)
+    display_lines = max(1, _ceil_div(fitted_height, cell_height))
+
+    if max_lines is not None:
+        display_lines = min(display_lines, max_lines)
+
+    return display_lines
 
 
 def _image_prep_worker_cache_size():
@@ -369,26 +390,41 @@ def _image_prep_worker_cli(argv):
             layout_key = "default"
         return source_key + (layout_key,)
 
-    def cached_layout(source_key, original, layout_key_value, max_pixel_width, cell_width, cell_height):
+    def cached_layout(source_key, original, layout_key_value, max_pixel_width, max_pixel_height, cell_width, cell_height):
         key = layout_cache_key(source_key, layout_key_value)
         cached = layout_cache.get(key)
         if cached is not None:
             return cached
 
-        base_width, base_height = _width_constrained_size(original.width, original.height, max_pixel_width)
+        base_width, base_height = _bounded_size(
+            original.width,
+            original.height,
+            max_pixel_width,
+            max_pixel_height,
+        )
         layout = {
             "base_width": base_width,
             "base_height": base_height,
             "base_cell_width": max(1, int(cell_width)),
             "base_cell_height": max(1, int(cell_height)),
+            "max_pixel_width": max(1, int(max_pixel_width)),
+            "max_pixel_height": max(1, int(max_pixel_height)),
         }
         layout_cache[key] = layout
         remember_cache_key("layout", key)
         return layout
 
-    def cached_scaled_image(path, layout_key_value, max_pixel_width, cell_width, cell_height):
+    def cached_scaled_image(path, layout_key_value, max_pixel_width, max_pixel_height, cell_width, cell_height):
         source_key, original = cached_original_image(path)
-        layout = cached_layout(source_key, original, layout_key_value, max_pixel_width, cell_width, cell_height)
+        layout = cached_layout(
+            source_key,
+            original,
+            layout_key_value,
+            max_pixel_width,
+            max_pixel_height,
+            cell_width,
+            cell_height,
+        )
         scaled_size = _cell_scaled_size(
             layout["base_width"],
             layout["base_height"],
@@ -449,7 +485,8 @@ def _image_prep_worker_cli(argv):
 
             input_path = _strip_null_bytes(request.get("input_path", ""))
             output_path = _strip_null_bytes(request.get("output_path", ""))
-            max_pixel_width = int(request.get("max_pixel_width", 1))
+            max_pixel_width = max(1, int(request.get("max_pixel_width", 1)))
+            max_pixel_height = max(1, int(request.get("max_pixel_height", 1)))
             crop_top_pixels = max(0, int(request.get("crop_top_pixels", 0)))
             crop_height_pixels = max(1, int(request.get("crop_height_pixels", 1)))
             output_format = _strip_null_bytes(request.get("output_format", "rgba"))
@@ -471,6 +508,7 @@ def _image_prep_worker_cli(argv):
                 input_path,
                 layout_key_value,
                 max_pixel_width,
+                max_pixel_height,
                 cell_width,
                 cell_height,
             )
@@ -489,6 +527,8 @@ def _image_prep_worker_cli(argv):
                 "base_cell_height": int(layout["base_cell_height"]),
                 "scaled_width": int(scaled_size[0]),
                 "scaled_height": int(scaled_size[1]),
+                "max_pixel_width": int(layout["max_pixel_width"]),
+                "max_pixel_height": int(layout["max_pixel_height"]),
             })
         except Exception as exc:
             send_response({
@@ -501,9 +541,9 @@ def _image_prep_worker_cli(argv):
 
 
 def _sixel_display_lines_cli(argv):
-    if len(argv) != 5:
+    if len(argv) not in (5, 6):
         print(
-            "usage: notebook-vim.py --sixel-display-lines INPUT_PNG MAX_WIDTH CELL_HEIGHT",
+            "usage: notebook-vim.py --sixel-display-lines INPUT_PNG MAX_WIDTH CELL_HEIGHT [MAX_LINES]",
             file=sys.stderr,
         )
         return 2
@@ -513,12 +553,13 @@ def _sixel_display_lines_cli(argv):
     try:
         max_pixel_width = int(argv[3])
         cell_height = int(argv[4])
+        max_lines = int(argv[5]) if len(argv) == 6 else None
     except ValueError:
-        print("MAX_WIDTH and CELL_HEIGHT must be integers", file=sys.stderr)
+        print("MAX_WIDTH, CELL_HEIGHT, and MAX_LINES must be integers", file=sys.stderr)
         return 2
 
     try:
-        print(_sixel_display_lines(input_path, max_pixel_width, cell_height))
+        print(_sixel_display_lines(input_path, max_pixel_width, cell_height, max_lines))
     except Exception as exc:
         print("could not compute sixel display lines: {}".format(exc), file=sys.stderr)
         return 1
