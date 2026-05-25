@@ -1,7 +1,7 @@
 vim9script
 
 # notebook-python.vim
-# Build: stateful kernel cells 2026-05-25
+# Build: async stateful kernel cells 2026-05-25
 # Minimal Jupyter-like Python notebook runner for Vim.
 #
 # Install:
@@ -51,7 +51,7 @@ vim9script
 # Shortcuts in active notebook buffers:
 #
 #    <C-l>    run everything from the top, from a fresh kernel
-#    <leader>r run the current cell in the persistent kernel
+#    <return> run the current cell asynchronously in the persistent kernel
 #    <leader>k restart the persistent kernel
 #    <leader>b clear all generated outputs
 
@@ -171,6 +171,10 @@ var image_prep_worker_last_request: string = ''
 var image_prep_worker_last_response: string = ''
 var image_prep_worker_last_stderr: string = ''
 var image_prep_worker_last_exit_status: string = ''
+
+var notebook_kernel_pending_requests: dict<dict<any>> = {}
+var notebook_kernel_pending_by_bufnr: dict<string> = {}
+var notebook_kernel_ready_responses: dict<dict<any>> = {}
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -868,6 +872,14 @@ def EnsureNotebookKernelState()
     if !exists('b:python_notebook_kernel_error')
         b:python_notebook_kernel_error = ''
     endif
+
+    if !exists('b:python_notebook_kernel_channel_key')
+        b:python_notebook_kernel_channel_key = ''
+    endif
+
+    if !exists('b:python_notebook_kernel_job_key')
+        b:python_notebook_kernel_job_key = ''
+    endif
 enddef
 
 def NotebookKernelJobStatus(): string
@@ -932,7 +944,67 @@ def NotebookKernelReady(): bool
     return status ==# 'open' || status ==# 'buffered'
 enddef
 
-def NotebookKernelStderrCb(channel: any, message: string)
+
+def NotebookKernelObjectKey(value: any): string
+    return string(value)
+enddef
+
+def NotebookKernelFindBufferForChannel(channel: any): number
+    var channel_key: string = NotebookKernelObjectKey(channel)
+
+    for info in getbufinfo({'bufloaded': 1})
+        var bufnr_value: number = str2nr(string(get(info, 'bufnr', 0)))
+        if bufnr_value <= 0
+            continue
+        endif
+
+        if getbufvar(bufnr_value, 'python_notebook_kernel_channel_key', '')
+                ==# channel_key
+            return bufnr_value
+        endif
+    endfor
+
+    return -1
+enddef
+
+def NotebookKernelFindBufferForJob(job: any): number
+    var job_key: string = NotebookKernelObjectKey(job)
+
+    for info in getbufinfo({'bufloaded': 1})
+        var bufnr_value: number = str2nr(string(get(info, 'bufnr', 0)))
+        if bufnr_value <= 0
+            continue
+        endif
+
+        if getbufvar(bufnr_value, 'python_notebook_kernel_job_key', '')
+                ==# job_key
+            return bufnr_value
+        endif
+    endfor
+
+    return -1
+enddef
+
+def NotebookKernelClearPendingForBuffer(bufnr_value: number)
+    var bufnr_key: string = string(bufnr_value)
+
+    if has_key(notebook_kernel_pending_by_bufnr, bufnr_key)
+        var request_id: string = notebook_kernel_pending_by_bufnr[bufnr_key]
+        remove(notebook_kernel_pending_by_bufnr, bufnr_key)
+        if has_key(notebook_kernel_pending_requests, request_id)
+            remove(notebook_kernel_pending_requests, request_id)
+        endif
+        if has_key(notebook_kernel_ready_responses, request_id)
+            remove(notebook_kernel_ready_responses, request_id)
+        endif
+    endif
+enddef
+
+def NotebookKernelBufferBusy(bufnr_value: number): bool
+    return has_key(notebook_kernel_pending_by_bufnr, string(bufnr_value))
+enddef
+
+def NotebookKernelStderrCb(bufnr_value: number, channel: any, message: string)
     var clean_message: string = StripNullBytes(message)
     if empty(clean_message)
         return
@@ -943,7 +1015,17 @@ def NotebookKernelStderrCb(channel: any, message: string)
     echohl None
 enddef
 
-def NotebookKernelExitCb(job: any, status: number)
+def NotebookKernelExitCb(bufnr_value: number, job: any, status: number)
+    if bufnr_value > 0
+        NotebookKernelClearPendingForBuffer(bufnr_value)
+        setbufvar(bufnr_value, 'python_notebook_kernel_job', v:none)
+        setbufvar(bufnr_value, 'python_notebook_kernel_channel', v:none)
+        setbufvar(bufnr_value, 'python_notebook_kernel_pid', 0)
+        setbufvar(bufnr_value, 'python_notebook_kernel_stdout_buffer', '')
+        setbufvar(bufnr_value, 'python_notebook_kernel_channel_key', '')
+        setbufvar(bufnr_value, 'python_notebook_kernel_job_key', '')
+    endif
+
     if status != 0
         echohl ErrorMsg
         echomsg 'notebook-python.vim: kernel exited with status '
@@ -1002,8 +1084,9 @@ def StartNotebookKernel()
         'out_mode': 'raw',
         'err_mode': 'nl',
         'drop': 'never',
-        'err_cb': function(script_sid .. 'NotebookKernelStderrCb'),
-        'exit_cb': function(script_sid .. 'NotebookKernelExitCb'),
+        'out_cb': function(script_sid .. 'NotebookKernelOutCb', [bufnr('%')]),
+        'err_cb': function(script_sid .. 'NotebookKernelStderrCb', [bufnr('%')]),
+        'exit_cb': function(script_sid .. 'NotebookKernelExitCb', [bufnr('%')]),
     }
 
     try
@@ -1074,6 +1157,11 @@ def StartNotebookKernel()
         b:python_notebook_kernel_pid = 0
     endtry
 
+    b:python_notebook_kernel_channel_key = NotebookKernelObjectKey(
+        b:python_notebook_kernel_channel)
+    b:python_notebook_kernel_job_key = NotebookKernelObjectKey(
+        b:python_notebook_kernel_job)
+
     if !NotebookKernelReady()
         b:python_notebook_kernel_error = 'worker channel is not ready; status='
             .. NotebookKernelJobStatus() .. ', channel status='
@@ -1096,20 +1184,49 @@ def StartNotebookKernel()
     b:python_notebook_kernel_error = ''
 enddef
 
-def NotebookKernelTakeResponse(request_id: string): any
-    EnsureNotebookKernelState()
+def NotebookKernelProcessResponse(bufnr_value: number, response: dict<any>)
+    var request_id: string = JsonValueToString(get(response, 'id', ''))
+    if empty(request_id)
+        return
+    endif
+
+    if !has_key(notebook_kernel_pending_requests, request_id)
+        return
+    endif
+
+    notebook_kernel_ready_responses[request_id] = response
+    var winid_value: number = bufwinid(bufnr_value)
+    if winid_value <= 0
+        return
+    endif
+
+    var old_winid: number = win_getid()
+    try
+        if win_gotoid(winid_value)
+            FinishNotebookKernelRequest(request_id)
+        endif
+    finally
+        if old_winid > 0
+            try
+                call win_gotoid(old_winid)
+            catch
+            endtry
+        endif
+    endtry
+enddef
+
+def NotebookKernelProcessBufferedOutput(bufnr_value: number)
+    var stdout_buffer: string = getbufvar(
+        bufnr_value, 'python_notebook_kernel_stdout_buffer', '')
 
     while true
-        var newline_index: number = stridx(
-            b:python_notebook_kernel_stdout_buffer, "\n")
+        var newline_index: number = stridx(stdout_buffer, "\n")
         if newline_index < 0
-            return v:none
+            break
         endif
 
-        var line_str: string = strpart(
-            b:python_notebook_kernel_stdout_buffer, 0, newline_index)
-        b:python_notebook_kernel_stdout_buffer = strpart(
-            b:python_notebook_kernel_stdout_buffer, newline_index + 1)
+        var line_str: string = strpart(stdout_buffer, 0, newline_index)
+        stdout_buffer = strpart(stdout_buffer, newline_index + 1)
         line_str = substitute(StripNullBytes(line_str), '\r$', '', '')
 
         if empty(line_str)
@@ -1120,72 +1237,48 @@ def NotebookKernelTakeResponse(request_id: string): any
         try
             decoded = json_decode(line_str)
         catch
-            b:python_notebook_kernel_error =
-                'could not decode kernel response: ' .. line_str
+            setbufvar(bufnr_value, 'python_notebook_kernel_error',
+                'could not decode kernel response: ' .. line_str)
             continue
         endtry
 
         if type(decoded) != v:t_dict
-            b:python_notebook_kernel_error =
-                'kernel response was not a dict: ' .. line_str
+            setbufvar(bufnr_value, 'python_notebook_kernel_error',
+                'kernel response was not a dict: ' .. line_str)
             continue
         endif
 
         var response: dict<any> = decoded
-        var response_id: string = JsonValueToString(get(response, 'id', ''))
-        if response_id ==# request_id
-            return response
-        endif
+        NotebookKernelProcessResponse(bufnr_value, response)
     endwhile
 
-    return v:none
+    setbufvar(bufnr_value, 'python_notebook_kernel_stdout_buffer',
+        stdout_buffer)
 enddef
 
-def NotebookKernelReadResponse(request_id: string, timeout_ms: number): any
-    EnsureNotebookKernelState()
+def NotebookKernelOutCb(bufnr_value: number, channel: any, message: string)
+    if bufnr_value <= 0
+        return
+    endif
 
-    var waited_ms: number = 0
-    var slice_ms: number = 20
-
-    while waited_ms <= timeout_ms
-        var response: any = NotebookKernelTakeResponse(request_id)
-        if type(response) == v:t_dict
-            return response
-        endif
-
-        var chunk: string = ''
-        try
-            chunk = ch_readraw(b:python_notebook_kernel_channel,
-                {'part': 'out', 'timeout': slice_ms})
-        catch
-            b:python_notebook_kernel_error = 'ch_readraw() failed: '
-                .. v:exception
-            return {
-                'id': request_id,
-                'ok': false,
-                'error': b:python_notebook_kernel_error,
-            }
-        endtry
-
-        if !empty(chunk)
-            b:python_notebook_kernel_stdout_buffer ..= chunk
-            waited_ms = 0
-        else
-            waited_ms += slice_ms
-        endif
-    endwhile
-
-    b:python_notebook_kernel_error = 'timeout waiting for response id='
-        .. request_id .. ' after ' .. string(timeout_ms) .. ' ms'
-    return {
-        'id': request_id,
-        'ok': false,
-        'error': b:python_notebook_kernel_error,
-    }
+    var stdout_buffer: string = getbufvar(
+        bufnr_value, 'python_notebook_kernel_stdout_buffer', '')
+    stdout_buffer ..= message
+    setbufvar(bufnr_value, 'python_notebook_kernel_stdout_buffer',
+        stdout_buffer)
+    NotebookKernelProcessBufferedOutput(bufnr_value)
 enddef
 
-def NotebookKernelRequest(command: dict<any>): dict<any>
+def NotebookKernelSendAsync(command: dict<any>, pending: dict<any>): bool
     EnsureNotebookKernelState()
+
+    var bufnr_value: number = bufnr('%')
+    if NotebookKernelBufferBusy(bufnr_value)
+        echohl WarningMsg
+        echomsg 'notebook-python.vim: kernel is already executing for this buffer'
+        echohl None
+        return false
+    endif
 
     if !NotebookKernelReady()
         StartNotebookKernel()
@@ -1195,51 +1288,43 @@ def NotebookKernelRequest(command: dict<any>): dict<any>
         b:python_notebook_kernel_error = 'worker is not ready; job status='
             .. NotebookKernelJobStatus() .. ', channel status='
             .. NotebookKernelChannelStatus()
-        return {
-            'ok': false,
-            'error': b:python_notebook_kernel_error,
-        }
+        echohl ErrorMsg
+        echomsg 'notebook-python.vim: kernel: '
+            .. b:python_notebook_kernel_error
+        echohl None
+        return false
     endif
 
     b:python_notebook_kernel_next_request_id += 1
-    var request_id: string = string(getpid()) .. '-buf' .. string(bufnr('%'))
+    var request_id: string = string(getpid()) .. '-buf' .. string(bufnr_value)
         .. '-' .. string(b:python_notebook_kernel_next_request_id)
     command['id'] = request_id
+
+    pending['id'] = request_id
+    pending['bufnr'] = bufnr_value
+    pending['changedtick'] = b:changedtick
+    notebook_kernel_pending_requests[request_id] = pending
+    notebook_kernel_pending_by_bufnr[string(bufnr_value)] = request_id
 
     try
         ch_sendraw(b:python_notebook_kernel_channel,
             json_encode(command) .. "\n")
     catch
+        NotebookKernelClearPendingForBuffer(bufnr_value)
         b:python_notebook_kernel_error = 'ch_sendraw() failed: ' .. v:exception
-        return {
-            'id': request_id,
-            'ok': false,
-            'error': b:python_notebook_kernel_error,
-        }
+        echohl ErrorMsg
+        echomsg 'notebook-python.vim: kernel: '
+            .. b:python_notebook_kernel_error
+        echohl None
+        return false
     endtry
 
-    var response_any: any = NotebookKernelReadResponse(request_id,
-        NotebookKernelTimeoutMs())
-    if type(response_any) != v:t_dict
-        b:python_notebook_kernel_error = 'kernel returned a non-dict response'
-        return {
-            'id': request_id,
-            'ok': false,
-            'error': b:python_notebook_kernel_error,
-        }
-    endif
-
-    var response: dict<any> = response_any
-    if !get(response, 'ok', false)
-        b:python_notebook_kernel_error = JsonValueToString(
-            get(response, 'error', 'unknown kernel error'))
-    endif
-
-    return response
+    return true
 enddef
 
 def StopNotebookKernel()
     EnsureNotebookKernelState()
+    NotebookKernelClearPendingForBuffer(bufnr('%'))
 
     if NotebookKernelReady()
         try
@@ -1261,6 +1346,8 @@ def StopNotebookKernel()
     b:python_notebook_kernel_pid = 0
     b:python_notebook_kernel_stdout_buffer = ''
     b:python_notebook_kernel_error = ''
+    b:python_notebook_kernel_channel_key = ''
+    b:python_notebook_kernel_job_key = ''
 enddef
 
 def RestartNotebookKernel()
@@ -3267,6 +3354,90 @@ def ClearGeneratedBlocksForCell(cell: dict<any>)
         str2nr(string(get(cell, 'code_end', line('$')))))
 enddef
 
+def FinishNotebookKernelRequest(request_id: string)
+    if !has_key(notebook_kernel_pending_requests, request_id)
+        if has_key(notebook_kernel_ready_responses, request_id)
+            remove(notebook_kernel_ready_responses, request_id)
+        endif
+        return
+    endif
+
+    if !has_key(notebook_kernel_ready_responses, request_id)
+        return
+    endif
+
+    var pending: dict<any> = notebook_kernel_pending_requests[request_id]
+    var response: dict<any> = notebook_kernel_ready_responses[request_id]
+    var bufnr_value: number = str2nr(string(get(pending, 'bufnr', 0)))
+    var bufnr_key: string = string(bufnr_value)
+
+    if bufnr_value <= 0 || bufnr('%') != bufnr_value
+        return
+    endif
+
+    remove(notebook_kernel_pending_requests, request_id)
+    remove(notebook_kernel_ready_responses, request_id)
+    if has_key(notebook_kernel_pending_by_bufnr, bufnr_key)
+        remove(notebook_kernel_pending_by_bufnr, bufnr_key)
+    endif
+
+    var request_changedtick: number = str2nr(string(
+        get(pending, 'changedtick', -1)))
+    if request_changedtick >= 0 && b:changedtick != request_changedtick
+        echohl WarningMsg
+        echomsg 'notebook-python.vim: buffer changed while cell was running; result was not inserted'
+        echohl None
+        return
+    endif
+
+    if !get(response, 'ok', false)
+        echohl ErrorMsg
+        echomsg 'notebook-python.vim: kernel failed: '
+            .. JsonValueToString(get(response, 'error', 'unknown error'))
+        echohl None
+        return
+    endif
+
+    var was_modifiable: bool = &l:modifiable
+    if !was_modifiable
+        setlocal modifiable
+    endif
+
+    try
+        var cells: list<dict<any>> = get(pending, 'cells', [])
+        var results: list<any> = get(response, 'results', [])
+        var has_error: bool = InsertNotebookResults(cells, results)
+
+        RefreshNotebookMatches()
+        NotebookRedraw()
+
+        if get(pending, 'jump_to_error', false) && has_error
+            JumpToFirstNotebookError()
+        endif
+    finally
+        if !was_modifiable
+            setlocal nomodifiable
+        endif
+    endtry
+enddef
+
+def FinishPendingNotebookKernelResponsesForCurrentBuffer()
+    var bufnr_value: number = bufnr('%')
+    var request_ids: list<string> = keys(notebook_kernel_ready_responses)
+
+    for request_id in request_ids
+        if !has_key(notebook_kernel_pending_requests, request_id)
+            remove(notebook_kernel_ready_responses, request_id)
+            continue
+        endif
+
+        var pending: dict<any> = notebook_kernel_pending_requests[request_id]
+        if str2nr(string(get(pending, 'bufnr', 0))) == bufnr_value
+            FinishNotebookKernelRequest(request_id)
+        endif
+    endfor
+enddef
+
 def RunPythonNotebookCurrentCell()
     var was_modifiable: bool = &l:modifiable
     if !was_modifiable
@@ -3309,25 +3480,21 @@ def RunPythonNotebookCurrentCell()
         endif
 
         var cell: dict<any> = cells[cell_index]
-        var response: dict<any> = NotebookKernelRequest({
+        var sent: bool = NotebookKernelSendAsync({
             'action': 'run_cell',
             'buffer_path': StripNullBytes(expand('%:p')),
             'figure_dir': StripNullBytes(NotebookFigureDir()),
             'cell': cell,
+        }, {
+            'action': 'run_cell',
+            'cells': cells,
+            'cell_index': cell_index,
+            'jump_to_error': false,
         })
 
-        if !get(response, 'ok', false)
-            echohl ErrorMsg
-            echomsg 'notebook-python.vim: kernel failed: '
-                .. JsonValueToString(get(response, 'error', 'unknown error'))
-            echohl None
-            return
+        if sent
+            echomsg 'notebook-python.vim: cell execution started'
         endif
-
-        var results: list<any> = get(response, 'results', [])
-        InsertNotebookResults(cells, results)
-        RefreshNotebookMatches()
-        NotebookRedraw()
     finally
         if !was_modifiable
             setlocal nomodifiable
@@ -3346,29 +3513,20 @@ def RunPythonNotebookFromScratch()
         ClearNotebookOutputs()
 
         var cells: list<dict<any>> = ParseNotebookCells()
-        var response: dict<any> = NotebookKernelRequest({
+        var sent: bool = NotebookKernelSendAsync({
             'action': 'run_all',
             'buffer_path': StripNullBytes(expand('%:p')),
             'figure_dir': StripNullBytes(NotebookFigureDir()),
             'stop_on_error': get(g:, 'python_notebook_stop_on_error', 1) != 0,
             'cells': cells,
+        }, {
+            'action': 'run_all',
+            'cells': cells,
+            'jump_to_error': true,
         })
 
-        if !get(response, 'ok', false)
-            echohl ErrorMsg
-            echomsg 'notebook-python.vim: kernel failed: '
-                .. JsonValueToString(get(response, 'error', 'unknown error'))
-            echohl None
-            return
-        endif
-
-        var results: list<any> = get(response, 'results', [])
-        var has_error: bool = InsertNotebookResults(cells, results)
-
-        RefreshNotebookMatches()
-        NotebookRedraw()
-        if has_error
-            JumpToFirstNotebookError()
+        if sent
+            echomsg 'notebook-python.vim: run-all execution started'
         endif
     finally
         if !was_modifiable
@@ -3429,6 +3587,8 @@ def EnablePythonNotebookForBuffer(): bool
     autocmd! * <buffer>
     execute 'autocmd BufWinEnter,WinEnter <buffer> call '
         .. script_sid .. 'ScheduleNotebookFigureDraw()'
+    execute 'autocmd BufWinEnter <buffer> call '
+        .. script_sid .. 'FinishPendingNotebookKernelResponsesForCurrentBuffer()'
     execute 'autocmd WinScrolled <buffer> call '
         .. script_sid .. 'NotebookScrollRedraw()'
     execute 'autocmd TextChanged,TextChangedI <buffer> call '
