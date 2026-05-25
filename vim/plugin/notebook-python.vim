@@ -86,7 +86,7 @@ if !exists('g:python_notebook_figure_lines')
 endif
 
 if !exists('g:python_notebook_draw_engine')
-    g:python_notebook_draw_engine = 'chafa'
+    g:python_notebook_draw_engine = 'ueberzugpp'
 endif
 
 # Image engine options:
@@ -213,7 +213,7 @@ def NotebookFigureLines(): number
     return figure_lines
 enddef
 
-def MagickCellWidth(): number
+def CellWidth(): number
     var cell_width: number = GetNumberSetting(
         'python_notebook_cell_width', 10)
     if cell_width <= 0
@@ -223,51 +223,11 @@ def MagickCellWidth(): number
     return cell_width
 enddef
 
-def MagickCellHeight(): number
+def CellHeight(): number
     var cell_height: number = GetNumberSetting(
         'python_notebook_cell_height', 20)
     if cell_height <= 0
         cell_height = 20
-    endif
-
-    return cell_height
-enddef
-
-def SixelCellWidth(): number
-    var cell_width: number = GetNumberSetting(
-        'python_notebook_cell_width', MagickCellWidth())
-    if cell_width <= 0
-        cell_width = MagickCellWidth()
-    endif
-
-    return cell_width
-enddef
-
-def SixelCellHeight(): number
-    var cell_height: number = GetNumberSetting(
-        'python_notebook_cell_height', MagickCellHeight())
-    if cell_height <= 0
-        cell_height = MagickCellHeight()
-    endif
-
-    return cell_height
-enddef
-
-def UeberzugppCellWidth(): number
-    var cell_width: number = GetNumberSetting('python_notebook_cell_width',
-        SixelCellWidth())
-    if cell_width <= 0
-        cell_width = SixelCellWidth()
-    endif
-
-    return cell_width
-enddef
-
-def UeberzugppCellHeight(): number
-    var cell_height: number = GetNumberSetting('python_notebook_cell_height',
-        SixelCellHeight())
-    if cell_height <= 0
-        cell_height = SixelCellHeight()
     endif
 
     return cell_height
@@ -919,15 +879,15 @@ def FigureDisplayLines(path: string, available_cols: number): number
         return fallback_lines
     endif
 
-    var max_pixel_width: number = max([1, available_cols * SixelCellWidth()])
-    var cell_height: number = SixelCellHeight()
+    var max_pixel_width: number = max([1, available_cols * CellWidth()])
+    var cell_height: number = CellHeight()
 
     if engine ==# 'magick'
-        max_pixel_width = max([1, available_cols * MagickCellWidth()])
-        cell_height = MagickCellHeight()
+        max_pixel_width = max([1, available_cols * CellWidth()])
+        cell_height = CellHeight()
     elseif engine ==# 'ueberzugpp'
-        max_pixel_width = max([1, available_cols * UeberzugppCellWidth()])
-        cell_height = UeberzugppCellHeight()
+        max_pixel_width = max([1, available_cols * CellWidth()])
+        cell_height = CellHeight()
     else
         assert_true(engine ==# 'chafa')
     endif
@@ -1623,11 +1583,11 @@ def SixelCacheKey(
     if engine ==# 'chafa'
         var helper_path: string = g:python_notebook_helper
         extra_key = ':' .. 'python3' .. ':' .. helper_path .. ':'
-            .. getftime(helper_path) .. ':' .. SixelCellWidth() .. 'x'
-            .. SixelCellHeight()
+            .. getftime(helper_path) .. ':' .. CellWidth() .. 'x'
+            .. CellHeight()
     elseif engine ==# 'magick'
         extra_key = ':' .. 'magick' .. ':'
-            .. MagickCellWidth() .. 'x' .. MagickCellHeight()
+            .. CellWidth() .. 'x' .. CellHeight()
     endif
 
     return engine .. ':' .. path .. ':' .. file_size .. ':' .. file_mtime
@@ -1672,11 +1632,11 @@ def GenerateFigureSixel(
         endif
 
         var max_pixel_width: number = max([1,
-            available_cols * SixelCellWidth()])
+            available_cols * CellWidth()])
         var crop_top_pixels: number = max([0,
-            crop_top_lines * SixelCellHeight()])
+            crop_top_lines * CellHeight()])
         var crop_height_pixels: number = max([1,
-            available_lines * SixelCellHeight()])
+            available_lines * CellHeight()])
         var prepared_path: string = tempname() .. '.png'
 
         try
@@ -1718,11 +1678,11 @@ def GenerateFigureSixel(
         endif
 
         var pixel_width: number = max([1,
-            available_cols * MagickCellWidth()])
+            available_cols * CellWidth()])
         var crop_top_pixels: number = max([0,
-            crop_top_lines * MagickCellHeight()])
+            crop_top_lines * CellHeight()])
         var crop_height_pixels: number = max([1,
-            available_lines * MagickCellHeight()])
+            available_lines * CellHeight()])
         var prepared_path: string = tempname() .. '.png'
 
         try
@@ -2104,7 +2064,7 @@ def UeberzugppPreparedCacheKey(
     return output_format .. ':' .. path .. ':' .. getfsize(path) .. ':'
         .. getftime(path) .. ':' .. available_cols .. 'x'
         .. available_lines .. '@' .. crop_top_lines .. ':'
-        .. UeberzugppCellWidth() .. 'x' .. UeberzugppCellHeight()
+        .. CellWidth() .. 'x' .. CellHeight()
 enddef
 
 def PrepareImageWithWorker(
@@ -2188,11 +2148,11 @@ def PrepareUeberzugppImage(
     endif
 
     var max_pixel_width: number = max([1,
-        available_cols * UeberzugppCellWidth()])
+        available_cols * CellWidth()])
     var crop_top_pixels: number = max([0,
-        crop_top_lines * UeberzugppCellHeight()])
+        crop_top_lines * CellHeight()])
     var crop_height_pixels: number = max([1,
-        available_lines * UeberzugppCellHeight()])
+        available_lines * CellHeight()])
     var prepared_path: string = tempname() .. '.png'
 
     var worker_path: string = PrepareImageWithWorker(path, prepared_path,
