@@ -56,8 +56,6 @@ if exists('g:loaded_python_notebook_vim')
 endif
 g:loaded_python_notebook_vim = 1
 
-var notebook_python_vim_build: string = 'visible-window-cycle-2026-05-23g'
-
 var script_sid: string = expand('<SID>')
 var script_dir: string = expand('<sfile>:p:h')
 
