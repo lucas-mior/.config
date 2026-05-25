@@ -91,7 +91,7 @@ if !exists('g:python_notebook_annotation_scan_lines')
 endif
 
 if !exists('g:python_notebook_figure_lines')
-    g:python_notebook_figure_lines = 18
+    g:python_notebook_figure_lines = 28
 endif
 
 # Image engine options:
@@ -207,9 +207,9 @@ enddef
 
 def NotebookFigureLines(): number
     var figure_lines: number = GetNumberSetting(
-        'python_notebook_figure_lines', 18)
+        'python_notebook_figure_lines', 28)
     if figure_lines <= 0
-        figure_lines = 18
+        figure_lines = 28
     endif
 
     return figure_lines
