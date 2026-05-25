@@ -254,15 +254,28 @@ def _width_constrained_size(width, height, max_width):
     height = max(1, int(height))
     max_width = max(1, int(max_width))
 
-    # Do not upscale smaller figures to the full terminal width. Upscaling a
-    # small or square Matplotlib figure makes it look unexpectedly huge and
-    # causes vertical cropping even when the original image would fit. Only
-    # shrink figures that exceed the available horizontal pixel box.
+    # Do not upscale smaller figures when the image is first fitted to the
+    # terminal. Later font cell-size changes are handled by scaling from this
+    # first fitted size, so the figure keeps the same terminal-line footprint.
     scale = min(1.0, max_width / width)
     fitted_width = max(1, int(round(width * scale)))
     fitted_height = max(1, int(round(height * scale)))
 
     return fitted_width, fitted_height
+
+
+def _cell_scaled_size(base_width, base_height, base_cell_width, base_cell_height, cell_width, cell_height):
+    base_width = max(1, int(base_width))
+    base_height = max(1, int(base_height))
+    base_cell_width = max(1, int(base_cell_width))
+    base_cell_height = max(1, int(base_cell_height))
+    cell_width = max(1, int(cell_width))
+    cell_height = max(1, int(cell_height))
+
+    scaled_width = max(1, int(round(base_width * (cell_width / base_cell_width))))
+    scaled_height = max(1, int(round(base_height * (cell_height / base_cell_height))))
+
+    return scaled_width, scaled_height
 
 
 def _crop_vertical(image, crop_top, crop_height):
@@ -311,37 +324,96 @@ def _image_prep_worker_cli(argv):
 
     from PIL import Image
 
-    resized_cache = {}
+    original_cache = {}
+    layout_cache = {}
+    scaled_cache = {}
     cache_order = []
     cache_size = _image_prep_worker_cache_size()
 
     def send_response(response):
         print(json.dumps(response, separators=(",", ":")), flush=True)
 
-    def stat_key(path, max_pixel_width):
+    def stat_key(path):
         stat_result = os.stat(path)
         mtime_ns = getattr(stat_result, "st_mtime_ns", int(stat_result.st_mtime * 1000000000))
-        return (path, stat_result.st_size, mtime_ns, max(1, int(max_pixel_width)))
+        return (path, stat_result.st_size, mtime_ns)
 
-    def cached_resized_image(path, max_pixel_width):
-        key = stat_key(path, max_pixel_width)
-        cached = resized_cache.get(key)
+    def remember_cache_key(cache_name, key):
+        cache_order.append((cache_name, key))
+
+        while len(cache_order) > cache_size:
+            old_cache_name, old_key = cache_order.pop(0)
+            if old_cache_name == "original":
+                original_cache.pop(old_key, None)
+            elif old_cache_name == "layout":
+                layout_cache.pop(old_key, None)
+            elif old_cache_name == "scaled":
+                scaled_cache.pop(old_key, None)
+
+    def cached_original_image(path):
+        key = stat_key(path)
+        cached = original_cache.get(key)
         if cached is not None:
-            return cached
+            return key, cached
 
         with Image.open(path) as image:
             rgba = image.convert("RGBA")
-            fitted_size = _width_constrained_size(rgba.width, rgba.height, max_pixel_width)
-            resized = rgba.resize(fitted_size, _resample_filter(Image))
 
-        resized_cache[key] = resized
-        cache_order.append(key)
+        original_cache[key] = rgba
+        remember_cache_key("original", key)
+        return key, rgba
 
-        while len(cache_order) > cache_size:
-            old_key = cache_order.pop(0)
-            resized_cache.pop(old_key, None)
+    def layout_cache_key(source_key, layout_key):
+        layout_key = _strip_null_bytes(layout_key)
+        if not layout_key:
+            layout_key = "default"
+        return source_key + (layout_key,)
 
-        return resized
+    def cached_layout(source_key, original, layout_key_value, max_pixel_width, cell_width, cell_height):
+        key = layout_cache_key(source_key, layout_key_value)
+        cached = layout_cache.get(key)
+        if cached is not None:
+            return cached
+
+        base_width, base_height = _width_constrained_size(original.width, original.height, max_pixel_width)
+        layout = {
+            "base_width": base_width,
+            "base_height": base_height,
+            "base_cell_width": max(1, int(cell_width)),
+            "base_cell_height": max(1, int(cell_height)),
+        }
+        layout_cache[key] = layout
+        remember_cache_key("layout", key)
+        return layout
+
+    def cached_scaled_image(path, layout_key_value, max_pixel_width, cell_width, cell_height):
+        source_key, original = cached_original_image(path)
+        layout = cached_layout(source_key, original, layout_key_value, max_pixel_width, cell_width, cell_height)
+        scaled_size = _cell_scaled_size(
+            layout["base_width"],
+            layout["base_height"],
+            layout["base_cell_width"],
+            layout["base_cell_height"],
+            cell_width,
+            cell_height,
+        )
+        key = source_key + (
+            _strip_null_bytes(layout_key_value or "default"),
+            scaled_size[0],
+            scaled_size[1],
+        )
+        cached = scaled_cache.get(key)
+        if cached is not None:
+            return cached, layout, scaled_size
+
+        if (original.width, original.height) == scaled_size:
+            scaled = original.copy()
+        else:
+            scaled = original.resize(scaled_size, _resample_filter(Image))
+
+        scaled_cache[key] = scaled
+        remember_cache_key("scaled", key)
+        return scaled, layout, scaled_size
 
     def save_prepared_image(cropped, output_path, output_format):
         output_format = _strip_null_bytes(output_format or "rgba")
@@ -381,6 +453,9 @@ def _image_prep_worker_cli(argv):
             crop_top_pixels = max(0, int(request.get("crop_top_pixels", 0)))
             crop_height_pixels = max(1, int(request.get("crop_height_pixels", 1)))
             output_format = _strip_null_bytes(request.get("output_format", "rgba"))
+            layout_key_value = _strip_null_bytes(request.get("layout_key", "default"))
+            cell_width = max(1, int(request.get("cell_width", 1)))
+            cell_height = max(1, int(request.get("cell_height", 1)))
 
             if not input_path:
                 raise ValueError("input_path is empty")
@@ -392,8 +467,14 @@ def _image_prep_worker_cli(argv):
             if output_dir:
                 os.makedirs(output_dir, exist_ok=True)
 
-            resized = cached_resized_image(input_path, max_pixel_width)
-            cropped = _crop_vertical(resized, crop_top_pixels, crop_height_pixels)
+            scaled, layout, scaled_size = cached_scaled_image(
+                input_path,
+                layout_key_value,
+                max_pixel_width,
+                cell_width,
+                cell_height,
+            )
+            cropped = _crop_vertical(scaled, crop_top_pixels, crop_height_pixels)
             save_prepared_image(cropped, output_path, output_format)
 
             send_response({
@@ -402,6 +483,12 @@ def _image_prep_worker_cli(argv):
                 "path": _strip_null_bytes(output_path),
                 "width": int(cropped.width),
                 "height": int(cropped.height),
+                "cell_width": int(cell_width),
+                "cell_height": int(cell_height),
+                "base_cell_width": int(layout["base_cell_width"]),
+                "base_cell_height": int(layout["base_cell_height"]),
+                "scaled_width": int(scaled_size[0]),
+                "scaled_height": int(scaled_size[1]),
             })
         except Exception as exc:
             send_response({

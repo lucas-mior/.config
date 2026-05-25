@@ -1576,7 +1576,8 @@ def GenerateFigureSixel(
     path: string,
     available_cols: number,
     available_lines: number,
-    crop_top_lines: number
+    crop_top_lines: number,
+    total_lines: number
 ): string
     if !filereadable(path)
         return ''
@@ -1584,6 +1585,9 @@ def GenerateFigureSixel(
 
     var engine: string = GetStringSetting('python_notebook_draw_engine',
         'chafa')
+    var current_cell_width: number = CellWidth()
+    var current_cell_height: number = CellHeight()
+    var layout_key: string = ImagePrepLayoutKey(path, total_lines)
     var cache_key: string = SixelCacheKey(path, available_cols,
         available_lines, crop_top_lines, engine)
     if has_key(figure_sixel_cache, cache_key)
@@ -1609,17 +1613,18 @@ def GenerateFigureSixel(
         endif
 
         var max_pixel_width: number = max([1,
-            available_cols * CellWidth()])
+            available_cols * current_cell_width])
         var crop_top_pixels: number = max([0,
-            crop_top_lines * CellHeight()])
+            crop_top_lines * current_cell_height])
         var crop_height_pixels: number = max([1,
-            available_lines * CellHeight()])
+            available_lines * current_cell_height])
         var prepared_path: string = tempname() .. '.png'
 
         try
             var worker_path: string = PrepareImageWithWorker(path,
                 prepared_path, max_pixel_width, crop_top_pixels,
-                crop_height_pixels, 'sixel', 'chafa image prep')
+                crop_height_pixels, 'sixel', 'chafa image prep',
+                layout_key, current_cell_width, current_cell_height)
             if !empty(worker_path)
                 prepared_path = worker_path
             else
@@ -1655,17 +1660,18 @@ def GenerateFigureSixel(
         endif
 
         var pixel_width: number = max([1,
-            available_cols * CellWidth()])
+            available_cols * current_cell_width])
         var crop_top_pixels: number = max([0,
-            crop_top_lines * CellHeight()])
+            crop_top_lines * current_cell_height])
         var crop_height_pixels: number = max([1,
-            available_lines * CellHeight()])
+            available_lines * current_cell_height])
         var prepared_path: string = tempname() .. '.png'
 
         try
             var worker_path: string = PrepareImageWithWorker(path,
                 prepared_path, pixel_width, crop_top_pixels,
-                crop_height_pixels, 'rgba', 'magick image prep')
+                crop_height_pixels, 'rgba', 'magick image prep',
+                layout_key, current_cell_width, current_cell_height)
             if !empty(worker_path)
                 prepared_path = worker_path
             else
@@ -2040,6 +2046,11 @@ def UeberzugppPreparedCacheKey(
         .. CellWidth() .. 'x' .. CellHeight()
 enddef
 
+def ImagePrepLayoutKey(path: string, total_lines: number): string
+    return path .. ':' .. getfsize(path) .. ':' .. getftime(path)
+        .. ':lines=' .. string(max([1, total_lines]))
+enddef
+
 def PrepareImageWithWorker(
     path: string,
     prepared_path: string,
@@ -2047,7 +2058,10 @@ def PrepareImageWithWorker(
     crop_top_pixels: number,
     crop_height_pixels: number,
     output_format: string,
-    failure_context: string
+    failure_context: string,
+    layout_key: string,
+    cell_width: number,
+    cell_height: number
 ): string
     var response: dict<any> = ImagePrepWorkerRequest({
         'action': 'prepare',
@@ -2057,6 +2071,9 @@ def PrepareImageWithWorker(
         'crop_top_pixels': crop_top_pixels,
         'crop_height_pixels': crop_height_pixels,
         'output_format': output_format,
+        'layout_key': layout_key,
+        'cell_width': cell_width,
+        'cell_height': cell_height,
     })
 
     if get(response, 'ok', false)
@@ -2093,14 +2110,9 @@ def PrepareUeberzugppImage(
 ): string
     var output_format: string = UeberzugppPreparedOutputFormat()
 
-    # In plain RGBA mode, a full visible image can be passed directly. In
-    # sixel/XShape-prep mode, even a full visible image must be converted so
-    # semi-transparent pixels become opaque edge pixels and alpha==0 remains
-    # the binary transparency mask.
-    if output_format ==# 'rgba' && crop_top_lines <= 0
-            && available_lines >= total_lines
-        return path
-    endif
+    # Always prepare through the worker, even for a full RGBA image. The
+    # worker owns the per-image baseline cell size and can therefore rescale
+    # the cached source when the terminal font cell size changes.
 
     var python_cmd: string = 'python3'
     var helper_path: string = g:python_notebook_helper
@@ -2113,6 +2125,9 @@ def PrepareUeberzugppImage(
         return path
     endif
 
+    var current_cell_width: number = CellWidth()
+    var current_cell_height: number = CellHeight()
+    var layout_key: string = ImagePrepLayoutKey(path, total_lines)
     var cache_key: string = UeberzugppPreparedCacheKey(path, available_cols,
         available_lines, crop_top_lines, output_format)
     if has_key(ueberzugpp_prepared_cache, cache_key)
@@ -2121,16 +2136,17 @@ def PrepareUeberzugppImage(
     endif
 
     var max_pixel_width: number = max([1,
-        available_cols * CellWidth()])
+        available_cols * current_cell_width])
     var crop_top_pixels: number = max([0,
-        crop_top_lines * CellHeight()])
+        crop_top_lines * current_cell_height])
     var crop_height_pixels: number = max([1,
-        available_lines * CellHeight()])
+        available_lines * current_cell_height])
     var prepared_path: string = tempname() .. '.png'
 
     var worker_path: string = PrepareImageWithWorker(path, prepared_path,
         max_pixel_width, crop_top_pixels, crop_height_pixels,
-        output_format, 'ueberzugpp image prep')
+        output_format, 'ueberzugpp image prep', layout_key,
+        current_cell_width, current_cell_height)
     if !empty(worker_path)
         ueberzugpp_prepared_cache[cache_key] = worker_path
         return worker_path
@@ -2319,8 +2335,9 @@ def DrawFigureAt(
     endif
 
     var crop_top_lines: number = visible_start - start_lnum
+    var total_lines: number = end_lnum - start_lnum + 1
     var sixel_data: string = GenerateFigureSixel(path, available_cols,
-        visible_lines, crop_top_lines)
+        visible_lines, crop_top_lines, total_lines)
     if empty(sixel_data)
         DrawGapText(visible_start, visible_lines, available_cols, screen_col,
             '[could not render figure as sixel]')
