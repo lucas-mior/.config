@@ -314,7 +314,8 @@ enddef
 def UeberzugppExitCb(job: any, status: number)
     ueberzugpp_last_exit_status = string(status)
     if status != 0
-        ueberzugpp_last_error = 'layer process exited with status ' .. string(status)
+        ueberzugpp_last_error = 'layer process exited with status '
+                                .. string(status)
         echohl ErrorMsg
         echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
         echohl None
@@ -1228,19 +1229,23 @@ def RefreshNotebookMatches()
             var has_figure: bool = OutputHeaderHasKind(line_str, 'figure')
 
             if has_stdout
-                AddNotebookHeaderWordMatch('PythonNotebookStdout', lnum, 'stdout')
+                AddNotebookHeaderWordMatch('PythonNotebookStdout',
+                                           lnum, 'stdout')
             endif
 
             if has_stderr
-                AddNotebookHeaderWordMatch('PythonNotebookStdout', lnum, 'stderr')
+                AddNotebookHeaderWordMatch('PythonNotebookStdout',
+                                           lnum, 'stderr')
             endif
 
             if has_result
-                AddNotebookHeaderWordMatch('PythonNotebookResult', lnum, 'result')
+                AddNotebookHeaderWordMatch('PythonNotebookResult',
+                                           lnum, 'result')
             endif
 
             if has_figure
-                AddNotebookHeaderWordMatch('PythonNotebookFigure', lnum, 'figure')
+                AddNotebookHeaderWordMatch('PythonNotebookFigure',
+                                           lnum, 'figure')
             endif
 
             var first_figure_lnum: number = 0
@@ -2968,9 +2973,12 @@ def HandleCellSizeResponse()
     endif
 enddef
 
-execute 'nnoremap <silent> <Esc>[6; :<C-u>call ' .. script_sid .. 'HandleCellSizeResponse()<CR>'
-execute 'vnoremap <silent> <Esc>[6; :<C-u>call ' .. script_sid .. 'HandleCellSizeResponse()<CR>'
-execute 'inoremap <silent> <Esc>[6; <Cmd>call ' .. script_sid .. 'HandleCellSizeResponse()<CR>'
+execute 'nnoremap <silent> <Esc>[6; :<C-u>call '
+        .. script_sid .. 'HandleCellSizeResponse()<CR>'
+execute 'vnoremap <silent> <Esc>[6; :<C-u>call '
+        .. script_sid .. 'HandleCellSizeResponse()<CR>'
+execute 'inoremap <silent> <Esc>[6; <Cmd>call '
+        .. script_sid .. 'HandleCellSizeResponse()<CR>'
 
 execute 'command! PythonNotebookTryEnable call '
     .. script_sid .. 'TryEnablePythonNotebook(1)'
