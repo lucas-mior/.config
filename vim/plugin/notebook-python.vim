@@ -144,7 +144,7 @@ var ueberzugpp_pid: number = 0
 var ueberzugpp_visible_image_ids: dict<bool> = {}
 var ueberzugpp_current_cycle_ids: dict<bool> = {}
 var ueberzugpp_prepared_cache: dict<string> = {}
-var ueberzugpp_last_error: string = ''
+var ueberzugpp_error: string = ''
 var ueberzugpp_last_command: string = ''
 var ueberzugpp_last_stdout: string = ''
 var ueberzugpp_last_stderr: string = ''
@@ -155,7 +155,7 @@ var image_prep_worker_channel: any = v:none
 var image_prep_worker_pid: number = 0
 var image_prep_worker_stdout_buffer: string = ''
 var image_prep_worker_next_request_id: number = 0
-var image_prep_worker_last_error: string = ''
+var image_prep_worker_error: string = ''
 var image_prep_worker_last_request: string = ''
 var image_prep_worker_last_response: string = ''
 var image_prep_worker_last_stderr: string = ''
@@ -305,19 +305,19 @@ def UeberzugppStderrCb(channel: any, message: string)
     endif
 
     ueberzugpp_last_stderr = clean_message
-    ueberzugpp_last_error = 'stderr: ' .. clean_message
+    ueberzugpp_error = 'stderr: ' .. clean_message
     echohl ErrorMsg
-    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
     echohl None
 enddef
 
 def UeberzugppExitCb(job: any, status: number)
     ueberzugpp_last_exit_status = string(status)
     if status != 0
-        ueberzugpp_last_error = 'layer process exited with status '
+        ueberzugpp_error = 'layer process exited with status '
                                 .. string(status)
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
     endif
 
@@ -432,21 +432,21 @@ def ImagePrepWorkerStderrCb(channel: any, message: string)
     endif
 
     image_prep_worker_last_stderr = clean_message
-    image_prep_worker_last_error = clean_message
-    ueberzugpp_last_error = 'image prep worker stderr: ' .. clean_message
+    image_prep_worker_error = clean_message
+    ueberzugpp_error = 'image prep worker stderr: ' .. clean_message
     echohl ErrorMsg
-    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
     echohl None
 enddef
 
 def ImagePrepWorkerExitCb(job: any, status: number)
     image_prep_worker_last_exit_status = string(status)
     if status != 0
-        image_prep_worker_last_error = 'image prep worker exited with status '
+        image_prep_worker_error = 'image prep worker exited with status '
             .. string(status)
-        ueberzugpp_last_error = image_prep_worker_last_error
+        ueberzugpp_error = image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
     endif
 
@@ -462,34 +462,34 @@ def StartImagePrepWorker()
     endif
 
     if !exists('*job_start')
-        image_prep_worker_last_error =
+        image_prep_worker_error =
             'job_start() is unavailable in this Vim build'
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
 
     if !exists('*job_getchannel')
-        image_prep_worker_last_error =
+        image_prep_worker_error =
             'job_getchannel() is unavailable in this Vim build'
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
 
     if !exists('*ch_sendraw') || !exists('*ch_readraw')
-        image_prep_worker_last_error =
+        image_prep_worker_error =
             'ch_sendraw()/ch_readraw() is unavailable in this Vim build'
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
@@ -498,23 +498,23 @@ def StartImagePrepWorker()
     var helper_path: string = g:python_notebook_helper
 
     if empty(python_cmd) || !executable(python_cmd)
-        image_prep_worker_last_error = 'Python executable not found: '
+        image_prep_worker_error = 'Python executable not found: '
             .. python_cmd
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
 
     if empty(helper_path) || !filereadable(helper_path)
-        image_prep_worker_last_error = 'helper script not found: '
+        image_prep_worker_error = 'helper script not found: '
             .. helper_path
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
@@ -541,11 +541,11 @@ def StartImagePrepWorker()
     try
         image_prep_worker_job = job_start(argv, job_options)
     catch
-        image_prep_worker_last_error = 'job_start() failed: ' .. v:exception
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        image_prep_worker_error = 'job_start() failed: ' .. v:exception
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         image_prep_worker_job = v:none
         image_prep_worker_channel = v:none
@@ -554,13 +554,13 @@ def StartImagePrepWorker()
     endtry
 
     if type(image_prep_worker_job) != v:t_job
-        image_prep_worker_last_error =
+        image_prep_worker_error =
             'job_start() did not return a job object; returned type='
             .. string(type(image_prep_worker_job))
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         image_prep_worker_job = v:none
         image_prep_worker_channel = v:none
@@ -569,12 +569,12 @@ def StartImagePrepWorker()
     endif
 
     if ImagePrepWorkerJobStatus() !=# 'run'
-        image_prep_worker_last_error =
+        image_prep_worker_error =
             'worker did not start; job status=' .. ImagePrepWorkerJobStatus()
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         image_prep_worker_job = v:none
         image_prep_worker_channel = v:none
@@ -585,12 +585,12 @@ def StartImagePrepWorker()
     try
         image_prep_worker_channel = job_getchannel(image_prep_worker_job)
     catch
-        image_prep_worker_last_error = 'job_getchannel() failed: '
+        image_prep_worker_error = 'job_getchannel() failed: '
             .. v:exception
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         try
             job_stop(image_prep_worker_job, 'term')
@@ -610,13 +610,13 @@ def StartImagePrepWorker()
     endtry
 
     if !ImagePrepWorkerReady()
-        image_prep_worker_last_error = 'worker channel is not ready; status='
+        image_prep_worker_error = 'worker channel is not ready; status='
             .. ImagePrepWorkerJobStatus() .. ', channel status='
             .. ImagePrepWorkerChannelStatus()
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         try
             job_stop(image_prep_worker_job, 'term')
@@ -653,23 +653,23 @@ def ImagePrepWorkerTakeResponse(request_id: string): any
         try
             decoded = json_decode(line_str)
         catch
-            image_prep_worker_last_error =
+            image_prep_worker_error =
                 'could not decode worker response: ' .. line_str
-            ueberzugpp_last_error = 'image prep worker: '
-                .. image_prep_worker_last_error
+            ueberzugpp_error = 'image prep worker: '
+                .. image_prep_worker_error
             echohl ErrorMsg
-            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
             echohl None
             continue
         endtry
 
         if type(decoded) != v:t_dict
-            image_prep_worker_last_error =
+            image_prep_worker_error =
                 'worker response was not a dict: ' .. line_str
-            ueberzugpp_last_error = 'image prep worker: '
-                .. image_prep_worker_last_error
+            ueberzugpp_error = 'image prep worker: '
+                .. image_prep_worker_error
             echohl ErrorMsg
-            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
             echohl None
             continue
         endif
@@ -699,17 +699,17 @@ def ImagePrepWorkerReadResponse(request_id: string, timeout_ms: number): any
             chunk = ch_readraw(image_prep_worker_channel,
                 {'part': 'out', 'timeout': slice_ms})
         catch
-            image_prep_worker_last_error = 'ch_readraw() failed: '
+            image_prep_worker_error = 'ch_readraw() failed: '
                 .. v:exception
-            ueberzugpp_last_error = 'image prep worker: '
-                .. image_prep_worker_last_error
+            ueberzugpp_error = 'image prep worker: '
+                .. image_prep_worker_error
             echohl ErrorMsg
-            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
             echohl None
             return {
                 'id': request_id,
                 'ok': false,
-                'error': image_prep_worker_last_error
+                'error': image_prep_worker_error
             }
         endtry
 
@@ -721,17 +721,17 @@ def ImagePrepWorkerReadResponse(request_id: string, timeout_ms: number): any
         endif
     endwhile
 
-    image_prep_worker_last_error = 'timeout waiting for response id='
+    image_prep_worker_error = 'timeout waiting for response id='
         .. request_id .. ' after ' .. string(timeout_ms) .. ' ms'
-    ueberzugpp_last_error = 'image prep worker: '
-        .. image_prep_worker_last_error
+    ueberzugpp_error = 'image prep worker: '
+        .. image_prep_worker_error
     echohl ErrorMsg
-    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
     echohl None
     return {
         'id': request_id,
         'ok': false,
-        'error': image_prep_worker_last_error
+        'error': image_prep_worker_error
     }
 enddef
 
@@ -741,15 +741,15 @@ def ImagePrepWorkerRequest(command: dict<any>): dict<any>
     endif
 
     if !ImagePrepWorkerReady()
-        image_prep_worker_last_error = 'worker is not ready; job status='
+        image_prep_worker_error = 'worker is not ready; job status='
             .. ImagePrepWorkerJobStatus() .. ', channel status='
             .. ImagePrepWorkerChannelStatus()
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
-        return {'ok': false, 'error': image_prep_worker_last_error}
+        return {'ok': false, 'error': image_prep_worker_error}
     endif
 
     image_prep_worker_next_request_id += 1
@@ -762,32 +762,32 @@ def ImagePrepWorkerRequest(command: dict<any>): dict<any>
         ch_sendraw(image_prep_worker_channel,
             image_prep_worker_last_request .. "\n")
     catch
-        image_prep_worker_last_error = 'ch_sendraw() failed: ' .. v:exception
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        image_prep_worker_error = 'ch_sendraw() failed: ' .. v:exception
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return {
             'id': request_id,
             'ok': false,
-            'error': image_prep_worker_last_error
+            'error': image_prep_worker_error
         }
     endtry
 
     var response_any: any = ImagePrepWorkerReadResponse(request_id,
         ImagePrepWorkerTimeoutMs())
     if type(response_any) != v:t_dict
-        image_prep_worker_last_error = 'worker returned a non-dict response'
-        ueberzugpp_last_error = 'image prep worker: '
-            .. image_prep_worker_last_error
+        image_prep_worker_error = 'worker returned a non-dict response'
+        ueberzugpp_error = 'image prep worker: '
+            .. image_prep_worker_error
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return {
             'id': request_id,
             'ok': false,
-            'error': image_prep_worker_last_error
+            'error': image_prep_worker_error
         }
     endif
 
@@ -795,7 +795,7 @@ def ImagePrepWorkerRequest(command: dict<any>): dict<any>
     image_prep_worker_last_response = json_encode(response)
 
     if !get(response, 'ok', false)
-        image_prep_worker_last_error = JsonValueToString(get(response, 'error',
+        image_prep_worker_error = JsonValueToString(get(response, 'error',
             'unknown worker error'))
     endif
 
@@ -1726,42 +1726,42 @@ def StartUeberzugppLayerDaemon()
     endif
 
     if !exists('*job_start')
-        ueberzugpp_last_error = 'job_start() is unavailable in this Vim build'
+        ueberzugpp_error = 'job_start() is unavailable in this Vim build'
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
 
     if !exists('*job_getchannel')
-        ueberzugpp_last_error = 'job_getchannel() is unavailable in this Vim build'
+        ueberzugpp_error = 'job_getchannel() is unavailable in this Vim build'
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
 
     if !exists('*ch_sendraw')
-        ueberzugpp_last_error = 'ch_sendraw() is unavailable in this Vim build'
+        ueberzugpp_error = 'ch_sendraw() is unavailable in this Vim build'
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
 
     var ueberzugpp_cmd: string = 'ueberzugpp'
     if empty(ueberzugpp_cmd)
-        ueberzugpp_last_error = 'g:python_notebook_ueberzugpp_command is empty'
+        ueberzugpp_error = 'g:python_notebook_ueberzugpp_command is empty'
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
 
     if !executable(ueberzugpp_cmd)
-        ueberzugpp_last_error = 'command is not executable: ' .. ueberzugpp_cmd
+        ueberzugpp_error = 'command is not executable: ' .. ueberzugpp_cmd
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return
     endif
@@ -1794,9 +1794,9 @@ def StartUeberzugppLayerDaemon()
     try
         ueberzugpp_job = job_start(argv, job_options)
     catch
-        ueberzugpp_last_error = 'job_start() failed: ' .. v:exception
+        ueberzugpp_error = 'job_start() failed: ' .. v:exception
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         ueberzugpp_job = v:none
         ueberzugpp_channel = v:none
@@ -1805,11 +1805,11 @@ def StartUeberzugppLayerDaemon()
     endtry
 
     if type(ueberzugpp_job) != v:t_job
-        ueberzugpp_last_error =
+        ueberzugpp_error =
             'job_start() did not return a job object; returned type='
             .. string(type(ueberzugpp_job))
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         ueberzugpp_job = v:none
         ueberzugpp_channel = v:none
@@ -1819,10 +1819,10 @@ def StartUeberzugppLayerDaemon()
 
     var job_status_text: string = UeberzugppJobStatus()
     if job_status_text !=# 'run'
-        ueberzugpp_last_error = 'layer job did not start; job status='
+        ueberzugpp_error = 'layer job did not start; job status='
             .. job_status_text
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         ueberzugpp_job = v:none
         ueberzugpp_channel = v:none
@@ -1833,9 +1833,9 @@ def StartUeberzugppLayerDaemon()
     try
         ueberzugpp_channel = job_getchannel(ueberzugpp_job)
     catch
-        ueberzugpp_last_error = 'job_getchannel() failed: ' .. v:exception
+        ueberzugpp_error = 'job_getchannel() failed: ' .. v:exception
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         try
             job_stop(ueberzugpp_job, 'term')
@@ -1855,11 +1855,11 @@ def StartUeberzugppLayerDaemon()
     endtry
 
     if !UeberzugppLayerReady()
-        ueberzugpp_last_error = 'layer job channel is not ready; job status='
+        ueberzugpp_error = 'layer job channel is not ready; job status='
             .. UeberzugppJobStatus() .. ', channel status='
             .. UeberzugppChannelStatus()
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         try
             job_stop(ueberzugpp_job, 'term')
@@ -1882,12 +1882,12 @@ def UeberzugppSendJson(command: dict<any>): bool
     endif
 
     if !UeberzugppLayerReady()
-        ueberzugpp_last_error = 'cannot send command because layer is not ready; '
+        ueberzugpp_error = 'cannot send command because layer is not ready; '
             .. 'job status=' .. UeberzugppJobStatus() .. ', channel status='
             .. UeberzugppChannelStatus() .. ', command='
             .. ueberzugpp_last_command
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return false
     endif
@@ -1895,10 +1895,10 @@ def UeberzugppSendJson(command: dict<any>): bool
     try
         ch_sendraw(ueberzugpp_channel, ueberzugpp_last_command .. "\n")
     catch
-        ueberzugpp_last_error = 'ch_sendraw() failed: ' .. v:exception
+        ueberzugpp_error = 'ch_sendraw() failed: ' .. v:exception
             .. '; command=' .. ueberzugpp_last_command
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return false
     endtry
@@ -2036,9 +2036,9 @@ def StopUeberzugppLayerDaemon()
         try
             job_stop(ueberzugpp_job, 'term')
         catch
-            ueberzugpp_last_error = 'job_stop() failed: ' .. v:exception
+            ueberzugpp_error = 'job_stop() failed: ' .. v:exception
             echohl ErrorMsg
-            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+            echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
             echohl None
         endtry
     endif
@@ -2102,20 +2102,20 @@ def PrepareImageWithWorker(
             return response_path
         endif
 
-        ueberzugpp_last_error = failure_context
+        ueberzugpp_error = failure_context
             .. ' worker reported success but output is unreadable: '
             .. response_path
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         return ''
     endif
 
-    ueberzugpp_last_error = failure_context .. ' worker failed; source=' .. path
+    ueberzugpp_error = failure_context .. ' worker failed; source=' .. path
         .. '; error=' .. JsonValueToString(get(response, 'error',
         'unknown error'))
     echohl ErrorMsg
-    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+    echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
     echohl None
     return ''
 enddef
@@ -2219,11 +2219,11 @@ def DrawFigureAtWithUeberzugpp(
     endif
 
     if !UeberzugppLayerReady()
-        ueberzugpp_last_error = 'draw skipped because layer is not ready; job status='
+        ueberzugpp_error = 'draw skipped because layer is not ready; job status='
             .. UeberzugppJobStatus() .. ', channel status='
             .. UeberzugppChannelStatus()
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         DrawGapText(visible_start, visible_lines, available_cols, screen_col,
             '[ueberzugpp layer daemon is not ready]')
@@ -2241,10 +2241,10 @@ def DrawFigureAtWithUeberzugpp(
         visible_lines, crop_top_lines, total_lines)
 
     if !filereadable(display_path)
-        ueberzugpp_last_error = 'draw skipped because prepared image is not readable; '
+        ueberzugpp_error = 'draw skipped because prepared image is not readable; '
             .. 'original=' .. path .. '; prepared=' .. display_path
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         DrawGapText(visible_start, visible_lines, available_cols, screen_col,
             '[ueberzugpp prepared image not readable]')
@@ -2271,10 +2271,10 @@ def DrawFigureAtWithUeberzugpp(
         })
         ueberzugpp_visible_image_ids[identifier] = true
     else
-        ueberzugpp_last_error = 'add command failed for identifier=' .. identifier
+        ueberzugpp_error = 'add command failed for identifier=' .. identifier
             .. '; path=' .. display_path
         echohl ErrorMsg
-        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_last_error
+        echomsg 'notebook-python.vim: ueberzugpp: ' .. ueberzugpp_error
         echohl None
         DrawGapText(visible_start, visible_lines, available_cols, screen_col,
             '[could not render figure with ueberzugpp]')
