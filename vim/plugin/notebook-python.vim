@@ -88,14 +88,13 @@ endif
 #    let g:python_notebook_draw_engine = 'chafa'
 #    let g:python_notebook_draw_engine = 'magick'
 #    let g:python_notebook_draw_engine = 'ueberzugpp'
-#
-# Image renderers ultimately need pixel dimensions. These defaults
-# approximate one terminal cell in pixels; tune them if rendered figures
-# are too large, too small, or distorted for your terminal/font.
 if !exists('g:python_notebook_draw_engine')
     g:python_notebook_draw_engine = 'chafa'
 endif
 
+# Image renderers ultimately need pixel dimensions. These defaults
+# approximate one terminal cell in pixels; tune them if rendered figures
+# are too large, too small, or distorted for your terminal/font.
 if !exists('g:python_notebook_cell_width')
     g:python_notebook_cell_width = 10
 endif
