@@ -1000,14 +1000,14 @@ def EnsureBufferMatchList()
 enddef
 
 def EnsureNotebookHighlightGroups()
-    execute 'highlight default link MdNotebookOutput Comment'
-    execute 'highlight MdNotebookFigure ctermfg=DarkGray ctermbg=NONE '
+    execute 'highlight default link PythonNotebookOutput Comment'
+    execute 'highlight PythonNotebookFigure ctermfg=DarkGray ctermbg=NONE '
         .. 'guifg=#808080 guibg=NONE'
-    execute 'highlight MdNotebookError ctermfg=Red ctermbg=NONE '
+    execute 'highlight PythonNotebookError ctermfg=Red ctermbg=NONE '
         .. 'guifg=#ff5f5f guibg=NONE'
-    execute 'highlight MdNotebookStdout ctermfg=White ctermbg=NONE '
+    execute 'highlight PythonNotebookStdout ctermfg=White ctermbg=NONE '
         .. 'guifg=#ffffff guibg=NONE'
-    execute 'highlight MdNotebookResult ctermfg=Blue ctermbg=NONE '
+    execute 'highlight PythonNotebookResult ctermfg=Blue ctermbg=NONE '
         .. 'guifg=#5fafff guibg=NONE'
 enddef
 
@@ -1281,7 +1281,7 @@ def RefreshNotebookMatches()
             endif
 
             for row in range(lnum, end_lnum)
-                AddNotebookLineMatch('MdNotebookError', row)
+                AddNotebookLineMatch('PythonNotebookError', row)
             endfor
 
             lnum = end_lnum + 1
@@ -1300,19 +1300,19 @@ def RefreshNotebookMatches()
             var has_figure: bool = OutputHeaderHasKind(line_str, 'figure')
 
             if has_stdout
-                AddNotebookHeaderWordMatch('MdNotebookStdout', lnum, 'stdout')
+                AddNotebookHeaderWordMatch('PythonNotebookStdout', lnum, 'stdout')
             endif
 
             if has_stderr
-                AddNotebookHeaderWordMatch('MdNotebookStdout', lnum, 'stderr')
+                AddNotebookHeaderWordMatch('PythonNotebookStdout', lnum, 'stderr')
             endif
 
             if has_result
-                AddNotebookHeaderWordMatch('MdNotebookResult', lnum, 'result')
+                AddNotebookHeaderWordMatch('PythonNotebookResult', lnum, 'result')
             endif
 
             if has_figure
-                AddNotebookHeaderWordMatch('MdNotebookFigure', lnum, 'figure')
+                AddNotebookHeaderWordMatch('PythonNotebookFigure', lnum, 'figure')
             endif
 
             var first_figure_lnum: number = 0
@@ -1334,19 +1334,19 @@ def RefreshNotebookMatches()
             if body_start <= body_end
                 if has_result && !has_stdout && !has_stderr
                     for row in range(body_start, body_end)
-                        AddNotebookLineMatch('MdNotebookResult', row)
+                        AddNotebookLineMatch('PythonNotebookResult', row)
                     endfor
                 elseif has_result
                     if body_start <= body_end - 1
                         for row in range(body_start, body_end - 1)
-                            AddNotebookLineMatch('MdNotebookStdout', row)
+                            AddNotebookLineMatch('PythonNotebookStdout', row)
                         endfor
                     endif
 
-                    AddNotebookLineMatch('MdNotebookResult', body_end)
+                    AddNotebookLineMatch('PythonNotebookResult', body_end)
                 else
                     for row in range(body_start, body_end)
-                        AddNotebookLineMatch('MdNotebookStdout', row)
+                        AddNotebookLineMatch('PythonNotebookStdout', row)
                     endfor
                 endif
             endif
@@ -1359,7 +1359,7 @@ def RefreshNotebookMatches()
                             figure_lnum)
                         for row in range(figure_lnum,
                                 min([figure_area_end, output_end - 1]))
-                            AddNotebookLineMatch('MdNotebookFigure', row)
+                            AddNotebookLineMatch('PythonNotebookFigure', row)
                         endfor
                         figure_lnum = figure_area_end + 1
                     else
@@ -2845,17 +2845,17 @@ def RunPythonNotebookFromScratch()
 enddef
 
 def SetupNotebookSyntax()
-    silent! syntax clear MdNotebookOutput
-    silent! syntax clear MdNotebookError
-    silent! syntax clear MdNotebookStdout
-    silent! syntax clear MdNotebookResult
-    silent! syntax clear MdNotebookFigure
+    silent! syntax clear PythonNotebookOutput
+    silent! syntax clear PythonNotebookError
+    silent! syntax clear PythonNotebookStdout
+    silent! syntax clear PythonNotebookResult
+    silent! syntax clear PythonNotebookFigure
 
-    execute 'syntax region MdNotebookOutput '
+    execute 'syntax region PythonNotebookOutput '
         .. 'start=/^\s*#\s*nb-output\s*:\s*start.*$/ '
         .. 'end=/^\s*#\s*nb-output\s*:\s*end\s*$/ '
         .. 'keepend containedin=ALL'
-    execute 'syntax region MdNotebookError '
+    execute 'syntax region PythonNotebookError '
         .. 'start=/^\s*#\s*nb-error\s*:\s*start.*$/ '
         .. 'end=/^\s*#\s*nb-error\s*:\s*end\s*$/ '
         .. 'keepend containedin=ALL'
