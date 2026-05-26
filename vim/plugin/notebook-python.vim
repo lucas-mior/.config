@@ -97,7 +97,7 @@ if !exists('g:python_notebook_annotation_scan_lines')
 endif
 
 if !exists('g:python_notebook_figure_lines')
-    g:python_notebook_figure_lines = 18
+    g:python_notebook_figure_lines = 40
 endif
 
 # Image engine options:
@@ -211,16 +211,6 @@ enddef
 def NotebookFigureDir(): string
     return expand('~/.cache/notebook-python-vim')
            .. '/figures/buf_' .. bufnr('%')
-enddef
-
-def NotebookFigureLines(): number
-    var figure_lines: number = GetNumberSetting(
-        'python_notebook_figure_lines', 18)
-    if figure_lines <= 0
-        figure_lines = 18
-    endif
-
-    return figure_lines
 enddef
 
 def CellWidth(): number
@@ -1418,7 +1408,7 @@ def WindowTextWidth(): number
 enddef
 
 def FigureDisplayLines(path: string, available_cols: number): number
-    var max_lines: number = NotebookFigureLines()
+    var max_lines: number = g:python_notebook_figure_lines
 
     if !filereadable(path)
         return max_lines
