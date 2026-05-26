@@ -1,7 +1,7 @@
 vim9script
 
 # notebook-python.vim
-# Build: async stateful kernel cells 2026-05-25
+# Build: async stateful kernel cells with running status 2026-05-25
 # Minimal Jupyter-like Python notebook runner for Vim.
 #
 # Install:
@@ -38,6 +38,12 @@ vim9script
 #    # nb-error: start
 #    # traceback text
 #    # nb-error: end
+#
+# Generated running status:
+#
+#    # nb-status: start [running]
+#    # running...
+#    # nb-status: end
 #
 # Commands:
 #
@@ -91,7 +97,7 @@ if !exists('g:python_notebook_annotation_scan_lines')
 endif
 
 if !exists('g:python_notebook_figure_lines')
-    g:python_notebook_figure_lines = 28
+    g:python_notebook_figure_lines = 18
 endif
 
 # Image engine options:
@@ -142,6 +148,8 @@ var output_start_marker_prefix: string = '# nb-output: start'
 var output_end_marker: string = '# nb-output: end'
 var error_start_marker: string = '# nb-error: start'
 var error_end_marker: string = '# nb-error: end'
+var status_start_marker_prefix: string = '# nb-status: start'
+var status_end_marker: string = '# nb-status: end'
 var figure_marker_prefix: string = '# nb-figure: '
 
 var figure_sixel_cache: dict<string> = {}
@@ -174,7 +182,7 @@ var image_prep_worker_last_exit_status: string = ''
 
 var notebook_kernel_pending_requests: dict<dict<any>> = {}
 var notebook_kernel_pending_by_bufnr: dict<string> = {}
-var notebook_kernel_ready_responses: dict<dict<any>> = {}
+var notebook_kernel_ready_responses: dict<any> = {}
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -207,9 +215,9 @@ enddef
 
 def NotebookFigureLines(): number
     var figure_lines: number = GetNumberSetting(
-        'python_notebook_figure_lines', 28)
+        'python_notebook_figure_lines', 18)
     if figure_lines <= 0
-        figure_lines = 28
+        figure_lines = 18
     endif
 
     return figure_lines
@@ -997,11 +1005,33 @@ def NotebookKernelClearPendingForBuffer(bufnr_value: number)
         if has_key(notebook_kernel_ready_responses, request_id)
             remove(notebook_kernel_ready_responses, request_id)
         endif
+
+        if bufnr_value == bufnr('%')
+            var was_modifiable: bool = &l:modifiable
+            if !was_modifiable
+                setlocal modifiable
+            endif
+            try
+                ClearNotebookStatusBlocksForRequest(request_id)
+                RefreshNotebookMatches()
+            finally
+                if !was_modifiable
+                    setlocal nomodifiable
+                endif
+            endtry
+        endif
     endif
 enddef
 
 def NotebookKernelBufferBusy(bufnr_value: number): bool
     return has_key(notebook_kernel_pending_by_bufnr, string(bufnr_value))
+enddef
+
+def NotebookKernelNewRequestId(bufnr_value: number): string
+    EnsureNotebookKernelState()
+    b:python_notebook_kernel_next_request_id += 1
+    return string(getpid()) .. '-buf' .. string(bufnr_value)
+        .. '-' .. string(b:python_notebook_kernel_next_request_id)
 enddef
 
 def NotebookKernelStderrCb(bufnr_value: number, channel: any, message: string)
@@ -1194,7 +1224,18 @@ def NotebookKernelProcessResponse(bufnr_value: number, response: dict<any>)
         return
     endif
 
-    notebook_kernel_ready_responses[request_id] = response
+    if has_key(notebook_kernel_ready_responses, request_id)
+        var existing: any = notebook_kernel_ready_responses[request_id]
+        if type(existing) == v:t_list
+            add(existing, response)
+            notebook_kernel_ready_responses[request_id] = existing
+        else
+            notebook_kernel_ready_responses[request_id] = [existing, response]
+        endif
+    else
+        notebook_kernel_ready_responses[request_id] = [response]
+    endif
+
     var winid_value: number = bufwinid(bufnr_value)
     if winid_value <= 0
         return
@@ -1203,7 +1244,10 @@ def NotebookKernelProcessResponse(bufnr_value: number, response: dict<any>)
     var old_winid: number = win_getid()
     try
         if win_gotoid(winid_value)
-            FinishNotebookKernelRequest(request_id)
+            while has_key(notebook_kernel_ready_responses, request_id)
+                    && has_key(notebook_kernel_pending_requests, request_id)
+                FinishNotebookKernelRequest(request_id)
+            endwhile
         endif
     finally
         if old_winid > 0
@@ -1295,14 +1339,17 @@ def NotebookKernelSendAsync(command: dict<any>, pending: dict<any>): bool
         return false
     endif
 
-    b:python_notebook_kernel_next_request_id += 1
-    var request_id: string = string(getpid()) .. '-buf' .. string(bufnr_value)
-        .. '-' .. string(b:python_notebook_kernel_next_request_id)
+    var request_id: string = JsonValueToString(get(pending, 'id', ''))
+    if empty(request_id)
+        request_id = NotebookKernelNewRequestId(bufnr_value)
+    endif
     command['id'] = request_id
 
     pending['id'] = request_id
     pending['bufnr'] = bufnr_value
-    pending['changedtick'] = b:changedtick
+    if !has_key(pending, 'changedtick')
+        pending['changedtick'] = b:changedtick
+    endif
     notebook_kernel_pending_requests[request_id] = pending
     notebook_kernel_pending_by_bufnr[string(bufnr_value)] = request_id
 
@@ -1471,6 +1518,8 @@ def EnsureNotebookHighlightGroups()
         .. 'guifg=#ffffff guibg=NONE'
     execute 'highlight PythonNotebookResult ctermfg=Blue ctermbg=NONE '
         .. 'guifg=#5fafff guibg=NONE'
+    execute 'highlight PythonNotebookStatus ctermfg=Yellow ctermbg=NONE '
+        .. 'guifg=#ffff5f guibg=NONE'
 enddef
 
 def HasNotebookAnnotation(): bool
@@ -1527,6 +1576,14 @@ def IsErrorEnd(line_str: string): bool
     return line_str =~# '^\s*#\s*nb-error\s*:\s*end\s*$'
 enddef
 
+def IsStatusStart(line_str: string): bool
+    return line_str =~# '^\s*#\s*nb-status\s*:\s*start\>'
+enddef
+
+def IsStatusEnd(line_str: string): bool
+    return line_str =~# '^\s*#\s*nb-status\s*:\s*end\s*$'
+enddef
+
 def IsFigureLine(line_str: string): bool
     return line_str =~# '^\s*#\s*nb-figure\s*:\s*.\+'
 enddef
@@ -1571,10 +1628,12 @@ enddef
 
 def IsGeneratedStart(line_str: string): bool
     return IsOutputStart(line_str) || IsErrorStart(line_str)
+        || IsStatusStart(line_str)
 enddef
 
 def IsGeneratedEnd(line_str: string): bool
     return IsOutputEnd(line_str) || IsErrorEnd(line_str)
+        || IsStatusEnd(line_str)
 enddef
 
 def FindGeneratedEnd(start_lnum: number): number
@@ -1746,6 +1805,20 @@ def RefreshNotebookMatches()
             endfor
 
             lnum = end_lnum + 1
+            continue
+        endif
+
+        if IsStatusStart(line_str)
+            var status_end: number = FindGeneratedEnd(lnum)
+            if status_end <= 0
+                status_end = lnum
+            endif
+
+            for row in range(lnum, status_end)
+                AddNotebookLineMatch('PythonNotebookStatus', row)
+            endfor
+
+            lnum = status_end + 1
             continue
         endif
 
@@ -3229,6 +3302,116 @@ def NotebookWindowLeave()
     redraw!
 enddef
 
+
+def BuildNotebookStatusBlock(
+    request_id: string,
+    cell_index: number,
+    state: string
+): list<string>
+    var clean_id: string = StripNullBytes(request_id)
+    var clean_state: string = StripNullBytes(state)
+    if clean_state !=# 'queued' && clean_state !=# 'running'
+        clean_state = 'running'
+    endif
+
+    return [
+        status_start_marker_prefix .. ' [' .. clean_state .. '] id=' .. clean_id
+            .. ' cell=' .. string(cell_index),
+        '# ' .. clean_state .. '...',
+        status_end_marker,
+    ]
+enddef
+
+def BuildRunningStatusBlock(request_id: string, cell_index: number): list<string>
+    return BuildNotebookStatusBlock(request_id, cell_index, 'running')
+enddef
+
+def InsertNotebookRunningStatuses(
+    cells: list<dict<any>>,
+    cell_indices: list<number>,
+    request_id: string,
+    state: string = 'running'
+)
+    var inserts: list<dict<any>> = []
+
+    for cell_index in cell_indices
+        if cell_index < 0 || cell_index >= len(cells)
+            continue
+        endif
+
+        var cell: dict<any> = cells[cell_index]
+        add(inserts, {
+            'lnum': str2nr(string(get(cell, 'insert_after', line('$')))),
+            'lines': BuildNotebookStatusBlock(request_id, cell_index, state),
+        })
+    endfor
+
+    sort(inserts, (a, b) => get(b, 'lnum', 0) - get(a, 'lnum', 0))
+
+    for insert in inserts
+        append(get(insert, 'lnum', line('$')), get(insert, 'lines', []))
+    endfor
+enddef
+
+def ClearNotebookStatusBlocksForRequest(request_id: string)
+    var clean_id: string = StripNullBytes(request_id)
+    if empty(clean_id)
+        return
+    endif
+
+    var lnum: number = 1
+    while lnum <= line('$')
+        var line_str: string = getline(lnum)
+        if IsStatusStart(line_str) && stridx(line_str, 'id=' .. clean_id) >= 0
+            var status_end: number = FindGeneratedEnd(lnum)
+            if status_end > 0
+                deletebufline(bufnr('%'), lnum, status_end)
+            else
+                deletebufline(bufnr('%'), lnum)
+            endif
+            continue
+        endif
+
+        lnum += 1
+    endwhile
+enddef
+
+def ClearNotebookStatusBlockForRequestCell(request_id: string, cell_index: number)
+    var clean_id: string = StripNullBytes(request_id)
+    if empty(clean_id)
+        return
+    endif
+
+    var cell_text: string = 'cell=' .. string(cell_index)
+    var lnum: number = 1
+    while lnum <= line('$')
+        var line_str: string = getline(lnum)
+        if IsStatusStart(line_str)
+                && stridx(line_str, 'id=' .. clean_id) >= 0
+                && stridx(line_str, cell_text) >= 0
+            var status_end: number = FindGeneratedEnd(lnum)
+            if status_end > 0
+                deletebufline(bufnr('%'), lnum, status_end)
+            else
+                deletebufline(bufnr('%'), lnum)
+            endif
+            continue
+        endif
+
+        lnum += 1
+    endwhile
+enddef
+
+def SetNotebookStatusForRequestCell(
+    request_id: string,
+    cell_index: number,
+    state: string
+)
+    ClearNotebookStatusBlockForRequestCell(request_id, cell_index)
+    var cells: list<dict<any>> = ParseNotebookCells()
+    InsertNotebookRunningStatuses(cells, [cell_index], request_id, state)
+enddef
+
 def InsertNotebookResults(cells: list<dict<any>>, results: list<any>): bool
     var inserts: list<dict<any>> = []
     var has_error: bool = false
@@ -3354,6 +3537,61 @@ def ClearGeneratedBlocksForCell(cell: dict<any>)
         str2nr(string(get(cell, 'code_end', line('$')))))
 enddef
 
+def NotebookKernelRemovePendingRequest(request_id: string, bufnr_value: number)
+    if has_key(notebook_kernel_pending_requests, request_id)
+        remove(notebook_kernel_pending_requests, request_id)
+    endif
+
+    if has_key(notebook_kernel_ready_responses, request_id)
+        remove(notebook_kernel_ready_responses, request_id)
+    endif
+
+    var bufnr_key: string = string(bufnr_value)
+    if has_key(notebook_kernel_pending_by_bufnr, bufnr_key)
+            && notebook_kernel_pending_by_bufnr[bufnr_key] ==# request_id
+        remove(notebook_kernel_pending_by_bufnr, bufnr_key)
+    endif
+enddef
+
+def NotebookKernelTakeReadyResponse(request_id: string): any
+    if !has_key(notebook_kernel_ready_responses, request_id)
+        return v:none
+    endif
+
+    var queued: any = notebook_kernel_ready_responses[request_id]
+    if type(queued) == v:t_list
+        if empty(queued)
+            remove(notebook_kernel_ready_responses, request_id)
+            return v:none
+        endif
+
+        var response: any = remove(queued, 0)
+        if empty(queued)
+            remove(notebook_kernel_ready_responses, request_id)
+        else
+            notebook_kernel_ready_responses[request_id] = queued
+        endif
+        return response
+    endif
+
+    remove(notebook_kernel_ready_responses, request_id)
+    return queued
+enddef
+
+def NotebookKernelClearStatusForResults(request_id: string, results: list<any>)
+    for raw_result in results
+        if type(raw_result) != v:t_dict
+            continue
+        endif
+
+        var result: dict<any> = raw_result
+        var cell_index: number = str2nr(string(get(result, 'index', -1)))
+        if cell_index >= 0
+            ClearNotebookStatusBlockForRequestCell(request_id, cell_index)
+        endif
+    endfor
+enddef
+
 def FinishNotebookKernelRequest(request_id: string)
     if !has_key(notebook_kernel_pending_requests, request_id)
         if has_key(notebook_kernel_ready_responses, request_id)
@@ -3362,39 +3600,17 @@ def FinishNotebookKernelRequest(request_id: string)
         return
     endif
 
-    if !has_key(notebook_kernel_ready_responses, request_id)
+    var response_any: any = NotebookKernelTakeReadyResponse(request_id)
+    if type(response_any) != v:t_dict
         return
     endif
 
     var pending: dict<any> = notebook_kernel_pending_requests[request_id]
-    var response: dict<any> = notebook_kernel_ready_responses[request_id]
+    var response: dict<any> = response_any
     var bufnr_value: number = str2nr(string(get(pending, 'bufnr', 0)))
-    var bufnr_key: string = string(bufnr_value)
 
     if bufnr_value <= 0 || bufnr('%') != bufnr_value
-        return
-    endif
-
-    remove(notebook_kernel_pending_requests, request_id)
-    remove(notebook_kernel_ready_responses, request_id)
-    if has_key(notebook_kernel_pending_by_bufnr, bufnr_key)
-        remove(notebook_kernel_pending_by_bufnr, bufnr_key)
-    endif
-
-    var request_changedtick: number = str2nr(string(
-        get(pending, 'changedtick', -1)))
-    if request_changedtick >= 0 && b:changedtick != request_changedtick
-        echohl WarningMsg
-        echomsg 'notebook-python.vim: buffer changed while cell was running; result was not inserted'
-        echohl None
-        return
-    endif
-
-    if !get(response, 'ok', false)
-        echohl ErrorMsg
-        echomsg 'notebook-python.vim: kernel failed: '
-            .. JsonValueToString(get(response, 'error', 'unknown error'))
-        echohl None
+        notebook_kernel_ready_responses[request_id] = [response]
         return
     endif
 
@@ -3404,9 +3620,92 @@ def FinishNotebookKernelRequest(request_id: string)
     endif
 
     try
-        var cells: list<dict<any>> = get(pending, 'cells', [])
+        var response_done: bool = get(response, 'done', true)
+        var action: string = JsonValueToString(get(pending, 'action', ''))
+        var request_changedtick: number = str2nr(string(
+            get(pending, 'changedtick', -1)))
+        var buffer_was_edited: bool = request_changedtick >= 0
+            && b:changedtick != request_changedtick
+
+        if get(pending, 'discard_results', false)
+            if response_done
+                ClearNotebookStatusBlocksForRequest(request_id)
+                NotebookKernelRemovePendingRequest(request_id, bufnr_value)
+                RefreshNotebookMatches()
+                NotebookRedraw()
+            endif
+            return
+        endif
+
+        if buffer_was_edited
+            ClearNotebookStatusBlocksForRequest(request_id)
+            pending['discard_results'] = true
+            pending['changedtick'] = b:changedtick
+            notebook_kernel_pending_requests[request_id] = pending
+            RefreshNotebookMatches()
+            NotebookRedraw()
+            echohl WarningMsg
+            echomsg 'notebook-python.vim: buffer changed while notebook was running; remaining results will not be inserted'
+            echohl None
+            if response_done
+                NotebookKernelRemovePendingRequest(request_id, bufnr_value)
+            endif
+            return
+        endif
+
+        if !get(response, 'ok', false)
+            ClearNotebookStatusBlocksForRequest(request_id)
+            NotebookKernelRemovePendingRequest(request_id, bufnr_value)
+            RefreshNotebookMatches()
+            NotebookRedraw()
+            echohl ErrorMsg
+            echomsg 'notebook-python.vim: kernel failed: '
+                .. JsonValueToString(get(response, 'error', 'unknown error'))
+            echohl None
+            return
+        endif
+
+        var status_state: string = JsonValueToString(get(response, 'status', ''))
+        if !empty(status_state)
+            var status_cell_index: number = str2nr(string(
+                get(response, 'cell_index', -1)))
+            if status_cell_index >= 0
+                SetNotebookStatusForRequestCell(
+                    request_id, status_cell_index, status_state)
+            endif
+
+            if response_done
+                ClearNotebookStatusBlocksForRequest(request_id)
+                NotebookKernelRemovePendingRequest(request_id, bufnr_value)
+            else
+                pending['changedtick'] = b:changedtick
+                notebook_kernel_pending_requests[request_id] = pending
+            endif
+
+            RefreshNotebookMatches()
+            NotebookRedraw()
+            return
+        endif
+
         var results: list<any> = get(response, 'results', [])
+        if action ==# 'run_all'
+            NotebookKernelClearStatusForResults(request_id, results)
+        else
+            ClearNotebookStatusBlocksForRequest(request_id)
+        endif
+
+        # Reparse after status/output changes made by previous streamed cells,
+        # so line numbers are current when this cell's result is inserted.
+        var cells: list<dict<any>> = ParseNotebookCells()
         var has_error: bool = InsertNotebookResults(cells, results)
+
+        if response_done
+            ClearNotebookStatusBlocksForRequest(request_id)
+            NotebookKernelRemovePendingRequest(request_id, bufnr_value)
+        else
+            pending['changedtick'] = b:changedtick
+            notebook_kernel_pending_requests[request_id] = pending
+        endif
 
         RefreshNotebookMatches()
         NotebookRedraw()
@@ -3433,7 +3732,10 @@ def FinishPendingNotebookKernelResponsesForCurrentBuffer()
 
         var pending: dict<any> = notebook_kernel_pending_requests[request_id]
         if str2nr(string(get(pending, 'bufnr', 0))) == bufnr_value
-            FinishNotebookKernelRequest(request_id)
+            while has_key(notebook_kernel_ready_responses, request_id)
+                    && has_key(notebook_kernel_pending_requests, request_id)
+                FinishNotebookKernelRequest(request_id)
+            endwhile
         endif
     endfor
 enddef
@@ -3480,20 +3782,33 @@ def RunPythonNotebookCurrentCell()
         endif
 
         var cell: dict<any> = cells[cell_index]
-        var sent: bool = NotebookKernelSendAsync({
-            'action': 'run_cell',
-            'buffer_path': StripNullBytes(expand('%:p')),
-            'figure_dir': StripNullBytes(NotebookFigureDir()),
-            'cell': cell,
-        }, {
+        var request_id: string = NotebookKernelNewRequestId(bufnr('%'))
+        InsertNotebookRunningStatuses(cells, [cell_index], request_id)
+        RefreshNotebookMatches()
+        redraw
+
+        var pending: dict<any> = {
+            'id': request_id,
             'action': 'run_cell',
             'cells': cells,
             'cell_index': cell_index,
             'jump_to_error': false,
-        })
+            'changedtick': b:changedtick,
+        }
+
+        var sent: bool = NotebookKernelSendAsync({
+            'id': request_id,
+            'action': 'run_cell',
+            'buffer_path': StripNullBytes(expand('%:p')),
+            'figure_dir': StripNullBytes(NotebookFigureDir()),
+            'cell': cell,
+        }, pending)
 
         if sent
             echomsg 'notebook-python.vim: cell execution started'
+        else
+            ClearNotebookStatusBlocksForRequest(request_id)
+            RefreshNotebookMatches()
         endif
     finally
         if !was_modifiable
@@ -3513,20 +3828,40 @@ def RunPythonNotebookFromScratch()
         ClearNotebookOutputs()
 
         var cells: list<dict<any>> = ParseNotebookCells()
+        var all_indices: list<number> = []
+        if !empty(cells)
+            for i in range(0, len(cells) - 1)
+                add(all_indices, i)
+            endfor
+        endif
+
+        var request_id: string = NotebookKernelNewRequestId(bufnr('%'))
+        InsertNotebookRunningStatuses(cells, all_indices, request_id, 'queued')
+        RefreshNotebookMatches()
+        redraw
+
+        var pending: dict<any> = {
+            'id': request_id,
+            'action': 'run_all',
+            'cells': cells,
+            'jump_to_error': true,
+            'changedtick': b:changedtick,
+        }
+
         var sent: bool = NotebookKernelSendAsync({
+            'id': request_id,
             'action': 'run_all',
             'buffer_path': StripNullBytes(expand('%:p')),
             'figure_dir': StripNullBytes(NotebookFigureDir()),
             'stop_on_error': get(g:, 'python_notebook_stop_on_error', 1) != 0,
             'cells': cells,
-        }, {
-            'action': 'run_all',
-            'cells': cells,
-            'jump_to_error': true,
-        })
+        }, pending)
 
         if sent
             echomsg 'notebook-python.vim: run-all execution started'
+        else
+            ClearNotebookStatusBlocksForRequest(request_id)
+            RefreshNotebookMatches()
         endif
     finally
         if !was_modifiable
@@ -3541,6 +3876,7 @@ def SetupNotebookSyntax()
     silent! syntax clear PythonNotebookStdout
     silent! syntax clear PythonNotebookResult
     silent! syntax clear PythonNotebookFigure
+    silent! syntax clear PythonNotebookStatus
 
     execute 'syntax region PythonNotebookOutput '
         .. 'start=/^\s*#\s*nb-output\s*:\s*start.*$/ '
@@ -3549,6 +3885,10 @@ def SetupNotebookSyntax()
     execute 'syntax region PythonNotebookError '
         .. 'start=/^\s*#\s*nb-error\s*:\s*start.*$/ '
         .. 'end=/^\s*#\s*nb-error\s*:\s*end\s*$/ '
+        .. 'keepend containedin=ALL'
+    execute 'syntax region PythonNotebookStatus '
+        .. 'start=/^\s*#\s*nb-status\s*:\s*start.*$/ '
+        .. 'end=/^\s*#\s*nb-status\s*:\s*end\s*$/ '
         .. 'keepend containedin=ALL'
 
     EnsureNotebookHighlightGroups()

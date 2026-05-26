@@ -803,11 +803,46 @@ def _kernel_worker_cli(argv):
                     raise ValueError("cells must be a JSON array")
 
                 stop_on_error = bool(request.get("stop_on_error", True))
-                results = _run_notebook_cells(cells, namespace, figure_dir, stop_on_error)
+                stopped_on_error = False
+
+                for cell in cells:
+                    cell_index = 0
+                    if isinstance(cell, dict):
+                        try:
+                            cell_index = int(cell.get("index", 0))
+                        except Exception:
+                            cell_index = 0
+
+                    _send_json_line({
+                        "id": request_id,
+                        "ok": True,
+                        "partial": True,
+                        "done": False,
+                        "status": "running",
+                        "cell_index": cell_index,
+                        "results": [],
+                    })
+
+                    result = _run_cell(cell, namespace, figure_dir)
+                    _send_json_line({
+                        "id": request_id,
+                        "ok": True,
+                        "partial": True,
+                        "done": False,
+                        "results": [result],
+                    })
+
+                    if stop_on_error and not result["ok"]:
+                        stopped_on_error = True
+                        break
+
                 _send_json_line({
                     "id": request_id,
                     "ok": True,
-                    "results": results,
+                    "partial": False,
+                    "done": True,
+                    "stopped_on_error": stopped_on_error,
+                    "results": [],
                 })
                 continue
 
