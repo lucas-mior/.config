@@ -183,6 +183,7 @@ var image_prep_worker_last_exit_status: string = ''
 var notebook_kernel_pending_requests: dict<dict<any>> = {}
 var notebook_kernel_pending_by_bufnr: dict<string> = {}
 var notebook_kernel_ready_responses: dict<any> = {}
+var notebook_kernel_expected_exit_by_bufnr: dict<bool> = {}
 
 def GetStringSetting(name: string, default_value: string): string
     var value: any = get(g:, name, default_value)
@@ -1036,6 +1037,13 @@ def NotebookKernelStderrCb(bufnr_value: number, channel: any, message: string)
 enddef
 
 def NotebookKernelExitCb(bufnr_value: number, job: any, status: number)
+    var bufnr_key: string = string(bufnr_value)
+    var expected_exit: bool = false
+    if has_key(notebook_kernel_expected_exit_by_bufnr, bufnr_key)
+        expected_exit = notebook_kernel_expected_exit_by_bufnr[bufnr_key]
+        remove(notebook_kernel_expected_exit_by_bufnr, bufnr_key)
+    endif
+
     if bufnr_value > 0
         NotebookKernelClearPendingForBuffer(bufnr_value)
         setbufvar(bufnr_value, 'python_notebook_kernel_job', v:none)
@@ -1046,7 +1054,7 @@ def NotebookKernelExitCb(bufnr_value: number, job: any, status: number)
         setbufvar(bufnr_value, 'python_notebook_kernel_job_key', '')
     endif
 
-    if status != 0
+    if status != 0 && !expected_exit
         echohl ErrorMsg
         echomsg 'notebook-python.vim: kernel exited with status '
             .. string(status)
@@ -1202,6 +1210,10 @@ def StartNotebookKernel()
 
     b:python_notebook_kernel_stdout_buffer = ''
     b:python_notebook_kernel_error = ''
+    var bufnr_key: string = string(bufnr('%'))
+    if has_key(notebook_kernel_expected_exit_by_bufnr, bufnr_key)
+        remove(notebook_kernel_expected_exit_by_bufnr, bufnr_key)
+    endif
 enddef
 
 def NotebookKernelProcessResponse(bufnr_value: number, response: dict<any>)
@@ -1359,32 +1371,75 @@ def NotebookKernelSendAsync(command: dict<any>, pending: dict<any>): bool
     return true
 enddef
 
+def StopNotebookKernelForBuffer(bufnr_value: number)
+    if bufnr_value <= 0
+        return
+    endif
+
+    var bufnr_key: string = string(bufnr_value)
+    NotebookKernelClearPendingForBuffer(bufnr_value)
+
+    var kernel_job: any = getbufvar(bufnr_value,
+        'python_notebook_kernel_job', v:none)
+    var kernel_channel: any = getbufvar(bufnr_value,
+        'python_notebook_kernel_channel', v:none)
+
+    if type(kernel_channel) == v:t_channel
+        var channel_status: string = ''
+        try
+            channel_status = ch_status(kernel_channel)
+        catch
+            channel_status = ''
+        endtry
+
+        if channel_status ==# 'open' || channel_status ==# 'buffered'
+            notebook_kernel_expected_exit_by_bufnr[bufnr_key] = true
+            try
+                ch_sendraw(kernel_channel,
+                    json_encode({'action': 'exit', 'id': 'exit'}) .. "\n")
+            catch
+            endtry
+        endif
+    endif
+
+    if type(kernel_job) == v:t_job
+        var job_status_value: string = ''
+        try
+            job_status_value = job_status(kernel_job)
+        catch
+            job_status_value = ''
+        endtry
+
+        if job_status_value ==# 'run'
+            notebook_kernel_expected_exit_by_bufnr[bufnr_key] = true
+            try
+                job_stop(kernel_job, 'term')
+            catch
+            endtry
+        endif
+    endif
+
+    setbufvar(bufnr_value, 'python_notebook_kernel_job', v:none)
+    setbufvar(bufnr_value, 'python_notebook_kernel_channel', v:none)
+    setbufvar(bufnr_value, 'python_notebook_kernel_pid', 0)
+    setbufvar(bufnr_value, 'python_notebook_kernel_stdout_buffer', '')
+    setbufvar(bufnr_value, 'python_notebook_kernel_error', '')
+    setbufvar(bufnr_value, 'python_notebook_kernel_channel_key', '')
+    setbufvar(bufnr_value, 'python_notebook_kernel_job_key', '')
+enddef
+
 def StopNotebookKernel()
     EnsureNotebookKernelState()
-    NotebookKernelClearPendingForBuffer(bufnr('%'))
+    StopNotebookKernelForBuffer(bufnr('%'))
+enddef
 
-    if NotebookKernelReady()
-        try
-            ch_sendraw(b:python_notebook_kernel_channel,
-                json_encode({'action': 'exit', 'id': 'exit'}) .. "\n")
-        catch
-        endtry
-    endif
-
-    if type(b:python_notebook_kernel_job) == v:t_job
-        try
-            job_stop(b:python_notebook_kernel_job, 'term')
-        catch
-        endtry
-    endif
-
-    b:python_notebook_kernel_job = v:none
-    b:python_notebook_kernel_channel = v:none
-    b:python_notebook_kernel_pid = 0
-    b:python_notebook_kernel_stdout_buffer = ''
-    b:python_notebook_kernel_error = ''
-    b:python_notebook_kernel_channel_key = ''
-    b:python_notebook_kernel_job_key = ''
+def StopAllNotebookKernels()
+    for info in getbufinfo({'bufloaded': 1})
+        var bufnr_value: number = str2nr(string(get(info, 'bufnr', 0)))
+        if bufnr_value > 0
+            StopNotebookKernelForBuffer(bufnr_value)
+        endif
+    endfor
 enddef
 
 def RestartNotebookKernel()
@@ -3929,8 +3984,8 @@ def EnablePythonNotebookForBuffer(): bool
         .. script_sid .. 'NotebookWindowLeave()'
     execute 'autocmd BufWinLeave,BufUnload <buffer> call '
         .. script_sid .. 'ClearNotebookMatches()'
-    execute 'autocmd BufUnload <buffer> call '
-        .. script_sid .. 'StopNotebookKernel()'
+    execute 'autocmd BufDelete,BufWipeout <buffer> call '
+        .. script_sid .. 'StopNotebookKernelForBuffer(str2nr(expand(''<abuf>'')))'
     augroup END
 
     echomsg 'notebook-python.vim: enabled for this buffer'
@@ -4086,6 +4141,8 @@ augroup PythonNotebookUeberzugpp
         .. script_sid .. 'StartImagePrepWorker()'
     execute 'autocmd VimEnter * call '
         .. script_sid .. 'StartUeberzugppLayerDaemon()'
+    execute 'autocmd VimLeavePre * call '
+        .. script_sid .. 'StopAllNotebookKernels()'
     execute 'autocmd VimLeavePre * call '
         .. script_sid .. 'StopUeberzugppLayerDaemon()'
 augroup END
